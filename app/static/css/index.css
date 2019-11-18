@@ -1,0 +1,417 @@
+
+
+/************************** 全局设定 **************************/
+/* 网页背景颜色 */
+.body{background:#F5F5F5}
+
+/* a标签去掉下划线 */
+a:hover {text-decoration:none ; color:#35b558;}
+
+/************************** 导航条 **************************/
+
+
+.logo_title{
+    font-size:16px;
+}
+
+
+/************************** 轮播图 **************************/
+
+/* 让轮播图显示屏幕的100%大小 */
+.info{
+    bottom:30%;
+}
+
+/* 未知 */
+.carousel-inner img {
+    width: 100%;
+    height: 100%;
+}
+
+/************************** 知识体系 && 职业发展 **************************/
+
+/* 知识体系 && 职业发展的大div */
+.content {
+    width: 1000px;
+    margin-top: 40px;
+}
+
+/************************** 知识发展 **************************/
+
+/* 知识体系的大div */
+.zhishitixi {
+    width: 1000px;
+    text-align:center;
+}
+
+/* 知识体系div > 第一个div */
+.zhishitixi_div1{
+    line-height: 60px;
+    height: 60px;
+    text-align: left;
+    font-size: 18px;
+    color: #333;
+}
+
+/* 知识体系div > 第二个div */
+.zhishitixi_div2 {
+    width: 1000px;
+    text-align:center;
+    /* margin-top: 10px; */
+}
+
+/* 知识体系的a标签 */
+.zhishitixi_div2_div_a{
+    border-radius:0;
+    text-decoration: none;
+    border: 0px solid transparent;
+}
+
+/* 知识体系div > 第二个div > a > h4 */
+.zhishitixi_div2_div_a_h4{
+    font-size: 16px;
+    color: #333;
+    line-height: 18px;
+    overflow: hidden;
+}
+
+/* 知识体系div > 第二个div > a > p */
+.zhishitixi_div2_div_a_p{
+    font-size: 12px;
+    line-height: 22px;
+    height: 22px;
+    overflow: hidden;
+    color: #999;
+}
+
+
+/************************** 职业发展 **************************/
+
+/* 职业发展的大div */
+.zhiyefazhan {
+    width: 1000px;
+    margin-top: 40px;
+}
+
+/* 职业发展div > 第一个div */
+.zhiyefazhan_div1{
+    height: 50px;
+    color: #333;
+    font-size: 18px;
+    text-align: left;
+    line-height: 60px;
+    
+}
+
+/* 职业发展div > 第一个div > 更多职业发展 */
+.zhiyefazhan_div1_more{
+    float: right;
+    color: #333333;
+    font-size: 12px; 
+    padding-right: 30px;
+    display: inline-block; 
+}
+
+/* 职业发展div > 第二个div */
+.zhiyefazhan_div2 {
+    width: 1000px;
+}
+
+/* 职业发展div > 第二个div阴影样式 */
+.zhiyefazhan_div2_div_a:hover {
+    box-shadow: 0 3px 6px rgba(0,0,0,.2);
+}
+
+/* 职业发展div > 第二个div > 第一个div > a */
+.zhiyefazhan_div2_div_a{
+    width: 168px; 
+    height:140px;
+    margin-top: 10px; 
+    text-align:center; 
+    text-decoration: none;
+    border-radius:0;
+    border: 0px solid transparent;
+}
+
+/* 职业发展div > 第二个div > 第一个div > a > 第一个img */
+.zhiyefazhan_div2_div_a_img1 {
+    display: inline-block;
+    width: 23px;
+    height: 11px;
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    background-size: 23px 11px;
+}
+
+/* 职业发展div > 第二个div > 第一个div > a > 第二个img */
+.zhiyefazhan_div2_div_a_img2{
+    height: 86px;
+    width:140px; 
+    margin-left: 14px; 
+    margin-top:16px;
+}
+
+/* 职业发展div > 第二个div > 第一个div > a > 第一个span */
+.zhiyefazhan_div2_div_a_span{
+    color: #333;
+    font-size: 12px;
+    margin-top: 5px;
+    text-decoration: none;
+}
+
+/************************** 学习课程 **************************/
+
+/* 学习课程的大div */
+.xuexikecheng {
+    width: 1000px;
+    margin-top: 40px;
+}
+
+/* 学习课程div > 第一个div */
+.xuexikecheng_div1{
+    line-height: 60px;
+    height: 50px;
+    text-align: left;
+    font-size: 18px;
+    color: #333;
+}
+
+/* 职业发展div > 第一个div > 更多职业发展 */
+.xuexikecheng_div1_more{
+    float: right;
+    color: #333333;
+    font-size: 12px; 
+    padding-right: 30px;
+    display: inline-block; 
+}
+
+/* 学习课程div > 第二个div */
+.xuexikecheng_div2 {
+    width: 1000px;
+}
+
+/* 学习课程div > 第二个div > 第一个div > a */
+
+.xuexikecheng_div2_div_a:hover {
+    box-shadow: 0 3px 6px rgba(0,0,0,.2);
+}
+
+/* 学习课程div > 第二个div > 第一个div > a */
+.xuexikecheng_div2_div_a{
+    width: 134px; 
+    height:120px; 
+    border-radius:0;
+    margin-top:10px;
+    text-align:center; 
+    text-decoration: none;
+    border: 0px solid transparent;
+}
+
+/* 学习课程div > 第二个div > 第一个div > a > img*/
+.xuexikecheng_div2_div_a_img{
+    width: 50px; 
+    margin: 10px 0px 0px 42px;
+}
+
+/* 学习课程div > 第二个div > 第一个div > a > span2 */
+.xuexikecheng_div2_div_a_span1{
+    color: #333;
+    font-size: 12px;
+    margin-top: 5px;
+    text-decoration: none;
+}
+
+/* 学习课程div > 第二个div > 第一个div > a > span2 */
+.xuexikecheng_div2_div_a_span2{
+    display: block;
+    font-size: 12px;
+    margin-top: 5px;
+    color: #35b558;
+    text-decoration: none;
+}
+
+/************************** 就业前景 **************************/
+
+/* 就业前景大div */
+.jiuyeqianjing {
+    width: 970px;
+    margin-top: 40px;
+}
+
+/* 就业前景标题 */
+.jiuyeqianjing_div1{
+    height: 50px;
+    color: #333;
+    font-size: 18px;
+    text-align: left;
+    line-height: 60px;
+}
+
+/* 学员故事大div的父div */
+.jiuyeqianjing_div2{
+    width: 970px;
+    margin-top: 10px;
+}
+
+/* 每个学员故事的大div */
+.jiuyeqianjing_div2_div_div_div_div{
+    width: 300px;
+}
+
+/* 学员故事a标签 */
+.jiuyeqianjing_div2_div_div_div_div_card{
+    width: 300px;
+    border-radius:0;
+    border: 0px solid transparent;
+}
+
+/* 学员故事title */
+.jiuyeqianjing_div2_div_div_div_div_card_i{
+    top: 10px;
+    left: 50%;
+    color: #fff;
+    width: 60px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 20px;
+    font-style: normal; 
+    margin-left: -30px;
+    position: absolute;
+    background: #f88;
+    text-align: center;
+    display: inline-block;
+
+}
+
+/* 学员感言内容 */
+.jiuyeqianjing_div2_div_div_div_div_card_p{
+    height: 80px;
+    overflow: hidden;
+    font-size: 12px;
+    color: #555;
+    line-height: 20px;
+    padding: 0 32px; 
+    margin-top:40px; 
+    text-align: justify; 
+}
+
+/* 学员信息大div */
+.jiuyeqianjing_div2_div_div_div_div_card_div{
+    height: 70px;
+    position: relative;
+    padding: 10px 10px 20px 20px;
+    background: #fafafa; display:block-inline;
+}
+
+/* 学员头像 */
+.jiuyeqianjing_div2_div_div_div_div_div_img{
+    top: 10px;
+    left: 30px;
+    position: absolute;
+    border-radius: 50%;
+}
+
+/* 学员姓名 */
+.jiuyeqianjing_div2_div_div_div_div_div_div{
+    color: #555;
+    height: 24px;
+    font-size: 12px;
+    padding-left: 80px; 
+    line-height: 24px;
+    overflow: hidden;
+    text-align: left;
+}
+
+/* 第几期学员 */
+.jiuyeqianjing_div2_div_div_div_div_div_div2{
+    height: 24px;
+    color: #999;
+    display: block;
+    font-size: 12px;
+    text-align: left;
+    line-height: 24px;
+    padding-left: 80px; 
+}
+
+
+.jiuyeqianjing_div2{
+    width: 1000px;
+}
+
+/************************** 关于我们 **************************/
+.guanyuwomen{
+    width: 1000px;
+    margin-top: 40px;
+}
+
+
+.guanyuwomen_div1{
+    line-height: 60px;
+    height: 50px;
+    text-align: left;
+    font-size: 18px;
+    color: #333;
+}
+
+
+
+/************************** 页尾 **************************/
+
+/* footer的大div */
+.footer_div{
+    height: 80px;
+    margin-top: 20px;
+    text-align:center; 
+}
+
+/* footer的body */
+.footer_body{
+    width: 1000px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+/* footer的body > 第一个div*/
+.footer_body_div1{
+    margin-top:20px;
+}
+
+/* qq图标 */
+.footer_body_div1_qq{
+    width: 18px;
+    margin-right: 15px;
+}
+
+/* 微信图标 */
+.footer_body_div1_weixin{
+    width: 25px;
+    margin-right: 15px;
+}
+
+/* footer的底部连接大div */
+.footer_body_about{
+    margin-top:15px;
+}
+
+/* footer底部超链接样式 */
+.footer_div2_a{
+    color: #666;
+    font-size: 12px; 
+    padding: 4px 10px; 
+}
+
+/* footer底部隔行符样式 */
+.footer_div2_i{
+    font-size: 12px; 
+    color: #E4E4E4;
+    font-style: normal;
+}
+
+/* footer底部的备案信息样式 */
+.footer_copyrights{
+    color: #999; 
+    padding: 10px 0; 
+    font-size: 12px; 
+}

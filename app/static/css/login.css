@@ -1,0 +1,11 @@
+
+/************************** 全局设定 **************************/
+/* 网页背景颜色 */
+.body{background:#F5F5F5}
+
+/* 去掉边框 */
+.no_border{
+    border-radius:0; 
+    border: 0px solid transparent;
+    box-shadow: 0 3px 6px rgba(0,0,0,.2);
+}
