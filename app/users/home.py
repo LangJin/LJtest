@@ -1,4 +1,4 @@
-from flask import jsonify,render_template
+from flask import jsonify,render_template,session
 from . import userbp
 from ..utils.mysqltools import query
 
@@ -15,7 +15,10 @@ def getbigimg():
 
 @userbp.route("/")
 def index():
-    return render_template('index.html')
+    session.permanent=True
+    session['username'] = 'xxx'
+    return "你好"
+    # return render_template('index.html')
 
 
 @userbp.route("/login")
