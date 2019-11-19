@@ -5,7 +5,7 @@ from app import create_app
 
 
 app = create_app()
-
-
+a = app.config.get("MYSQL_CONFIG")
+print(a)
 if __name__ == "__main__":
     app.run()
