@@ -33,11 +33,7 @@ db_config = {
     'port': 3306,
     'user': 'root',
     'password': '123456',
-    'db': 'lux',
+    'db': 'ljtestdb',
     'charset': 'utf8mb4'
 }
 
-keys = {
-    "user":"sb250",
-    "admin":"god666"
-}

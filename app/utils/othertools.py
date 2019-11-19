@@ -2,7 +2,7 @@
 __author__ = 'LangJin'
 
 import os, hashlib
-from config import keys
+
 
 
 def create_token():
@@ -22,4 +22,24 @@ def encryption(username,password,role):
     password = md5.hexdigest()
     return password
 
+def checkusername(username):
+    '''
+    检查账号是否满足用户需求
+    '''
+    if len(username) >= 6 and len(username) <= 12:
+        for i in username:
+            if i not in "0123456789qazwsxedcrfvtgbyhnujmikolp":
+                return "账号仅能由数字和字母组成！"
+        return True
+    else:
+        return "账号长度必须大于等于6位，并且小于等于12位"
 
+
+def checkpasswd(password):
+    '''
+    检查密码是否符合规范
+    '''
+    if len(password) >= 8 and len(password) <= 16:
+        return True
+    else:
+        return "账号长度必须大于等于6位，并且小于等于12位"
