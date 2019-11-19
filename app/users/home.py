@@ -3,3 +3,6 @@ from . import userbp
 
 
 
+@userbp.route("/")
+def index():
+    return "浪晋的测试小讲堂"

@@ -1,6 +1,5 @@
 # -*- coding:utf-8 -*-
 __author__ = 'LangJin'
-from config import config
 from flask import Flask
 from .users import userbp
 from .errors import errorbp
@@ -8,12 +7,14 @@ from .errors import errorbp
 
 
 
-def create_app(config_name="Develop"):
+def create_app():
     '''
     工厂方法
     '''
-    app = Flask(__name__)
-    app.config.update(config[config_name])
+    app = Flask(__name__,instance_relative_config=True)
+    # app.config.from_object("config")
+    app.config.from_pyfile('config.py')
     app.register_blueprint(userbp)  # 注册蓝本
     app.register_blueprint(errorbp)  # 注册蓝本
     return app
+
