@@ -91,6 +91,7 @@ def question():
     questiondata = request.get_json()
     token = request.headers.get("token")
     title = questiondata.get("title")
+    brief = questiondata.get("brief")
     tags = questiondata.get("tags")
     content = questiondata.get("content")
     resdata = {}
@@ -103,7 +104,7 @@ def question():
             # print(res)
             uid = res[0]["id"]
             author = res[0]["username"]
-            dbres = db.commit("insert into t_questions (title,content,tags,uid) values ('{}','{}','{}',{});".format(title,content,tags,uid))
+            dbres = db.commit("insert into t_questions (title,brief,content,tags,uid) values ('{}','{}','{}','{}',{});".format(title,brief,content,tags,uid))
             resdata["status"] = dbres
             resdata["msg"] = "提问成功"
             return jsonify(resdata)

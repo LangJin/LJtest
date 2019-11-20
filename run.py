@@ -8,4 +8,4 @@ app = create_app()
 a = app.config.get("MYSQL_CONFIG")
 print(a)
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0")
