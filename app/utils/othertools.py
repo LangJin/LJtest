@@ -26,20 +26,26 @@ def checkusername(username):
     '''
     检查账号是否满足用户需求
     '''
-    if len(username) >= 6 and len(username) <= 12:
-        for i in username:
-            if i not in "0123456789qazwsxedcrfvtgbyhnujmikolp":
-                return "账号仅能由数字和字母组成！"
-        return True
+    if username != None:
+        if len(username) >= 6 and len(username) <= 12:
+            for i in username:
+                if i not in "0123456789qazwsxedcrfvtgbyhnujmikolp":
+                    return "账号仅能由数字和字母组成！"
+            return True
+        else:
+            return "账号长度必须大于等于6位，并且小于等于12位"
     else:
-        return "账号长度必须大于等于6位，并且小于等于12位"
+        return "账号不能为空！"
 
 
 def checkpasswd(password):
     '''
     检查密码是否符合规范
     '''
-    if len(password) >= 8 and len(password) <= 16:
-        return True
+    if username != None:
+        if len(password) >= 8 and len(password) <= 16:
+            return True
+        else:
+            return "密码长度必须大于等于8位，并且小于等于16位"
     else:
-        return "密码长度必须大于等于8位，并且小于等于16位"
+        return "密码不能为空！"

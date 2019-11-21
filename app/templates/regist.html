@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bootstrap 实例</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+  <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
+  <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<script>
+  function regist(){
+    var datas = {"username1":$("#username").val(),"password":$("#password").val()} 
+    $.ajax({
+      type:"post",
+      url:"/regist",
+      dataType:"json",
+      contentType:"application/json",
+      data:JSON.stringify(datas),
+      success:function(data){
+        var res = data.msg;
+        alert(res); 
+      }
+
+    });
+    
+  }
+
+</script>
+</head>
+<body>
+
+<div class="container mt-3">
+  <h3>多个输入框和文本</h3>
+  
+  <div>
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text">Person</span>
+      </div>
+      <input type="text" class="form-control" placeholder="账号" id="username">
+      <input type="text" class="form-control" placeholder="密码" id="password">
+      <button onclick="regist()">注册</button>
+    </div>  
+</div>
+</div>
+
+</body>
+</html>

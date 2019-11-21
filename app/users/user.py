@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 __author__ = 'LangJin'
 
-from flask import jsonify,request
+from flask import jsonify,request,render_template
 from . import userbp
 from ..utils.dbtools import Db
 from config import db_config
@@ -45,7 +45,7 @@ def regist():
             return jsonify(data)
         
     else:
-        return "注册界面"
+        return render_template("regist.html")
 
 
 @userbp.route("/login",methods=["post","get"])
