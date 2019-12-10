@@ -10,3 +10,7 @@ def get_title_img():
     res = db.query("select id,title,content,imghost from t_title_img;")
     return jsonify(res)
 
+@userbp.route("/getcoures")
+def getcoures():
+    res = db.query("select id,title,content from t_coures limit 4;")
+    return jsonify(res)
