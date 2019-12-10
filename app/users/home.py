@@ -5,25 +5,7 @@ from config import db_config
 db = Db(db_config)
 
 
-@userbp.route("/")
-def index():
-    return render_template("index.html")
-
-@userbp.route("/questions")
-def questions():
-    return render_template("questions.html")
-
-
-@userbp.route("/getquestions")
-def getquestions():
-    res = db.query("select * from t_questions limit 10;")
-    # print(res)
-    return jsonify(res)
-
-
-@userbp.route("/questions/")
-def questioncontent():
-    questionid = request.args.get("questionid")
-    res = db.query("select * from t_questions where id = {};".format(questionid))
-    print(res)
+@userbp.route("/get_title_img")
+def get_title_img():
+    res = db.query("select id,title,content,imghost from t_title_img;")
     return jsonify(res)
