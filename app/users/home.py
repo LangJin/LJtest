@@ -9,3 +9,4 @@ db = Db(db_config)
 def get_title_img():
     res = db.query("select id,title,content,imghost from t_title_img;")
     return jsonify(res)
+
