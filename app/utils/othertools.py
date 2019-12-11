@@ -42,7 +42,7 @@ def checkpasswd(password):
     '''
     检查密码是否符合规范
     '''
-    if username != None:
+    if password != None:
         if len(password) >= 8 and len(password) <= 16:
             return True
         else:

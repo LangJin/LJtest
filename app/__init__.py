@@ -13,6 +13,7 @@ def create_app():
     '''
     app = Flask(__name__,instance_relative_config=True)
     # app.config.from_object("config")
+    app.secret_key = "cdhhhhhhhkjdn"
     app.config.from_pyfile('config.py')
     app.register_blueprint(userbp)  # 注册蓝本
     app.register_blueprint(errorbp)  # 注册蓝本
