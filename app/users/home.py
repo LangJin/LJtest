@@ -11,15 +11,25 @@ def get_title_img():
     获取首页轮播图
     '''
     res = db.query("select id,title,content,imghost from t_title_img;")
-    return jsonify(res)
+    data = {
+        "status":200,
+        "data":res,
+        "msg":"查询成功！"
+    }
+    return jsonify(data)
 
 @userbp.route("/getcoures")
 def getcoures():
     '''
     教程
     '''
-    res = db.query("select id,title,content from t_coures limit 4;")
-    return jsonify(res)
+    res = db.query("select id,title,content from t_coures where status = 0 limit 4;")
+    data = {
+        "status":200,
+        "data":res,
+        "msg":"查询成功！"
+    }
+    return jsonify(data)
 
 @userbp.route("/getquestions")
 def getquestions():
@@ -29,8 +39,13 @@ def getquestions():
     num = request.args.get("num")
     if num is None:
         num = 6
-    res = db.query("select id,title,content,tags from t_questions limit {};".format(num))
-    return jsonify(res)
+    res = db.query("select id,title,content,tags from t_questions where status = 0 limit {};".format(num))
+    data = {
+        "status":200,
+        "data":res,
+        "msg":"查询成功！"
+    }
+    return jsonify(data)
 
 @userbp.route("/getarticle")
 def getarticle():
@@ -40,8 +55,13 @@ def getarticle():
     num = request.args.get("num")
     if num is None:
         num = 6
-    res = db.query("select id,title,content,tags from t_article limit {};".format(num))
-    return jsonify(res)
+    res = db.query("select id,title,content,tags from t_article where status = 0  limit {};".format(num))
+    data = {
+        "status":200,
+        "data":res,
+        "msg":"查询成功！"
+    }
+    return jsonify(data)
 
 @userbp.route("/getinspirer")
 def getinspirer():
@@ -51,8 +71,13 @@ def getinspirer():
     num = request.args.get("num")
     if num is None:
         num = 6
-    res = db.query("select id,content from t_inspirer limit {};".format(num))
-    return jsonify(res)
+    res = db.query("select id,content from t_inspirer where status = 0  limit {};".format(num))
+    data = {
+        "status":200,
+        "data":res,
+        "msg":"查询成功！"
+    }
+    return jsonify(data)
 
 @userbp.route("/gethighusers")
 def gethighusers():
@@ -62,6 +87,11 @@ def gethighusers():
     num = request.args.get("num")
     if num is None:
         num = 15
-    res = db.query("select id,nickname,headpic from t_user limit {};".format(num))
-    return jsonify(res)
+    res = db.query("select id,nickname,headpic from t_user where status = 0 limit {};".format(num))
+    data = {
+        "status":200,
+        "data":res,
+        "msg":"查询成功！"
+    }
+    return jsonify(data)
 

@@ -28,6 +28,7 @@ def regist():
         if len(res) != 0:
             data["msg"] = "用户名已存在，请重新设置！"
             data["data"] = None
+            data["stutas"] = 401
         else:
             # password = encryption(username,password,"user")
             passwd = checkpasswd(password)
@@ -35,14 +36,17 @@ def regist():
                 sql = "insert into t_user (username,password) values ('{}','{}');".format(username,password)
                 msg = db.commit(sql)
                 data["msg"] = "注册成功！"
-                data["data"] = {}
-                data["data"]["status"] = msg
+                data["data"] = msg
+                data["status"] = 200
             else:
-                data["msg"] = passwd
-        return jsonify(data)
+                data["msg"] = "注册失败！"
+                data["data"] = passwd
+                data["status"] = 401
     else:
-        data["msg"] = usernamemsg
-        return jsonify(data)
+        data["msg"] = "注册失败！"
+        data["data"] = usernamemsg
+        data["status"] = 401
+    return jsonify(data)
 
 
 
@@ -63,23 +67,30 @@ def userlogin():
         if len(res) != 1:
             data["msg"] = "数据异常或者用户不存在！"
             data["data"] = None
+            data["status"] = 401
         else:
             # password = encryption(username,password,"user")
             if password == res[0].get("password"):
                 token = create_token()
-                session["token"] = token
-                sql = "update t_user set token = '{token}' where id = {id};".format(token=token,id=res[0].get("id"))
-                msg = db.commit(sql)
+                session["userinfo"] = {"token":token,"uid":res[0]["id"]}
+                userinfo = {
+                    "nickname":res[0]["nickname"],
+                    "uid":res[0]["id"],
+                    "headpic":res[0]["headpic"]
+                }
                 data["msg"] = "登录成功！"
                 data["data"] = {}
+                data["data"]["userinfo"] = userinfo
                 data["data"]["token"] = token
-                data["data"]["status"] = msg
+                data["status"] = 200
             else:
                 data["msg"] = "密码错误！"
+                data["data"] = None
+                data["status"] = 401
     else:
-        data = {
-            "msg":"账号为空！"
-        }
+        data["msg"] = "账号为空"
+        data["data"] = None
+        data["status"] = 401
     return jsonify(data)
 
 
@@ -89,22 +100,26 @@ def question():
     '''
     提问接口
     '''
-    questiondata = request.get_json()
+    requestdata = request.get_json()
     token = request.headers.get("token")
-    title = questiondata.get("title")
-    brief = questiondata.get("brief")
-    tags = questiondata.get("tags")
-    content = questiondata.get("content")
-    uid = questiondata.get("uid")
-    resdata = {}
-    if session.get("token") != None and session.get("token") == token:
+    title = requestdata.get("title")
+    brief = requestdata.get("brief")
+    tags = requestdata.get("tags")
+    content = requestdata.get("content")
+    data = {}
+    userinfo = session.get("userinfo")
+    tokenid = userinfo.get("token")
+    if tokenid != None and tokenid == token:
+        uid = session["userinfo"]["uid"]
         dbres = db.commit("insert into t_questions (title,brief,content,tags,uid) values ('{}','{}','{}','{}',{});".format(title,brief,content,tags,uid))
-        resdata["status"] = dbres
-        resdata["msg"] = "提问成功"
-        return jsonify(resdata)
+        data["data"] = dbres
+        data["msg"] = "提问成功"
+        data["status"] = 200
     else:
-        resdata["msg"] = "未登录"
-        return jsonify(resdata)
+        data["msg"] = "未登录"
+        data["data"] = None
+        data["status"] = 401
+    return jsonify(data)
     
 
 @userbp.route("/question/update",methods=["post"])
@@ -112,19 +127,222 @@ def questionupdate():
     '''
     修改提问接口
     '''
+    requestdata = request.get_json()
+    token = request.headers.get("token")
+    title = requestdata.get("title")
+    brief = requestdata.get("brief")
+    tags = requestdata.get("tags")
+    content = requestdata.get("content")
+    qid = requestdata.get("qid")
+    data = {}
+    userinfo = session.get("userinfo")
+    tokenid = userinfo.get("token")
+    if tokenid != None and tokenid == token:
+        uid = session["userinfo"]["uid"]
+        qres = db.query("select * from t_questions where uid ={};".format(uid))
+        qlist = []
+        if len(qres) != 0:
+            for i in qres:
+                qlist.append(i["id"])
+            if qid in qlist:
+                dbres = db.commit("update t_questions set title='{}',brief='{}',tags='{}',content='{}' where id = {} and uid = {};".format(title,brief,tags,content,qid,uid))
+                data["status"] = 200
+                data["msg"] = "修改成功"
+                data["data"] = dbres
+            else:
+                data["status"] = 401
+                data["msg"] = "内容不存在"
+                data["data"] = None
+        else:
+            data["status"] = 401
+            data["msg"] = "内容不存在"
+            data["data"] = None
+    else:
+        data["status"] = 401
+        data["msg"] = "未登录"
+        data["data"] = None
+    return jsonify(data)
+
+@userbp.route("/question/delete",methods=["post"])
+def questiondelete():
+    '''
+    删除提问接口
+    '''
+    requestdata = request.get_json()
+    token = request.headers.get("token")
+    qid = requestdata.get("qid")
+    data = {}
+    userinfo = session.get("userinfo")
+    tokenid = userinfo.get("token")
+    if tokenid != None and tokenid == token:
+        uid = session["userinfo"]["uid"]
+        dbres = db.commit("update t_questions set status=1 where id = {} and uid = {};".format(qid,uid))
+        data["status"] = 200
+        data["msg"] = "删除成功"
+        data["data"] = dbres
+    else:
+        data["status"] = 401
+        data["msg"] = "未登录"
+        data["data"] = None
+    return jsonify(data)
+
+
+@userbp.route("/inspirer/new",methods=["post"])
+def inspirer():
+    '''
+    发表灵感
+    '''
+    requestdata = request.get_json()
+    token = request.headers.get("token")
+    content = requestdata.get("content")
+    data = {}
+    userinfo = session.get("userinfo")
+    tokenid = userinfo.get("token")
+    if tokenid != None and tokenid == token:
+        uid = session["userinfo"]["uid"]
+        dbres = db.commit("insert into t_inspirer (content,uid) values ('{}',{});".format(content,uid))
+        data["data"] = dbres
+        data["msg"] = "提问成功"
+        data["status"] = 200
+    else:
+        data["msg"] = "未登录"
+        data["data"] = None
+        data["status"] = 401
+    return jsonify(data)
+
+
+@userbp.route("/inspirer/update",methods=["post"])
+def inspirerupdate():
+    '''
+    修改灵感
+    '''
     questiondata = request.get_json()
     token = request.headers.get("token")
-    title = questiondata.get("title")
-    brief = questiondata.get("brief")
-    tags = questiondata.get("tags")
     content = questiondata.get("content")
-    uid = questiondata.get("uid")
-    resdata = {}
-    if session.get("token") != None and session.get("token") == token:
-        dbres = db.commit("insert into t_questions (title,brief,content,tags,uid) values ('{}','{}','{}','{}',{});".format(title,brief,content,tags,uid))
-        resdata["status"] = dbres
-        resdata["msg"] = "提问成功"
-        return jsonify(resdata)
+    iid = questiondata.get("iid")
+    data = {}
+    userinfo = session.get("userinfo")
+    tokenid = userinfo.get("token")
+    if tokenid != None and tokenid == token:
+        uid = session["userinfo"]["uid"]
+        dbres = db.commit("update t_inspirer set content = '{}' where id = {} ;".format(content,iid))
+        data["data"] = dbres
+        data["msg"] = "修改成功"
+        data["status"] = 200
     else:
-        resdata["msg"] = "未登录"
-        return jsonify(resdata)
+        data["msg"] = "未登录"
+        data["data"] = None
+        data["status"] = 401
+    return jsonify(data)
+
+
+@userbp.route("/inspirer/delete",methods=["post"])
+def inspirerdelete():
+    '''
+    删除灵感
+    '''
+    questiondata = request.get_json()
+    token = request.headers.get("token")
+    content = questiondata.get("content")
+    iid = questiondata.get("iid")
+    data = {}
+    userinfo = session.get("userinfo")
+    tokenid = userinfo.get("token")
+    if tokenid != None and tokenid == token:
+        uid = session["userinfo"]["uid"]
+        dbres = db.commit("update t_inspirer set status = 1 where id = {} ;".format(iid))
+        data["data"] = dbres
+        data["msg"] = "修改成功"
+        data["status"] = 200
+    else:
+        data["msg"] = "未登录"
+        data["data"] = None
+        data["status"] = 401
+    return jsonify(data)
+
+
+@userbp.route("/article/new",methods=["post"])
+def article():
+    '''
+    写文章接口
+    '''
+    requestdata = request.get_json()
+    token = request.headers.get("token")
+    title = requestdata.get("title")
+    tags = requestdata.get("tags")
+    content = requestdata.get("content")
+    author = requestdata.get("nickname")
+    data = {}
+    userinfo = session.get("userinfo")
+    tokenid = userinfo.get("token")
+    if tokenid != None and tokenid == token:
+        uid = session["userinfo"]["uid"]
+        dbres = db.commit("insert into t_article (title,author,content,tags,uid) values ('{}','{}','{}','{}',{});".format(title,author,content,tags,uid))
+        data["data"] = dbres
+        data["msg"] = "提问成功"
+        data["status"] = 200
+    else:
+        data["msg"] = "未登录"
+        data["data"] = None
+        data["status"] = 401
+    return jsonify(data)
+
+
+@userbp.route("/article/update",methods=["post"])
+def articleupdate():
+    '''
+    修改文章接口
+    '''
+    requestdata = request.get_json()
+    token = request.headers.get("token")
+    title = requestdata.get("title")
+    tags = requestdata.get("tags")
+    content = requestdata.get("content")
+    author = requestdata.get("nickname")
+    aid = requestdata.get("aid")
+    data = {}
+    userinfo = session.get("userinfo")
+    tokenid = userinfo.get("token")
+    if tokenid != None and tokenid == token:
+        uid = session["userinfo"]["uid"]
+        dbres = db.commit("update t_article set title='{}',tags='{}',content='{}' where id ={};".format(title,tags,content,aid))
+        data["data"] = dbres
+        data["msg"] = "修改成功"
+        data["status"] = 200
+    else:
+        data["msg"] = "未登录"
+        data["data"] = None
+        data["status"] = 401
+    return jsonify(data)
+
+@userbp.route("/article/delete",methods=["post"])
+def articledelete():
+    '''
+    删除文章接口
+    '''
+    requestdata = request.get_json()
+    token = request.headers.get("token")
+    aid = requestdata.get("aid")
+    data = {}
+    userinfo = session.get("userinfo")
+    tokenid = userinfo.get("token")
+    if tokenid != None and tokenid == token:
+        uid = session["userinfo"]["uid"]
+        dbres = db.commit("update t_article set status=1 where id ={} and uid = {};".format(aid,uid))
+        data["data"] = dbres
+        data["msg"] = "删除成功"
+        data["status"] = 200
+    else:
+        data["msg"] = "未登录"
+        data["data"] = None
+        data["status"] = 401
+    return jsonify(data)
+
+@userbp.route("/test")
+def test():
+    headers  = request.args.get("token")
+    data = {}
+    data["msg"] = "测试接口"
+    data["data"] = headers
+    data["stutas"] = 200
+    return jsonify(data)

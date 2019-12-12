@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50724
 File Encoding         : 65001
 
-Date: 2019-12-10 16:23:43
+Date: 2019-12-12 16:39:19
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -31,11 +31,12 @@ CREATE TABLE `t_article` (
   `createtime` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `updatetime` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='心得体会';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='心得体会';
 
 -- ----------------------------
 -- Records of t_article
 -- ----------------------------
+INSERT INTO `t_article` VALUES ('1', '我爱测试', '测试真香', '日记', '0', '王五', '1', '', null, null);
 
 -- ----------------------------
 -- Table structure for t_coures
@@ -57,6 +58,7 @@ CREATE TABLE `t_coures` (
 -- ----------------------------
 -- Records of t_coures
 -- ----------------------------
+INSERT INTO `t_coures` VALUES ('1', '测试基础', '1111111111111111111111111111111111111111', '0', '浪晋', '测试基础', null, null, null);
 
 -- ----------------------------
 -- Table structure for t_inspirer
@@ -70,11 +72,12 @@ CREATE TABLE `t_inspirer` (
   `createtime` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `updatetime` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='灵光一闪';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='灵光一闪';
 
 -- ----------------------------
 -- Records of t_inspirer
 -- ----------------------------
+INSERT INTO `t_inspirer` VALUES ('1', '产品真垃圾', '1', '0', null, null);
 
 -- ----------------------------
 -- Table structure for t_questions
@@ -83,6 +86,7 @@ DROP TABLE IF EXISTS `t_questions`;
 CREATE TABLE `t_questions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) NOT NULL COMMENT '问题题目',
+  `brief` varchar(255) DEFAULT NULL COMMENT '简介',
   `content` varchar(255) DEFAULT NULL COMMENT '问题内容',
   `tags` varchar(255) DEFAULT NULL COMMENT '问题分类',
   `author` varchar(255) DEFAULT NULL COMMENT '作者',
@@ -92,15 +96,19 @@ CREATE TABLE `t_questions` (
   `createtime` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `updatetime` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COMMENT='交流讨论表';
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 COMMENT='交流讨论表';
 
 -- ----------------------------
 -- Records of t_questions
 -- ----------------------------
-INSERT INTO `t_questions` VALUES ('1', 'admi....n', '123456', '测试', null, '0', '4', null, '2019-11-19 16:45:35', '2019-11-19 16:45:39');
-INSERT INTO `t_questions` VALUES ('2', 'admi....n', '123456', '测试', null, '0', '4', null, null, null);
-INSERT INTO `t_questions` VALUES ('3', 'admi....n', '123456', '测试', null, '0', '4', null, null, null);
-INSERT INTO `t_questions` VALUES ('4', 'admi....n', '123456', '测试', null, '0', '1', null, null, null);
+INSERT INTO `t_questions` VALUES ('1', '为什么要学习测试', '介绍', '内容', '测试', null, '1', '1', null, '2019-12-12 16:30:59', '2019-12-12 16:30:59');
+INSERT INTO `t_questions` VALUES ('2', 'admi....n', null, '123456', '测试', null, '0', '4', null, null, null);
+INSERT INTO `t_questions` VALUES ('3', 'admi....n', null, '123456', '测试', null, '0', '4', null, null, null);
+INSERT INTO `t_questions` VALUES ('4', 'admi....n', null, '123456', '测试', null, '0', '1', null, null, null);
+INSERT INTO `t_questions` VALUES ('5', '为什么要学习测试', '介绍', '内容', '测试', null, '0', '1', null, null, null);
+INSERT INTO `t_questions` VALUES ('6', '为什么要学习测试', '介绍', '内容', '测试', null, '0', '1', null, null, null);
+INSERT INTO `t_questions` VALUES ('7', '测试文章标题1', '这是文章的简介', '这是测试文章的内容', '教程', null, '0', '21', null, null, null);
+INSERT INTO `t_questions` VALUES ('8', '为什么要学习测试', '介绍', '内容', '测试', null, '0', '1', null, null, null);
 
 -- ----------------------------
 -- Table structure for t_title_img
@@ -111,6 +119,7 @@ CREATE TABLE `t_title_img` (
   `title` varchar(255) DEFAULT NULL COMMENT '轮播图标题',
   `content` varchar(255) DEFAULT NULL COMMENT '轮播图内容',
   `imghost` varchar(255) NOT NULL,
+  `rurl` varchar(255) DEFAULT NULL,
   `remark` varchar(255) DEFAULT NULL,
   `createtime` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `updatetime` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
@@ -119,7 +128,7 @@ CREATE TABLE `t_title_img` (
 -- ----------------------------
 -- Records of t_title_img
 -- ----------------------------
-INSERT INTO `t_title_img` VALUES ('1', '不积跬步无以至千里', '人啊就是要努力', '/images/1.jpg', null, '2019-12-10 16:16:44', '2019-12-10 16:16:44');
+INSERT INTO `t_title_img` VALUES ('1', '不积跬步无以至千里', '人啊就是要努力', '/images/1.jpg', null, null, '2019-12-10 16:16:44', '2019-12-10 16:16:44');
 
 -- ----------------------------
 -- Table structure for t_user
@@ -146,7 +155,7 @@ CREATE TABLE `t_user` (
   `createtime` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `updatetime` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8 COMMENT='用户表';
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8 COMMENT='用户表';
 
 -- ----------------------------
 -- Records of t_user
@@ -169,3 +178,6 @@ INSERT INTO `t_user` VALUES ('16', '12345898', '12345678', null, null, null, nul
 INSERT INTO `t_user` VALUES ('17', 'yujing123123', '123456789', null, null, null, null, null, null, null, null, null, null, null, null, '0', null, null, null);
 INSERT INTO `t_user` VALUES ('18', 'iiii23yi', '12345678', null, null, null, null, null, null, null, null, null, null, null, null, '0', null, null, null);
 INSERT INTO `t_user` VALUES ('19', '0000000', '00000000', null, null, null, null, null, null, null, null, null, null, null, null, '0', null, null, null);
+INSERT INTO `t_user` VALUES ('20', 'admin1234', '123451116', 'b17be390cc56bfa0d9a305a3575e212f3968bfb5', null, null, null, null, null, null, null, null, null, null, null, '0', null, '2019-12-11 16:08:16', '2019-12-11 16:08:16');
+INSERT INTO `t_user` VALUES ('21', 'test111', '12345678', '3f711160a28c850c787fba5635ec3a1152cb951d', null, null, null, null, null, null, null, null, null, null, null, '0', null, '2019-12-11 15:24:36', '2019-12-11 15:24:36');
+INSERT INTO `t_user` VALUES ('22', 'yujing1233', '123456789', null, null, null, null, null, null, null, null, null, null, null, null, '0', null, null, null);
