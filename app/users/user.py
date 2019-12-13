@@ -50,20 +50,20 @@ def regist():
 
 
 
-@userbp.route("/login",methods=["post","get"])
+@userbp.route("/login",methods=["post"])
 def userlogin():
     '''
     用户登录接口\n
     获取json格式的数据进行处理
     '''
-    
+    data = {}
     userinfo = request.get_json()
     username = userinfo.get("username")
     password = userinfo.get("password")
     if len(username) != 0 and len(password) != 0:
         sql = "select * from t_user where username = '{}'".format(username)
         res = db.query(sql)
-        data = {}
+        
         if len(res) != 1:
             data["msg"] = "数据异常或者用户不存在！"
             data["data"] = None
@@ -100,13 +100,13 @@ def question():
     '''
     提问接口
     '''
+    data = {}
     requestdata = request.get_json()
     token = request.headers.get("token")
     title = requestdata.get("title")
     brief = requestdata.get("brief")
     tags = requestdata.get("tags")
     content = requestdata.get("content")
-    data = {}
     userinfo = session.get("userinfo")
     tokenid = userinfo.get("token")
     if tokenid != None and tokenid == token:
@@ -127,6 +127,7 @@ def questionupdate():
     '''
     修改提问接口
     '''
+    data = {}
     requestdata = request.get_json()
     token = request.headers.get("token")
     title = requestdata.get("title")
@@ -134,12 +135,11 @@ def questionupdate():
     tags = requestdata.get("tags")
     content = requestdata.get("content")
     qid = requestdata.get("qid")
-    data = {}
     userinfo = session.get("userinfo")
     tokenid = userinfo.get("token")
     if tokenid != None and tokenid == token:
         uid = session["userinfo"]["uid"]
-        qres = db.query("select * from t_questions where uid ={};".format(uid))
+        qres = db.query("select * from t_questions where uid ={} and status = 0;".format(uid))
         qlist = []
         if len(qres) != 0:
             for i in qres:
@@ -168,10 +168,10 @@ def questiondelete():
     '''
     删除提问接口
     '''
+    data = {}
     requestdata = request.get_json()
     token = request.headers.get("token")
     qid = requestdata.get("qid")
-    data = {}
     userinfo = session.get("userinfo")
     tokenid = userinfo.get("token")
     if tokenid != None and tokenid == token:
@@ -192,10 +192,10 @@ def inspirer():
     '''
     发表灵感
     '''
+    data = {}
     requestdata = request.get_json()
     token = request.headers.get("token")
     content = requestdata.get("content")
-    data = {}
     userinfo = session.get("userinfo")
     tokenid = userinfo.get("token")
     if tokenid != None and tokenid == token:
@@ -216,11 +216,11 @@ def inspirerupdate():
     '''
     修改灵感
     '''
+    data = {}
     questiondata = request.get_json()
     token = request.headers.get("token")
     content = questiondata.get("content")
     iid = questiondata.get("iid")
-    data = {}
     userinfo = session.get("userinfo")
     tokenid = userinfo.get("token")
     if tokenid != None and tokenid == token:
@@ -241,11 +241,11 @@ def inspirerdelete():
     '''
     删除灵感
     '''
+    data = {}
     questiondata = request.get_json()
     token = request.headers.get("token")
     content = questiondata.get("content")
     iid = questiondata.get("iid")
-    data = {}
     userinfo = session.get("userinfo")
     tokenid = userinfo.get("token")
     if tokenid != None and tokenid == token:
@@ -266,13 +266,13 @@ def article():
     '''
     写文章接口
     '''
+    data = {}
     requestdata = request.get_json()
     token = request.headers.get("token")
     title = requestdata.get("title")
     tags = requestdata.get("tags")
     content = requestdata.get("content")
     author = requestdata.get("nickname")
-    data = {}
     userinfo = session.get("userinfo")
     tokenid = userinfo.get("token")
     if tokenid != None and tokenid == token:
@@ -293,6 +293,7 @@ def articleupdate():
     '''
     修改文章接口
     '''
+    data = {}
     requestdata = request.get_json()
     token = request.headers.get("token")
     title = requestdata.get("title")
@@ -300,7 +301,6 @@ def articleupdate():
     content = requestdata.get("content")
     author = requestdata.get("nickname")
     aid = requestdata.get("aid")
-    data = {}
     userinfo = session.get("userinfo")
     tokenid = userinfo.get("token")
     if tokenid != None and tokenid == token:
@@ -320,10 +320,10 @@ def articledelete():
     '''
     删除文章接口
     '''
+    data = {}
     requestdata = request.get_json()
     token = request.headers.get("token")
     aid = requestdata.get("aid")
-    data = {}
     userinfo = session.get("userinfo")
     tokenid = userinfo.get("token")
     if tokenid != None and tokenid == token:
@@ -332,6 +332,107 @@ def articledelete():
         data["data"] = dbres
         data["msg"] = "删除成功"
         data["status"] = 200
+    else:
+        data["msg"] = "未登录"
+        data["data"] = None
+        data["status"] = 401
+    return jsonify(data)
+
+@userbp.route("/updateuserinfo",methods=["post"])
+def updateuserinfo():
+    '''
+    修改个人资料接口
+    '''
+    data = {}
+    requestdata = request.get_json()
+    token = request.headers.get("token")
+    nickname = requestdata.get("nickname")
+    titlepic = requestdata.get("titlepic")
+    headpic = requestdata.get("headpic")
+    phone = requestdata.get("phone")
+    sex = requestdata.get("sex")
+    job = requestdata.get("job")
+    email = requestdata.get("email")
+    weixin = requestdata.get("weixin")
+    qq = requestdata.get("qq")
+    qianming = requestdata.get("userinfo")
+    address = requestdata.get("address")
+    userinfo = session.get("userinfo")
+    tokenid = userinfo.get("token")
+    if tokenid != None and tokenid == token:  
+        uid = userinfo.get("uid")
+        dbres = db.commit("update t_user set nickname='{}', titlepic='{}', headpic='{}', phone='{}', sex='{}', job='{}', email='{}',\
+        weixin ='{}', QQ='{}', userinfo='{}', address='{}' where id={};".format(nickname,titlepic,headpic,phone,sex,job,email,weixin,qq,qianming,address,uid))
+        data["data"] = dbres
+        data["msg"] = "修改成功"
+        data["status"] = 200    
+    else:
+        data["msg"] = "未登录"
+        data["data"] = None
+        data["status"] = 401
+    return jsonify(data)
+
+
+@userbp.route("/userfellgoods",methods=["post"])
+def userfellgoods():
+    '''
+    点赞
+    '''
+    data = {}
+    token = request.headers.get("token")
+    userinfo = session.get("userinfo")
+    tokenid = userinfo.get("token")
+    if tokenid != None and tokenid == token:
+        uid = session["userinfo"]["uid"]
+        requestdata = request.get_json()
+        # {"goodtype":"article","status":0,"gid":1}
+        goodtype = requestdata.get("goodtype")
+        status = requestdata.get("status")
+        gid = requestdata.get("gid")
+        if goodtype == "article":
+            goods = db.query("select goods from t_article where id = {}".format(gid))[0]["goods"]
+            if status == 0:
+                goods = goods + 1
+            else:
+                goods = goods - 1
+            dbres = db.commit("update t_article set goods={} where id ={};".format(goods,gid))
+            data["data"] = dbres
+            data["msg"] = "点赞成功！"
+            data["status"] = 200
+        elif goodtype == "coures":
+            goods = db.query("select goods from t_coures where id = {}".format(gid))[0]["goods"]
+            if status == 0:
+                goods = goods + 1
+            else:
+                goods = goods - 1
+            dbres = db.commit("update t_coures set goods={} where id ={};".format(goods,gid))
+            data["data"] = dbres
+            data["msg"] = "点赞成功！"
+            data["status"] = 200
+        elif goodtype == "inspirer":
+            goods = db.query("select goods from t_inspirer where id = {}".format(gid))[0]["goods"]
+            if status == 0:
+                goods = goods + 1
+            else:
+                goods = goods - 1
+            dbres = db.commit("update t_inspirer set goods={} where id ={};".format(goods,gid))
+            data["data"] = dbres
+            data["msg"] = "点赞成功！"
+            data["status"] = 200
+        elif goodtype == "questions":
+            goods = db.query("select goods from t_questions where id = {}".format(gid))[0]["goods"]
+            if status == 0:
+                goods = goods + 1
+            else:
+                goods = goods - 1
+            dbres = db.commit("update t_questions set goods={} where id ={};".format(goods,gid))
+            data["data"] = dbres
+            data["msg"] = "点赞成功！"
+            data["status"] = 200
+        else:
+            data["data"] = None
+            data["msg"] = "不存在该文章类型"
+            data["status"] = 401
     else:
         data["msg"] = "未登录"
         data["data"] = None
