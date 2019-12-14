@@ -23,7 +23,10 @@ def getcoures():
     '''
     教程
     '''
-    res = db.query("select id,title,content from t_coures where status = 0 limit 4;")
+    num = request.args.get("num")
+    if num is None:
+        num = 4
+    res = db.query("select id,title,content from t_coures where status = 0 limit {};".format(num))
     data = {
         "status":200,
         "data":res,
