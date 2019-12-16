@@ -1,6 +1,7 @@
-from flask import jsonify,render_template,request
+from flask import render_template,request
 from . import userbp
 from ..utils.dbtools import Db
+from ..utils.othertools import setcors
 from config import db_config
 db = Db(db_config)
 
@@ -16,7 +17,7 @@ def get_title_img():
         "data":res,
         "msg":"查询成功！"
     }
-    return jsonify(data)
+    return setcors(data)
 
 @userbp.route("/getcoures")
 def getcoures():
@@ -32,7 +33,7 @@ def getcoures():
         "data":res,
         "msg":"查询成功！"
     }
-    return jsonify(data)
+    return setcors(data)
 
 @userbp.route("/getquestions")
 def getquestions():
@@ -48,7 +49,7 @@ def getquestions():
         "data":res,
         "msg":"查询成功！"
     }
-    return jsonify(data)
+    return setcors(data)
 
 @userbp.route("/getarticle")
 def getarticle():
@@ -64,7 +65,7 @@ def getarticle():
         "data":res,
         "msg":"查询成功！"
     }
-    return jsonify(data)
+    return setcors(data)
 
 @userbp.route("/getinspirer")
 def getinspirer():
@@ -80,7 +81,7 @@ def getinspirer():
         "data":res,
         "msg":"查询成功！"
     }
-    return jsonify(data)
+    return setcors(data)
 
 @userbp.route("/gethighusers")
 def gethighusers():
@@ -96,5 +97,5 @@ def gethighusers():
         "data":res,
         "msg":"查询成功！"
     }
-    return jsonify(data)
+    return setcors(data)
 

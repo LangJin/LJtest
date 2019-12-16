@@ -1,11 +1,11 @@
 # -*- coding:utf-8 -*-
 __author__ = 'LangJin'
 
-from flask import jsonify,request,render_template,session
+from flask import request,render_template,session,make_response
 from . import userbp
 from ..utils.dbtools import Db
 from config import db_config
-from ..utils.othertools import checkusername,checkpasswd,create_token
+from ..utils.othertools import checkusername,checkpasswd,create_token,setcors
 
 db = Db(db_config)
 
@@ -46,7 +46,8 @@ def regist():
         data["msg"] = "注册失败！"
         data["data"] = usernamemsg
         data["status"] = 401
-    return jsonify(data)
+
+    return setcors(data)
 
 
 
@@ -91,7 +92,7 @@ def userlogin():
         data["msg"] = "账号为空"
         data["data"] = None
         data["status"] = 401
-    return jsonify(data)
+    return setcors(data)
 
 
 
@@ -119,8 +120,8 @@ def question():
         data["msg"] = "未登录"
         data["data"] = None
         data["status"] = 401
-    return jsonify(data)
-    
+    return setcors(data)
+
 
 @userbp.route("/question/update",methods=["post"])
 def questionupdate():
@@ -161,7 +162,7 @@ def questionupdate():
         data["status"] = 401
         data["msg"] = "未登录"
         data["data"] = None
-    return jsonify(data)
+    return setcors(data)
 
 @userbp.route("/question/delete",methods=["post"])
 def questiondelete():
@@ -184,7 +185,7 @@ def questiondelete():
         data["status"] = 401
         data["msg"] = "未登录"
         data["data"] = None
-    return jsonify(data)
+    return setcors(data)
 
 
 @userbp.route("/inspirer/new",methods=["post"])
@@ -208,7 +209,7 @@ def inspirer():
         data["msg"] = "未登录"
         data["data"] = None
         data["status"] = 401
-    return jsonify(data)
+    return setcors(data)
 
 
 @userbp.route("/inspirer/update",methods=["post"])
@@ -233,7 +234,7 @@ def inspirerupdate():
         data["msg"] = "未登录"
         data["data"] = None
         data["status"] = 401
-    return jsonify(data)
+    return setcors(data)
 
 
 @userbp.route("/inspirer/delete",methods=["post"])
@@ -257,7 +258,7 @@ def inspirerdelete():
         data["msg"] = "未登录"
         data["data"] = None
         data["status"] = 401
-    return jsonify(data)
+    return setcors(data)
 
 
 @userbp.route("/article/new",methods=["post"])
@@ -284,7 +285,7 @@ def article():
         data["msg"] = "未登录"
         data["data"] = None
         data["status"] = 401
-    return jsonify(data)
+    return setcors(data)
 
 
 @userbp.route("/article/update",methods=["post"])
@@ -312,7 +313,7 @@ def articleupdate():
         data["msg"] = "未登录"
         data["data"] = None
         data["status"] = 401
-    return jsonify(data)
+    return setcors(data)
 
 @userbp.route("/article/delete",methods=["post"])
 def articledelete():
@@ -335,7 +336,7 @@ def articledelete():
         data["msg"] = "未登录"
         data["data"] = None
         data["status"] = 401
-    return jsonify(data)
+    return setcors(data)
 
 @userbp.route("/updateuserinfo",methods=["post"])
 def updateuserinfo():
@@ -369,7 +370,7 @@ def updateuserinfo():
         data["msg"] = "未登录"
         data["data"] = None
         data["status"] = 401
-    return jsonify(data)
+    return setcors(data)
 
 
 @userbp.route("/userfellgoods",methods=["post"])
@@ -496,7 +497,7 @@ def userfellgoods():
         data["msg"] = "未登录"
         data["data"] = None
         data["status"] = 401
-    return jsonify(data)
+    return setcors(data)
 
 
 
@@ -508,4 +509,4 @@ def test():
     data["msg"] = "测试接口"
     data["data"] = headers
     data["stutas"] = 200
-    return jsonify(data)
+    return setcors(data)

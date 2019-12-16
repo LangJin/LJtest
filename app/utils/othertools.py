@@ -2,7 +2,7 @@
 __author__ = 'LangJin'
 
 import os, hashlib
-
+from flask import jsonify,make_response
 
 
 def create_token():
@@ -49,3 +49,15 @@ def checkpasswd(password):
             return "密码长度必须大于等于8位，并且小于等于16位"
     else:
         return "密码不能为空！"
+
+
+
+def setcors(data):
+    '''
+    解决跨域问题
+    '''
+    res = make_response(jsonify(data))
+    res.headers['Access-Control-Allow-Origin'] = '*'
+    res.headers['Access-Control-Allow-Method'] = '*'
+    res.headers['Access-Control-Allow-Headers'] = '*'
+    return res
