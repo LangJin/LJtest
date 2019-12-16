@@ -131,14 +131,14 @@ def questionupdate():
     data = {}
     requestdata = request.get_json()
     token = request.headers.get("token")
-    title = requestdata.get("title")
-    brief = requestdata.get("brief")
-    tags = requestdata.get("tags")
-    content = requestdata.get("content")
-    qid = requestdata.get("qid")
     userinfo = session.get("userinfo")
     tokenid = userinfo.get("token")
     if tokenid != None and tokenid == token:
+        title = requestdata.get("title")
+        brief = requestdata.get("brief")
+        tags = requestdata.get("tags")
+        content = requestdata.get("content")
+        qid = requestdata.get("qid")
         uid = session["userinfo"]["uid"]
         qres = db.query("select * from t_questions where uid ={} and status = 0;".format(uid))
         qlist = []
@@ -177,10 +177,24 @@ def questiondelete():
     tokenid = userinfo.get("token")
     if tokenid != None and tokenid == token:
         uid = session["userinfo"]["uid"]
-        dbres = db.commit("update t_questions set status=1 where id = {} and uid = {};".format(qid,uid))
-        data["status"] = 200
-        data["msg"] = "删除成功"
-        data["data"] = dbres
+        qres = db.query("select * from t_questions where uid ={} and status = 0;".format(uid))
+        qlist = []
+        if len(qres) != 0:
+            for i in qres:
+                qlist.append(i["id"])
+            if qid in qlist:
+                dbres = db.commit("update t_questions set status = 1 where id = {} and uid = {};".format(qid,uid))
+                data["status"] = 200
+                data["msg"] = "删除成功"
+                data["data"] = dbres
+            else:
+                data["status"] = 401
+                data["msg"] = "内容不存在"
+                data["data"] = None
+        else:
+            data["status"] = 401
+            data["msg"] = "内容不存在"
+            data["data"] = None
     else:
         data["status"] = 401
         data["msg"] = "未登录"
@@ -220,16 +234,21 @@ def inspirerupdate():
     data = {}
     questiondata = request.get_json()
     token = request.headers.get("token")
-    content = questiondata.get("content")
-    iid = questiondata.get("iid")
     userinfo = session.get("userinfo")
     tokenid = userinfo.get("token")
     if tokenid != None and tokenid == token:
-        uid = session["userinfo"]["uid"]
-        dbres = db.commit("update t_inspirer set content = '{}' where id = {} ;".format(content,iid))
-        data["data"] = dbres
-        data["msg"] = "修改成功"
-        data["status"] = 200
+        content = questiondata.get("content")
+        if content != None and content != "":
+            iid = questiondata.get("iid")
+            uid = session["userinfo"]["uid"]
+            dbres = db.commit("update t_inspirer set content = '{}' where id = {} ;".format(content,iid))
+            data["data"] = dbres
+            data["msg"] = "修改成功"
+            data["status"] = 200
+        else:
+            data["data"] = None
+            data["msg"] = "修改内容不能为空！"
+            data["status"] = 200
     else:
         data["msg"] = "未登录"
         data["data"] = None
@@ -279,7 +298,7 @@ def article():
         uid = session["userinfo"]["uid"]
         dbres = db.commit("insert into t_article (title,brief,content,tags,uid) values ('{}','{}','{}','{}',{});".format(title,brief,content,tags,uid))
         data["data"] = dbres
-        data["msg"] = "提问成功"
+        data["msg"] = "发表成功"
         data["status"] = 200
     else:
         data["msg"] = "未登录"
