@@ -251,7 +251,7 @@ def inspirerdelete():
         uid = session["userinfo"]["uid"]
         dbres = db.commit("update t_inspirer set status = 1 where id = {} ;".format(iid))
         data["data"] = dbres
-        data["msg"] = "修改成功"
+        data["msg"] = "删除成功"
         data["status"] = 200
     else:
         data["msg"] = "未登录"
@@ -389,45 +389,105 @@ def userfellgoods():
         status = requestdata.get("status")
         gid = requestdata.get("gid")
         if goodtype == "article":
+            qres = db.query("select * from t_article_user_status where uid = {} and aid = {};".format(uid,gid))
             goods = db.query("select goods from t_article where id = {}".format(gid))[0]["goods"]
-            if status == 0:
+            if len(qres) == 0  and status == 0:  #没有点赞的情况下点赞
                 goods = goods + 1
+                dzres = db.commit("insert into t_article_user_status (aid,uid,gstatus) values ({},{},0);".format(gid,uid))
+                upres = db.commit("update t_article set goods={} where id ={};".format(goods,gid))
+                data["data"] = (dzres,upres)
+                data["msg"] = "点赞成功！"
+                data["status"] = 200
+            elif len(qres) == 0  and status == 1: #没有点赞的情况下取消点赞
+                data["data"] = None
+                data["msg"] = "你还没有对该文章点赞过！"
+                data["status"] = 401        
+            elif len(qres) == 1  and status == 0:  #有点赞的情况下点赞:
+                data["data"] = None
+                data["msg"] = "你已经点赞过！"
+                data["status"] = 401     
             else:
                 goods = goods - 1
-            dbres = db.commit("update t_article set goods={} where id ={};".format(goods,gid))
-            data["data"] = dbres
-            data["msg"] = "点赞成功！"
-            data["status"] = 200
+                dzres = db.commit("update t_article_user_status set gstatus = 1 where  uid = {} and aid = {};".format(uid,gid))
+                upres = db.commit("update t_article set goods={} where id ={};".format(goods,gid))
+                data["data"] = (dzres,upres)
+                data["msg"] = "取消点赞成功！"
+                data["status"] = 200
         elif goodtype == "coures":
+            qres = db.query("select * from t_coures_user_status where uid = {} and aid = {};".format(uid,gid))
             goods = db.query("select goods from t_coures where id = {}".format(gid))[0]["goods"]
-            if status == 0:
+            if len(qres) == 0  and status == 0:  #没有点赞的情况下点赞
                 goods = goods + 1
+                dzres = db.commit("insert into t_coures_user_status (aid,uid,gstatus) values ({},{},0);".format(gid,uid))
+                upres = db.commit("update t_coures set goods={} where id ={};".format(goods,gid))
+                data["data"] = (dzres,upres)
+                data["msg"] = "点赞成功！"
+                data["status"] = 200
+            elif len(qres) == 0  and status == 1: #没有点赞的情况下取消点赞
+                data["data"] = None
+                data["msg"] = "你还没有对该文章点赞过！"
+                data["status"] = 401        
+            elif len(qres) == 1  and status == 0:  #有点赞的情况下点赞:
+                data["data"] = None
+                data["msg"] = "你已经点赞过！"
+                data["status"] = 401     
             else:
                 goods = goods - 1
-            dbres = db.commit("update t_coures set goods={} where id ={};".format(goods,gid))
-            data["data"] = dbres
-            data["msg"] = "点赞成功！"
-            data["status"] = 200
+                dzres = db.commit("update t_coures_user_status set gstatus = 1 where  uid = {} and aid = {};".format(uid,gid))
+                upres = db.commit("update t_coures set goods={} where id ={};".format(goods,gid))
+                data["data"] = (dzres,upres)
+                data["msg"] = "取消点赞成功！"
+                data["status"] = 200
         elif goodtype == "inspirer":
+            qres = db.query("select * from t_inspirer_user_status where uid = {} and aid = {};".format(uid,gid))
             goods = db.query("select goods from t_inspirer where id = {}".format(gid))[0]["goods"]
-            if status == 0:
+            if len(qres) == 0  and status == 0:  #没有点赞的情况下点赞
                 goods = goods + 1
+                dzres = db.commit("insert into t_inspirer_user_status (aid,uid,gstatus) values ({},{},0);".format(gid,uid))
+                upres = db.commit("update t_inspirer set goods={} where id ={};".format(goods,gid))
+                data["data"] = (dzres,upres)
+                data["msg"] = "点赞成功！"
+                data["status"] = 200
+            elif len(qres) == 0  and status == 1: #没有点赞的情况下取消点赞
+                data["data"] = None
+                data["msg"] = "你还没有对该文章点赞过！"
+                data["status"] = 401        
+            elif len(qres) == 1  and status == 0:  #有点赞的情况下点赞:
+                data["data"] = None
+                data["msg"] = "你已经点赞过！"
+                data["status"] = 401     
             else:
                 goods = goods - 1
-            dbres = db.commit("update t_inspirer set goods={} where id ={};".format(goods,gid))
-            data["data"] = dbres
-            data["msg"] = "点赞成功！"
-            data["status"] = 200
+                dzres = db.commit("update t_inspirer_user_status set gstatus = 1 where  uid = {} and aid = {};".format(uid,gid))
+                upres = db.commit("update t_inspirer set goods={} where id ={};".format(goods,gid))
+                data["data"] = (dzres,upres)
+                data["msg"] = "取消点赞成功！"
+                data["status"] = 200
         elif goodtype == "questions":
+            qres = db.query("select * from t_questions_user_status where uid = {} and aid = {};".format(uid,gid))
             goods = db.query("select goods from t_questions where id = {}".format(gid))[0]["goods"]
-            if status == 0:
+            if len(qres) == 0  and status == 0:  #没有点赞的情况下点赞
                 goods = goods + 1
+                dzres = db.commit("insert into questions_user_status (aid,uid,gstatus) values ({},{},0);".format(gid,uid))
+                upres = db.commit("update t_questions set goods={} where id ={};".format(goods,gid))
+                data["data"] = (dzres,upres)
+                data["msg"] = "点赞成功！"
+                data["status"] = 200
+            elif len(qres) == 0  and status == 1: #没有点赞的情况下取消点赞
+                data["data"] = None
+                data["msg"] = "你还没有对该文章点赞过！"
+                data["status"] = 401        
+            elif len(qres) == 1  and status == 0:  #有点赞的情况下点赞:
+                data["data"] = None
+                data["msg"] = "你已经点赞过！"
+                data["status"] = 401     
             else:
                 goods = goods - 1
-            dbres = db.commit("update t_questions set goods={} where id ={};".format(goods,gid))
-            data["data"] = dbres
-            data["msg"] = "点赞成功！"
-            data["status"] = 200
+                dzres = db.commit("update t_questions_user_status set gstatus = 1 where  uid = {} and aid = {};".format(uid,gid))
+                upres = db.commit("update t_questions set goods={} where id ={};".format(goods,gid))
+                data["data"] = (dzres,upres)
+                data["msg"] = "取消点赞成功！"
+                data["status"] = 200
         else:
             data["data"] = None
             data["msg"] = "不存在该文章类型"
