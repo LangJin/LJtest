@@ -26,7 +26,7 @@ def getcoures():
     num = request.args.get("num")
     if num is None:
         num = 4
-    res = db.query("select id,title,content from t_coures where status = 0 limit {};".format(num))
+    res = db.query("select id,title,content,ximg from t_coures where status = 0 limit {};".format(num))
     data = {
         "status":200,
         "data":res,
@@ -42,7 +42,7 @@ def getquestions():
     num = request.args.get("num")
     if num is None:
         num = 6
-    res = db.query("select id,title,content,tags from t_questions where status = 0 limit {};".format(num))
+    res = db.query("select id,title,content,tags,ximg from t_questions where status = 0 limit {};".format(num))
     data = {
         "status":200,
         "data":res,
@@ -58,7 +58,7 @@ def getarticle():
     num = request.args.get("num")
     if num is None:
         num = 6
-    res = db.query("select id,title,content,tags from t_article where status = 0  limit {};".format(num))
+    res = db.query("select id,title,content,tags,ximg from t_article where status = 0  limit {};".format(num))
     data = {
         "status":200,
         "data":res,
@@ -74,7 +74,7 @@ def getinspirer():
     num = request.args.get("num")
     if num is None:
         num = 6
-    res = db.query("select id,content from t_inspirer where status = 0  limit {};".format(num))
+    res = db.query("select id,content,ximg from t_inspirer where status = 0  limit {};".format(num))
     data = {
         "status":200,
         "data":res,

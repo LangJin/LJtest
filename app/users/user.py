@@ -244,7 +244,6 @@ def inspirerdelete():
     data = {}
     questiondata = request.get_json()
     token = request.headers.get("token")
-    content = questiondata.get("content")
     iid = questiondata.get("iid")
     userinfo = session.get("userinfo")
     tokenid = userinfo.get("token")
@@ -272,12 +271,12 @@ def article():
     title = requestdata.get("title")
     tags = requestdata.get("tags")
     content = requestdata.get("content")
-    author = requestdata.get("nickname")
+    brief = requestdata.get("brief")
     userinfo = session.get("userinfo")
     tokenid = userinfo.get("token")
     if tokenid != None and tokenid == token:
         uid = session["userinfo"]["uid"]
-        dbres = db.commit("insert into t_article (title,author,content,tags,uid) values ('{}','{}','{}','{}',{});".format(title,author,content,tags,uid))
+        dbres = db.commit("insert into t_article (title,brief,content,tags,uid) values ('{}','{}','{}','{}',{});".format(title,brief,content,tags,uid))
         data["data"] = dbres
         data["msg"] = "提问成功"
         data["status"] = 200
@@ -438,6 +437,9 @@ def userfellgoods():
         data["data"] = None
         data["status"] = 401
     return jsonify(data)
+
+
+
 
 @userbp.route("/test")
 def test():
