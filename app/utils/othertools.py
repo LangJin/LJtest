@@ -2,7 +2,7 @@
 __author__ = 'LangJin'
 
 import os, hashlib
-from flask import jsonify,make_response
+from flask import jsonify,make_response,session
 
 
 def create_token():
@@ -49,6 +49,20 @@ def checkpasswd(password):
             return "密码长度必须大于等于8位，并且小于等于16位"
     else:
         return "密码不能为空！"
+
+def checkloginstatus(session,token):
+    '''
+    检查用户的登录状态
+    '''
+    userinfo = session.get("userinfo")
+    if userinfo != None and token != None:
+        tokenid = userinfo.get("token")
+        if tokenid == token:
+            return True
+        else:
+            return False
+    else:
+        return False
 
 
 
