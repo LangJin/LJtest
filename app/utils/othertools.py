@@ -2,7 +2,7 @@
 __author__ = 'LangJin'
 
 import os, hashlib
-from flask import jsonify,make_response,session
+from flask import jsonify,make_response,session,request
 
 
 def create_token():
@@ -26,14 +26,14 @@ def checkusername(username):
     '''
     检查账号是否满足用户需求
     '''
-    if username != None:
-        if len(username) >= 6 and len(username) <= 12:
+    if username != None and username != "":
+        if len(username) >= 5 and len(username) <= 12:
             for i in username:
                 if i not in "0123456789qazwsxedcrfvtgbyhnujmikolp":
                     return "账号仅能由数字和字母组成！"
             return True
         else:
-            return "账号长度必须大于等于6位，并且小于等于12位"
+            return "账号长度必须大于等于5位，并且小于等于12位"
     else:
         return "账号不能为空！"
 
@@ -42,8 +42,11 @@ def checkpasswd(password):
     '''
     检查密码是否符合规范
     '''
-    if password != None:
+    if password != None and password != "":
         if len(password) >= 8 and len(password) <= 16:
+            for i in username:
+                if i not in "0123456789qazwsxedcrfvtgbyhnujmikolp_!@#$%^&*<>?-=+|":
+                    return "密码不能输入特殊字符！"
             return True
         else:
             return "密码长度必须大于等于8位，并且小于等于16位"
@@ -75,3 +78,12 @@ def setcors(data):
     res.headers['Access-Control-Allow-Method'] = '*'
     res.headers['Access-Control-Allow-Headers'] = '*'
     return res
+
+
+def checkContentType(request):
+    '''
+    检查用户headers的状态
+    '''
+    contentType = request.headers.get("Content-Type")
+    if contentType != "application/json":
+        pass

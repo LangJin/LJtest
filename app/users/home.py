@@ -26,14 +26,22 @@ def getcoures():
     '''
     num = request.args.get("num")
     if num is None:
-        num = 4
-    res = db.query("select id,title,content,ximg from t_coures where status = 0 limit {};".format(num))
-    data = {
-        "status":200,
-        "data":res,
-        "msg":"查询成功！"
-    }
+        num = '4'
+    if num in '1234567890':
+        res = db.query("select id,title,content,ximg from t_coures where status = 0 limit {};".format(num))
+        data = {
+            "status":200,
+            "data":res,
+            "msg":"查询成功！"
+        }
+    else:
+        data = {
+            "status":401,
+            "data":None,
+            "msg":"num只能是数字！"
+        }   
     return setcors(data)
+
 
 @userbp.route("/getquestions")
 def getquestions():
@@ -42,13 +50,20 @@ def getquestions():
     '''
     num = request.args.get("num")
     if num is None:
-        num = 6
-    res = db.query("select id,title,content,tags,ximg from t_questions where status = 0 limit {};".format(num))
-    data = {
-        "status":200,
-        "data":res,
-        "msg":"查询成功！"
-    }
+        num = '6'
+    if num in '1234567890':
+        res = db.query("select id,title,content,tags,ximg from t_questions where status = 0 limit {};".format(num))
+        data = {
+            "status":200,
+            "data":res,
+            "msg":"查询成功！"
+        }
+    else:
+        data = {
+            "status":401,
+            "data":None,
+            "msg":"num只能是数字！"
+        }      
     return setcors(data)
 
 @userbp.route("/getarticle")
@@ -58,13 +73,20 @@ def getarticle():
     '''
     num = request.args.get("num")
     if num is None:
-        num = 6
-    res = db.query("select id,title,content,tags,ximg from t_article where status = 0  limit {};".format(num))
-    data = {
-        "status":200,
-        "data":res,
-        "msg":"查询成功！"
-    }
+        num = '6'
+    if num in "1234567890":
+        res = db.query("select id,title,content,tags,ximg from t_article where status = 0  limit {};".format(num))
+        data = {
+            "status":200,
+            "data":res,
+            "msg":"查询成功！"
+        }
+    else:
+        data = {
+            "status":401,
+            "data":None,
+            "msg":"num只能是数字！"
+        }  
     return setcors(data)
 
 @userbp.route("/getinspirer")
@@ -74,13 +96,20 @@ def getinspirer():
     '''
     num = request.args.get("num")
     if num is None:
-        num = 6
-    res = db.query("select id,content,ximg from t_inspirer where status = 0  limit {};".format(num))
-    data = {
-        "status":200,
-        "data":res,
-        "msg":"查询成功！"
-    }
+        num = '6'
+    if num in '1234567890':
+        res = db.query("select id,content,ximg from t_inspirer where status = 0  limit {};".format(num))
+        data = {
+            "status":200,
+            "data":res,
+            "msg":"查询成功！"
+        }
+    else:
+        data = {
+            "status":401,
+            "data":None,
+            "msg":"num只能是数字！"
+        }  
     return setcors(data)
 
 @userbp.route("/gethighusers")
@@ -90,12 +119,18 @@ def gethighusers():
     '''
     num = request.args.get("num")
     if num is None:
-        num = 15
-    res = db.query("select id,nickname,headpic from t_user where status = 0 limit {};".format(num))
-    data = {
-        "status":200,
-        "data":res,
-        "msg":"查询成功！"
-    }
+        num = '15'
+    if num in '1234567890':
+        res = db.query("select id,nickname,headpic from t_user where status = 0 limit {};".format(num))
+        data = {
+            "status":200,
+            "data":res,
+            "msg":"查询成功！"
+        }
+    else:
+        data = {
+            "status":401,
+            "data":None,
+            "msg":"num只能是数字！"
+        }  
     return setcors(data)
-

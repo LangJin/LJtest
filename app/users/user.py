@@ -16,7 +16,6 @@ def regist():
     用户注册接口\n
     获取json格式的数据进行处理
     '''
-
     userinfo = request.get_json()
     username = userinfo.get("username")
     password = userinfo.get("password")
@@ -61,6 +60,16 @@ def userlogin():
     userinfo = request.get_json()
     username = userinfo.get("username")
     password = userinfo.get("password")
+    if password == "" or password == None:
+        data["msg"] = "密码不能为空"
+        data["data"] = None
+        data["status"] = 401
+        return setcors(data)
+    if username == "" or username == None:
+        data["msg"] = "账号不能为空"
+        data["data"] = None
+        data["status"] = 401
+        return setcors(data)
     if len(username) != 0 and len(password) != 0:
         sql = "select * from t_user where username = '{}'".format(username)
         res = db.query(sql)
