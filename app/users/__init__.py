@@ -17,7 +17,8 @@ def showversion():
         "status":200,
         "data":{
             "Version": "1.0.1",
-            "info":"1、修改首页的获取各种数据num为非数字报错的BUG。"
+            "info":"1、修改首页的获取各种数据num为非数字报错的BUG。\
+                2、修改修改删除接口可以操作其他的人BUG"
         },
         "msg":"查询成功！"
     }

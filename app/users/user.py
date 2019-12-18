@@ -5,7 +5,7 @@ from flask import request,render_template,session,make_response
 from . import userbp
 from ..utils.dbtools import Db
 from config import db_config
-from ..utils.othertools import checkusername,checkpasswd,create_token,setcors,checkloginstatus
+from ..utils.othertools import checkusername,checkpasswd,create_token,setcors,checkloginstatus,checkContentType
 
 db = Db(db_config)
 
@@ -16,11 +16,17 @@ def regist():
     用户注册接口\n
     获取json格式的数据进行处理
     '''
+    data = {}
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        data["msg"] = "请求失败！"
+        data["data"] = headrsmsg
+        data["status"] = 401
+        return setcors(data)
     userinfo = request.get_json()
     username = userinfo.get("username")
     password = userinfo.get("password")
     usernamemsg = checkusername(username)
-    data = {}
     if usernamemsg is True:
         sql = "select * from t_user where username = '{}'".format(username)
         res = db.query(sql)
@@ -45,7 +51,6 @@ def regist():
         data["msg"] = "注册失败！"
         data["data"] = usernamemsg
         data["status"] = 401
-
     return setcors(data)
 
 
@@ -57,6 +62,12 @@ def userlogin():
     获取json格式的数据进行处理
     '''
     data = {}
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        data["msg"] = "请求失败！"
+        data["data"] = headrsmsg
+        data["status"] = 401
+        return setcors(data)
     userinfo = request.get_json()
     username = userinfo.get("username")
     password = userinfo.get("password")
@@ -71,9 +82,8 @@ def userlogin():
         data["status"] = 401
         return setcors(data)
     if len(username) != 0 and len(password) != 0:
-        sql = "select * from t_user where username = '{}'".format(username)
+        sql = "select * from t_user where status = 0 and username = '{}'".format(username)
         res = db.query(sql)
-        
         if len(res) != 1:
             data["msg"] = "数据异常或者用户不存在！"
             data["data"] = None
@@ -112,6 +122,12 @@ def question():
     提问接口
     '''
     data = {}
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        data["msg"] = "请求失败！"
+        data["data"] = headrsmsg
+        data["status"] = 401
+        return setcors(data)
     requestdata = request.get_json()
     token = request.headers.get("token")
     title = requestdata.get("title")
@@ -137,6 +153,12 @@ def questionupdate():
     修改提问接口
     '''
     data = {}
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        data["msg"] = "请求失败！"
+        data["data"] = headrsmsg
+        data["status"] = 401
+        return setcors(data)
     requestdata = request.get_json()
     token = request.headers.get("token")
     if checkloginstatus(session,token) is True:
@@ -145,21 +167,18 @@ def questionupdate():
         tags = requestdata.get("tags")
         content = requestdata.get("content")
         qid = requestdata.get("qid")
+        if qid == None or qid == "":
+            data["msg"] = "qid不能为空"
+            data["data"] = None
+            data["status"] = 401
+            return setcors(data)
         uid = session["userinfo"]["uid"]
-        qres = db.query("select * from t_questions where uid ={} and status = 0;".format(uid))
-        qlist = []
+        qres = db.query("select * from t_questions where uid ={} and status = 0 and id = {};".format(uid,qid))
         if len(qres) != 0:
-            for i in qres:
-                qlist.append(i["id"])
-            if qid in qlist:
-                dbres = db.commit("update t_questions set title='{}',brief='{}',tags='{}',content='{}' where id = {} and uid = {};".format(title,brief,tags,content,qid,uid))
-                data["status"] = 200
-                data["msg"] = "修改成功"
-                data["data"] = dbres
-            else:
-                data["status"] = 401
-                data["msg"] = "内容不存在"
-                data["data"] = None
+            dbres = db.commit("update t_questions set title='{}',brief='{}',tags='{}',content='{}' where id = {} and uid = {};".format(title,brief,tags,content,qid,uid))
+            data["status"] = 200
+            data["msg"] = "修改成功"
+            data["data"] = dbres
         else:
             data["status"] = 401
             data["msg"] = "内容不存在"
@@ -177,25 +196,28 @@ def questiondelete():
     删除提问接口
     '''
     data = {}
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        data["msg"] = "请求失败！"
+        data["data"] = headrsmsg
+        data["status"] = 401
+        return setcors(data)
     requestdata = request.get_json()
     token = request.headers.get("token")
     qid = requestdata.get("qid")
+    if qid == None or qid == "":
+        data["msg"] = "qid不能为空"
+        data["data"] = None
+        data["status"] = 401
+        return setcors(data)
     if checkloginstatus(session,token) is True:
         uid = session["userinfo"]["uid"]
-        qres = db.query("select * from t_questions where uid ={} and status = 0;".format(uid))
-        qlist = []
+        qres = db.query("select * from t_questions where uid ={} and status = 0 and id = {};".format(uid,qid))
         if len(qres) != 0:
-            for i in qres:
-                qlist.append(i["id"])
-            if qid in qlist:
                 dbres = db.commit("update t_questions set status = 1 where id = {} and uid = {};".format(qid,uid))
                 data["status"] = 200
                 data["msg"] = "删除成功"
                 data["data"] = dbres
-            else:
-                data["status"] = 401
-                data["msg"] = "内容不存在"
-                data["data"] = None
         else:
             data["status"] = 401
             data["msg"] = "内容不存在"
@@ -213,19 +235,30 @@ def inspirer():
     发表灵感
     '''
     data = {}
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        data["msg"] = "请求失败！"
+        data["data"] = headrsmsg
+        data["status"] = 401
+        return setcors(data)
     requestdata = request.get_json()
     token = request.headers.get("token")
     content = requestdata.get("content")
     if checkloginstatus(session,token) is True:
-        uid = session["userinfo"]["uid"]
-        dbres = db.commit("insert into t_inspirer (content,uid) values ('{}',{});".format(content,uid))
-        data["data"] = dbres
-        data["msg"] = "提问成功"
-        data["status"] = 200
+        if content != None or content != "":
+            uid = session["userinfo"]["uid"]
+            dbres = db.commit("insert into t_inspirer (content,uid) values ('{}',{});".format(content,uid))
+            data["data"] = dbres
+            data["msg"] = "发表成功"
+            data["status"] = 200
+        else:
+            data["msg"] = "内容不能为空"
+            data["data"] = None
+            data["status"] = 401
     else:
-        data["msg"] = "未登录"
-        data["data"] = None
-        data["status"] = 401
+            data["msg"] = "未登录"
+            data["data"] = None
+            data["status"] = 401
     return setcors(data)
 
 
@@ -235,17 +268,34 @@ def inspirerupdate():
     修改灵感
     '''
     data = {}
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        data["msg"] = "请求失败！"
+        data["data"] = headrsmsg
+        data["status"] = 401
+        return setcors(data)
     questiondata = request.get_json()
     token = request.headers.get("token")
     if checkloginstatus(session,token) is True:
         content = questiondata.get("content")
         if content != None and content != "":
             iid = questiondata.get("iid")
+            if iid == None or iid == "":
+                data["msg"] = "qid不能为空"
+                data["data"] = None
+                data["status"] = 401
+                return setcors(data)
             uid = session["userinfo"]["uid"]
-            dbres = db.commit("update t_inspirer set content = '{}' where id = {} ;".format(content,iid))
-            data["data"] = dbres
-            data["msg"] = "修改成功"
-            data["status"] = 200
+            qres = db.query("select * from t_inspirer where uid ={} and status = 0 and id = {};".format(uid,iid))
+            if len(qres) != 0:
+                dbres = db.commit("update t_inspirer set content = '{}' where id = {} ;".format(content,iid))
+                data["data"] = dbres
+                data["msg"] = "修改成功"
+                data["status"] = 200
+            else:
+                data["data"] = None
+                data["msg"] = "修改的内容不存在"
+                data["status"] = 401 
         else:
             data["data"] = None
             data["msg"] = "修改内容不能为空！"
@@ -263,15 +313,32 @@ def inspirerdelete():
     删除灵感
     '''
     data = {}
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        data["msg"] = "请求失败！"
+        data["data"] = headrsmsg
+        data["status"] = 401
+        return setcors(data)
     questiondata = request.get_json()
     token = request.headers.get("token")
     iid = questiondata.get("iid")
+    if iid == None or iid == "":
+        data["msg"] = "qid不能为空"
+        data["data"] = None
+        data["status"] = 401
+        return setcors(data)
     if checkloginstatus(session,token) is True:
         uid = session["userinfo"]["uid"]
-        dbres = db.commit("update t_inspirer set status = 1 where id = {} ;".format(iid))
-        data["data"] = dbres
-        data["msg"] = "删除成功"
-        data["status"] = 200
+        ires = db.query("select * from t_inspirer from uid = {} and status = 0 and id = {}".format(uid,iid))
+        if len(ires) != 0:
+            dbres = db.commit("update t_inspirer set status = 1 where id = {} ;".format(iid))
+            data["data"] = dbres
+            data["msg"] = "删除成功"
+            data["status"] = 200
+        else:
+            data["data"] = None
+            data["msg"] = "内容不存在"
+            data["status"] = 200     
     else:
         data["msg"] = "未登录"
         data["data"] = None
@@ -285,6 +352,12 @@ def article():
     写文章接口
     '''
     data = {}
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        data["msg"] = "请求失败！"
+        data["data"] = headrsmsg
+        data["status"] = 401
+        return setcors(data)
     requestdata = request.get_json()
     token = request.headers.get("token")
     title = requestdata.get("title")
@@ -310,6 +383,12 @@ def articleupdate():
     修改文章接口
     '''
     data = {}
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        data["msg"] = "请求失败！"
+        data["data"] = headrsmsg
+        data["status"] = 401
+        return setcors(data)
     requestdata = request.get_json()
     token = request.headers.get("token")
     title = requestdata.get("title")
@@ -317,17 +396,29 @@ def articleupdate():
     content = requestdata.get("content")
     author = requestdata.get("nickname")
     aid = requestdata.get("aid")
+    if aid == None or aid == "":
+        data["msg"] = "qid不能为空"
+        data["data"] = None
+        data["status"] = 401
+        return setcors(data)
     if checkloginstatus(session,token) is True:
         uid = session["userinfo"]["uid"]
-        dbres = db.commit("update t_article set title='{}',tags='{}',content='{}' where id ={};".format(title,tags,content,aid))
-        data["data"] = dbres
-        data["msg"] = "修改成功"
-        data["status"] = 200
+        ares = db.query("select * from t_article where status =0 and uid ={} and id = {};".format(uid,aid))
+        if len(ares) != 0: 
+            dbres = db.commit("update t_article set title='{}',tags='{}',content='{}' where id ={};".format(title,tags,content,aid))
+            data["data"] = dbres
+            data["msg"] = "修改成功"
+            data["status"] = 200
+        else:
+            data["data"] = None
+            data["msg"] = "内容不存在"
+            data["status"] = 401        
     else:
         data["msg"] = "未登录"
         data["data"] = None
         data["status"] = 401
     return setcors(data)
+
 
 @userbp.route("/article/delete",methods=["post"])
 def articledelete():
@@ -335,20 +426,38 @@ def articledelete():
     删除文章接口
     '''
     data = {}
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        data["msg"] = "请求失败！"
+        data["data"] = headrsmsg
+        data["status"] = 401
+        return setcors(data)
     requestdata = request.get_json()
     token = request.headers.get("token")
     aid = requestdata.get("aid")
+    if aid == None or aid == "":
+        data["msg"] = "qid不能为空"
+        data["data"] = None
+        data["status"] = 401
+        return setcors(data)
     if checkloginstatus(session,token) is True:
         uid = session["userinfo"]["uid"]
-        dbres = db.commit("update t_article set status=1 where id ={} and uid = {};".format(aid,uid))
-        data["data"] = dbres
-        data["msg"] = "删除成功"
-        data["status"] = 200
+        ares = db.query("select * from t_article where status =0 and uid ={} and id = {};".format(uid,aid))
+        if len(ares) != 0: 
+            dbres = db.commit("update t_article set status=1 where id ={} and uid = {};".format(aid,uid))
+            data["data"] = dbres
+            data["msg"] = "删除成功"
+            data["status"] = 200
+        else:
+            data["data"] = None
+            data["msg"] = "内容不存在"
+            data["status"] = 401  
     else:
         data["msg"] = "未登录"
         data["data"] = None
         data["status"] = 401
     return setcors(data)
+
 
 @userbp.route("/updateuserinfo",methods=["post"])
 def updateuserinfo():
@@ -356,6 +465,12 @@ def updateuserinfo():
     修改个人资料接口
     '''
     data = {}
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        data["msg"] = "请求失败！"
+        data["data"] = headrsmsg
+        data["status"] = 401
+        return setcors(data)
     requestdata = request.get_json()
     token = request.headers.get("token")
     nickname = requestdata.get("nickname")
@@ -389,6 +504,12 @@ def userfellgoods():
     点赞
     '''
     data = {}
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        data["msg"] = "请求失败！"
+        data["data"] = headrsmsg
+        data["status"] = 401
+        return setcors(data)
     token = request.headers.get("token")
     if checkloginstatus(session,token) is True:
         uid = session["userinfo"]["uid"]
@@ -613,6 +734,12 @@ def usercollections():
     收藏
     '''
     data = {}
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        data["msg"] = "请求失败！"
+        data["data"] = headrsmsg
+        data["status"] = 401
+        return setcors(data)
     token = request.headers.get("token")
     if checkloginstatus(session,token) is True:
         uid = session["userinfo"]["uid"]
@@ -692,7 +819,7 @@ def usercollections():
                             data["msg"] = "你还没有对该文章收藏过！"
                             data["status"] = 401  
                     else:
-                        cstatus = db.query("select gstatus from t_coures_user_status where cid = {} and uid = {};".format(cid,uid))[0]["cstatus"]
+                        cstatus = db.query("select cstatus from t_coures_user_status where cid = {} and uid = {};".format(cid,uid))[0]["cstatus"]
                         if status == 0: # 点赞
                             if cstatus == 0:
                                 data["data"] = None

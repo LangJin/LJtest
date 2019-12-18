@@ -1,8 +1,9 @@
 # -*- coding:utf-8 -*-
 __author__ = 'LangJin'
 
-import os, hashlib
+import os, hashlib,urllib
 from flask import jsonify,make_response,session,request
+
 
 
 def create_token():
@@ -73,10 +74,15 @@ def setcors(data):
     '''
     解决跨域问题
     '''
+    referrer = request.referrer
+    parse = urllib.parse
+    scheme = parse.urlsplit(referrer).scheme
+    netloc = parse.urlsplit(referrer).netloc
     res = make_response(jsonify(data))
-    res.headers['Access-Control-Allow-Origin'] = '*'
+    res.headers['Access-Control-Allow-Origin'] = "{scheme}://{netloc}".format(scheme=scheme, netloc=netloc)
     res.headers['Access-Control-Allow-Method'] = '*'
     res.headers['Access-Control-Allow-Headers'] = '*'
+    res.headers['Access-Control-Allow-Credentials'] = 'true'
     return res
 
 
@@ -85,5 +91,21 @@ def checkContentType(request):
     检查用户headers的状态
     '''
     contentType = request.headers.get("Content-Type")
-    if contentType != "application/json":
-        pass
+    if contentType == "application/json":
+        return True
+    else:
+        return "请求头必须为application/json"
+
+
+def is_number(s):
+    '''
+    判断输入值是否是数字
+    '''
+    if s != None and s != "":
+        try:
+            int(s)
+            return True
+        except ValueError:
+            return "仅支持输入数字"
+    else:
+        return "不能为空"
