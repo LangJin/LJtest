@@ -14,12 +14,8 @@ def showversion():
     查看系统版本
     '''
     data = {
-        "status":200,
-        "data":{
-            "Version": "1.0.1",
+            "Version": "1.0.2",
             "info":"1、修改了禅道上提出的一堆BUG。\n\
                 2、优化了代码，增加了部分BUG。"
-        },
-        "msg":"查询成功！"
-    }
-    return setcors(data)
+        }
+    return setcors(data=data,msg="查询成功",status=200)

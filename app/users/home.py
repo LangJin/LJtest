@@ -12,12 +12,7 @@ def get_title_img():
     获取首页轮播图
     '''
     res = db.query("select id,title,content,imghost from t_title_img;")
-    data = {
-        "status":200,
-        "data":res,
-        "msg":"查询成功！"
-    }
-    return setcors(data)
+    return setcors(data=res,status=200)
 
 @userbp.route("/getcoures")
 def getcoures():
@@ -30,18 +25,9 @@ def getcoures():
     nummsg = is_number(num)
     if nummsg == True:
         res = db.query("select id,title,content,ximg from t_coures where status = 0 limit {};".format(num))
-        data = {
-            "status":200,
-            "data":res,
-            "msg":"查询成功！"
-        }
+        return setcors(data=res,status=200)
     else:
-        data = {
-            "status":401,
-            "data":None,
-            "msg":"num只能是数字！"
-        }   
-    return setcors(data)
+        return setcors(msg=nummsg)
 
 @userbp.route("/get/coure")
 def getcourecid():
@@ -52,18 +38,9 @@ def getcourecid():
     nummsg = is_number(cid)
     if nummsg == True:
         res = db.query("select id,title,content,ximg from t_coures where status = 0 and id = {};".format(cid))
-        data = {
-            "status":200,
-            "data":res,
-            "msg":"查询成功！"
-        }
+        return setcors(data=res,status=200)
     else:
-        data = {
-            "status":401,
-            "data":None,
-            "msg":"id只能是数字！且不能为空"
-        }   
-    return setcors(data)
+        return setcors(msg=nummsg)
 
 
 @userbp.route("/getquestions")
@@ -77,18 +54,9 @@ def getquestions():
     nummsg = is_number(num)
     if nummsg == True:
         res = db.query("select id,title,content,tags,ximg,uid from t_questions where status = 0 limit {};".format(num))
-        data = {
-            "status":200,
-            "data":res,
-            "msg":"查询成功！"
-        }
+        return setcors(data=res,status=200)
     else:
-        data = {
-            "status":401,
-            "data":None,
-            "msg":"num只能是数字！"
-        }      
-    return setcors(data)
+        return setcors(msg=nummsg)
 
 
 @userbp.route("/get/question")
@@ -100,18 +68,9 @@ def getquestionqid():
     nummsg = is_number(qid)
     if nummsg == True:
         res = db.query("select id,title,content,tags,ximg,uid from t_questions where status = 0 and id = {};".format(qid))
-        data = {
-            "status":200,
-            "data":res,
-            "msg":"查询成功！"
-        }
+        return setcors(data=res,status=200)
     else:
-        data = {
-            "status":401,
-            "data":None,
-            "msg":"qid只能是数字！且不能为空！"
-        }      
-    return setcors(data)
+        return setcors(msg=nummsg)
 
 
 @userbp.route("/getarticle")
@@ -125,18 +84,9 @@ def getarticle():
     nummsg = is_number(num)
     if nummsg == True:
         res = db.query("select id,title,content,tags,ximg,uid from t_article where status = 0  limit {};".format(num))
-        data = {
-            "status":200,
-            "data":res,
-            "msg":"查询成功！"
-        }
+        return setcors(data=res,status=200)
     else:
-        data = {
-            "status":401,
-            "data":None,
-            "msg":"num只能是数字！"
-        }  
-    return setcors(data)
+        return setcors(msg=nummsg)
 
 
 @userbp.route("/get/article")
@@ -148,18 +98,9 @@ def getarticleaid():
     nummsg = is_number(aid)
     if nummsg == True:
         res = db.query("select id,title,content,tags,ximg,uid from t_article where status = 0  and id = {};".format(aid))
-        data = {
-            "status":200,
-            "data":res,
-            "msg":"查询成功！"
-        }
+        return setcors(data=res,status=200)
     else:
-        data = {
-            "status":401,
-            "data":None,
-            "msg":"aid只能是数字！,且不能为空"
-        }  
-    return setcors(data)
+        return setcors(msg=nummsg)
 
 
 @userbp.route("/getinspirer")
@@ -173,18 +114,9 @@ def getinspirer():
     nummsg = is_number(num)
     if nummsg == True:
         res = db.query("select id,content,ximg,uid from t_inspirer where status = 0  limit {};".format(num))
-        data = {
-            "status":200,
-            "data":res,
-            "msg":"查询成功！"
-        }
+        return setcors(data=res,status=200)
     else:
-        data = {
-            "status":401,
-            "data":None,
-            "msg":"num只能是数字！"
-        }  
-    return setcors(data)
+        return setcors(msg=nummsg)
 
 
 @userbp.route("/get/inspirer")
@@ -196,18 +128,9 @@ def getinspireriid():
     nummsg = is_number(iid)
     if nummsg == True:
         res = db.query("select id,content,ximg,uid from t_inspirer where status = 0  and id = {};".format(iid))
-        data = {
-            "status":200,
-            "data":res,
-            "msg":"查询成功！"
-        }
+        return setcors(data=res,status=200)
     else:
-        data = {
-            "status":401,
-            "data":None,
-            "msg":nummsg
-        }  
-    return setcors(data)
+        return setcors(msg=nummsg)
 
 
 @userbp.route("/gethighusers")
@@ -221,18 +144,9 @@ def gethighusers():
     nummsg = is_number(num)
     if nummsg == True:
         res = db.query("select id,nickname,headpic from t_user where status = 0 limit {};".format(num))
-        data = {
-            "status":200,
-            "data":res,
-            "msg":"查询成功！"
-        }
+        return setcors(data=res,status=200)
     else:
-        data = {
-            "status":401,
-            "data":None,
-            "msg":"num只能是数字！"
-        }  
-    return setcors(data)
+        return setcors(msg=nummsg)
 
 
 @userbp.route("/get/userinfo")
@@ -244,15 +158,6 @@ def getuserinfo():
     nummsg = is_number(uid)
     if nummsg == True:
         res = db.query("select * from t_user where status = 0 and id = {};".format(uid))
-        data = {
-            "status":200,
-            "data":res,
-            "msg":"查询成功！"
-        }
+        return setcors(data=res,status=200)
     else:
-        data = {
-            "status":401,
-            "data":None,
-            "msg":nummsg
-        }  
-    return setcors(data)
+        return setcors(msg=nummsg)

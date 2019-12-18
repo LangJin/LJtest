@@ -188,7 +188,7 @@ def inspirer():
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         dbres = db.commit("insert into t_inspirer (content,uid) values ('{}',{});".format(content,uid))
-        return setcors(msg=dbres)
+        return setcors(msg=dbres,status=200)
     else:
         return setcors(msg=loginstatus)
 
@@ -217,7 +217,7 @@ def inspirerupdate():
         qres = db.query("select * from t_inspirer where uid ={} and status = 0 and id = {};".format(uid,iid))
         if len(qres) != 0:
             dbres = db.commit("update t_inspirer set content = '{}' where id = {} ;".format(content,iid))
-            return setcors(msg=dbres)
+            return setcors(msg=dbres,status=200)
         else:
             return setcors(msg="修改的灵感不存在！")
     else:
@@ -241,10 +241,10 @@ def inspirerdelete():
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
-        ires = db.query("select * from t_inspirer from uid = {} and status = 0 and id = {}".format(uid,iid))
+        ires = db.query("select * from t_inspirer where uid = {} and status = 0 and id = {};".format(uid,iid))
         if len(ires) != 0:
-            dbres = db.commit("update t_inspirer set status = 1 where id = {} ;".format(iid))
-            return setcors(msg=dbres)
+            dbres = db.commit("update t_inspirer set status = 1 where id = {};".format(iid))
+            return setcors(msg=dbres,status=200)
         else:
             return setcors(msg="删除的灵感不存在！")   
     else:
@@ -272,7 +272,7 @@ def article():
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         dbres = db.commit("insert into t_article (title,brief,content,tags,uid) values ('{}','{}','{}','{}',{});".format(title,brief,content,tags,uid))
-        return setcors(msg=dbres)
+        return setcors(msg=dbres,status=200)
     else:
         return setcors(msg=loginstatus)
 
@@ -347,7 +347,6 @@ def updateuserinfo():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    token = request.headers.get("token")
     nickname = requestdata.get("nickname")
     titlepic = requestdata.get("titlepic")
     headpic = requestdata.get("headpic")
@@ -359,18 +358,15 @@ def updateuserinfo():
     qq = requestdata.get("qq")
     qianming = requestdata.get("userinfo")
     address = requestdata.get("address")
-    if checkloginstatus(session,token) is True:
-        uid = userinfo.get("uid")
+    token = request.headers.get("token")
+    loginstatus = checkloginstatus(session,token)
+    if loginstatus is True:
+        uid = session["userinfo"]["uid"]
         dbres = db.commit("update t_user set nickname='{}', titlepic='{}', headpic='{}', phone='{}', sex='{}', job='{}', email='{}',\
         weixin ='{}', QQ='{}', userinfo='{}', address='{}' where id={};".format(nickname,titlepic,headpic,phone,sex,job,email,weixin,qq,qianming,address,uid))
-        data["data"] = dbres
-        data["msg"] = "修改成功"
-        data["status"] = 200    
+        return setcors(msg=dbres,status=200)
     else:
-        data["msg"] = "未登录"
-        data["data"] = None
-        data["status"] = 401
-    return setcors(data)
+        return setcors(msg=loginstatus)
 
 
 @userbp.route("/userfellgoods",methods=["post"])
@@ -690,6 +686,135 @@ def usercollections():
             return setcors(msg="不存在该文章类型")
     else:
         return setcors(msg=loginstatus)
+
+
+
+@userbp.route("/userfollows",methods=["post"])
+def userfollows():
+    '''
+    关注  # {"followtype":"article","status":0,"fid":1}
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    followtype = requestdata.get("followtype")
+    status = requestdata.get("status")
+    if status not in [0,1]:
+        return setcors(msg="status仅能为0或1")
+    fid = requestdata.get("fid")
+    idmsg = is_number(fid)
+    if idmsg != True:
+        return setcors(msg=idmsg)
+    token = request.headers.get("token")
+    loginstatus = checkloginstatus(session,token) 
+    if loginstatus is True:
+        uid = session["userinfo"]["uid"]
+        if followtype == "article":
+            qres = db.query("select * from t_article_user_status where uid = {} and aid = {};".format(uid,fid))
+            follows = db.query("select follows from t_article where id = {}  and status = 0;".format(fid))
+            if len(follows) != 0 :
+                follows = follows[0]["follows"]
+                if len(qres) == 0:  # 从来没有点过赞
+                    if status == 0: # 点赞
+                        follows = follows + 1
+                        dzres = db.commit("insert into t_article_user_status (aid,uid,fstatus) values ({},{},0);".format(fid,uid))
+                        upres = db.commit("update t_article set follows={} where id ={};".format(follows,fid))
+                        return setcors(msg=(dzres,upres))
+                    else:  #取消点赞
+                        return setcors(msg="你还没有对该文章关注过！")
+                else:
+                    fstatus = db.query("select fstatus from t_article_user_status where aid = {} and uid = {};".format(fid,uid))[0]["fstatus"]
+                    if status == 0: # 点赞
+                        if fstatus == 0:     
+                            return setcors(msg="已经关注过了")                 
+                        else:
+                            follows = follows + 1
+                            dzres = db.commit("update t_article_user_status set fstatus = 0 where  uid = {} and aid = {};".format(uid,fid))
+                            upres = db.commit("update t_article set follows={} where id ={};".format(follows,fid))
+                            return setcors(msg=(dzres,upres)) 
+                    else: # 取消点赞
+                        if fstatus == 0:
+                            follows = follows - 1
+                            dzres = db.commit("update t_article_user_status set fstatus = 1 where  uid = {} and aid = {};".format(uid,fid))
+                            upres = db.commit("update t_article set follows={} where id ={};".format(follows,fid))
+                            return setcors(msg=(dzres,upres))
+                        else:
+                            return setcors(msg="你还没有对该文章关注过！")
+            else:
+                return setcors(msg="不存在该文章")          
+        elif followtype == "coures":
+            qres = db.query("select * from t_coures_user_status where uid = {} and cid = {};".format(uid,fid))
+            follows = db.query("select follows from t_coures where id = {} and status = 0;".format(fid))
+            if len(follows) != 0 :
+                follows = follows[0]["follows"]
+                if len(qres) == 0:  # 从来没有点过赞
+                    if status == 0: # 点赞
+                        follows = follows + 1
+                        dzres = db.commit("insert into t_coures_user_status (cid,uid,fstatus) values ({},{},0);".format(fid,uid))
+                        upres = db.commit("update t_coures set follows={} where id ={};".format(follows,fid))
+                        return setcors(msg=(dzres,upres))
+                    else:  #取消点赞
+                        return setcors(msg="你还没有对该文章关注过！")
+                else:
+                    fstatus = db.query("select fstatus from t_coures_user_status where cid = {} and uid = {};".format(cid,uid))[0]["fstatus"]
+                    if status == 0: # 点赞
+                        if fstatus == 0:  
+                            return setcors(msg="已经关注过了")                    
+                        else:
+                            follows = follows + 1
+                            dzres = db.commit("update t_coures_user_status set fstatus = 0 where  uid = {} and cid = {};".format(uid,fid))
+                            upres = db.commit("update t_coures set follows={} where id ={};".format(follows,fid))
+                            return setcors(msg=(dzres,upres))   
+                    else: # 取消点赞
+                        if fstatus == 0:
+                            follows = follows - 1
+                            dzres = db.commit("update t_coures_user_status set fstatus = 1 where  uid = {} and cid = {};".format(uid,fid))
+                            upres = db.commit("update t_coures set follows={} where id ={};".format(follows,fid))
+                            return setcors(msg=(dzres,upres))
+                        else:
+                            return setcors(msg="你还没有对该文章关注过！")   
+            else: 
+                return setcors(msg="不存在该教程")
+        elif followtype == "questions":
+            qres = db.query("select * from t_questions_user_status where uid = {} and qid = {};".format(uid,fid))
+            follows = db.query("select follows from t_questions where id = {} and status = 0;".format(fid))
+            if len(follows) != 0 :
+                follows = follows[0]["follows"]
+                if len(qres) == 0:  # 从来没有点过赞
+                    if status == 0: # 点赞
+                        follows = follows + 1
+                        dzres = db.commit("insert into t_questions_user_status (qid,uid,fstatus) values ({},{},0);".format(fid,uid))
+                        upres = db.commit("update t_questions set follows={} where id ={};".format(follows,fid))
+                        return setcors(msg=(dzres,upres))
+                    else:  #取消点赞
+                        return setcors(msg="你还没有对该文章关注过！")
+                else:
+                    fstatus = db.query("select fstatus from t_questions_user_status where qid = {} and uid = {}".format(fid,uid))[0]["fstatus"]
+                    if status == 0: # 点赞
+                        if fstatus == 0:    
+                            return setcors(msg="已经关注过了")               
+                        else:
+                            follows = follows + 1
+                            dzres = db.commit("update t_questions_user_status set fstatus = 0 where  uid = {} and qid = {};".format(uid,fid))
+                            upres = db.commit("update t_questions set follows={} where id ={};".format(follows,fid))
+                            return setcors(msg=(dzres,upres))
+                    else: # 取消点赞
+                        if fstatus == 0:
+                            follows = follows - 1
+                            dzres = db.commit("update t_questions_user_status set fstatus = 1 where  uid = {} and qid = {};".format(uid,fid))
+                            upres = db.commit("update t_questions set follows={} where id ={};".format(follows,fid))
+                            return setcors(msg=(dzres,upres))
+                        else:
+                            return setcors(msg="你还没有对该文章关注过！")
+            else:
+                return setcors(msg="不存在该文章")
+        else:
+            return setcors(msg="不存在该文章类型")
+    else:
+        return setcors(msg=loginstatus)
+
+
 
 
 
