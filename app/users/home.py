@@ -51,7 +51,7 @@ def getcourecid():
     cid = request.args.get("cid")
     nummsg = is_number(cid)
     if nummsg == True:
-        res = db.query("select id,title,content,ximg,uid from t_coures where status = 0 and id = {};".format(cid))
+        res = db.query("select id,title,content,ximg from t_coures where status = 0 and id = {};".format(cid))
         data = {
             "status":200,
             "data":res,
