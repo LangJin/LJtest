@@ -9,12 +9,14 @@ class DevelopConfig:
     SECRET_KEY = "ssssdddd"    # SESSION配置
 
 
+
 # 线上发布环境
 class ProductionConfig:
     DEBUG = False
     JSON_AS_ASCII = False #json 中文支持
     BABEL_DEFAULT_LOCALE = 'zh'
     SECRET_KEY = "ssssdddd"    # SESSION配置
+
 
 
 flask_config = {

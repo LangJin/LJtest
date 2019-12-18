@@ -5,7 +5,7 @@ from flask import request,render_template,session,make_response
 from . import userbp
 from ..utils.dbtools import Db
 from config import db_config
-from ..utils.othertools import checkusername,checkpasswd,create_token,setcors,checkloginstatus,checkContentType
+from ..utils.othertools import checkusername,checkpasswd,create_token,setcors,checkloginstatus,checkContentType,is_number
 
 db = Db(db_config)
 
@@ -167,8 +167,9 @@ def questionupdate():
         tags = requestdata.get("tags")
         content = requestdata.get("content")
         qid = requestdata.get("qid")
-        if qid == None or qid == "":
-            data["msg"] = "qid不能为空"
+        idmsg = is_number(qid)
+        if idmsg != True:
+            data["msg"] = idmsg
             data["data"] = None
             data["status"] = 401
             return setcors(data)
@@ -205,8 +206,9 @@ def questiondelete():
     requestdata = request.get_json()
     token = request.headers.get("token")
     qid = requestdata.get("qid")
-    if qid == None or qid == "":
-        data["msg"] = "qid不能为空"
+    idmsg = is_number(qid)
+    if idmsg != True:
+        data["msg"] = idmsg
         data["data"] = None
         data["status"] = 401
         return setcors(data)
@@ -280,8 +282,9 @@ def inspirerupdate():
         content = questiondata.get("content")
         if content != None and content != "":
             iid = questiondata.get("iid")
-            if iid == None or iid == "":
-                data["msg"] = "qid不能为空"
+            idmsg = is_number(iid)
+            if idmsg != True:
+                data["msg"] = idmsg
                 data["data"] = None
                 data["status"] = 401
                 return setcors(data)
@@ -322,8 +325,9 @@ def inspirerdelete():
     questiondata = request.get_json()
     token = request.headers.get("token")
     iid = questiondata.get("iid")
-    if iid == None or iid == "":
-        data["msg"] = "qid不能为空"
+    idmsg = is_number(iid)
+    if idmsg != True:
+        data["msg"] = idmsg
         data["data"] = None
         data["status"] = 401
         return setcors(data)
@@ -396,8 +400,9 @@ def articleupdate():
     content = requestdata.get("content")
     author = requestdata.get("nickname")
     aid = requestdata.get("aid")
-    if aid == None or aid == "":
-        data["msg"] = "qid不能为空"
+    idmsg = is_number(aid)
+    if idmsg != True:
+        data["msg"] = idmsg
         data["data"] = None
         data["status"] = 401
         return setcors(data)
@@ -435,8 +440,9 @@ def articledelete():
     requestdata = request.get_json()
     token = request.headers.get("token")
     aid = requestdata.get("aid")
-    if aid == None or aid == "":
-        data["msg"] = "qid不能为空"
+    idmsg = is_number(aid)
+    if idmsg != True:
+        data["msg"] = idmsg
         data["data"] = None
         data["status"] = 401
         return setcors(data)
