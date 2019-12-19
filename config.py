@@ -7,6 +7,7 @@ class DevelopConfig:
     JSON_AS_ASCII = False #json 中文支持
     BABEL_DEFAULT_LOCALE = 'zh'
     SECRET_KEY = "ssssdddd"    # SESSION配置
+    MAX_CONTENT_LENGTH = 2 * 1024 * 1024 # 2MB  限制文件大小
 
 
 
@@ -16,6 +17,8 @@ class ProductionConfig:
     JSON_AS_ASCII = False #json 中文支持
     BABEL_DEFAULT_LOCALE = 'zh'
     SECRET_KEY = "ssssdddd"    # SESSION配置
+    MAX_CONTENT_LENGTH = 2 * 1024 * 1024 # 2MB  限制文件大小
+
 
 
 
@@ -23,6 +26,9 @@ flask_config = {
     "DevelopConfig": DevelopConfig,
     "ProductionConfig": ProductionConfig
     }
+
+UPLOAD_FOLDER = './app/static/images'  # 上传的文件路径
+
 
 db_config = {
     # 'host': '192.168.0.103',

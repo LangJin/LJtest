@@ -18,4 +18,4 @@ def page_not_found(e):
 
 @errorbp.app_errorhandler(500)
 def internal_server_error(e):
-    return "恭喜你发现了我，我是你最喜欢的BUG，快把我记录到禅道上吧。嘻嘻，😘", 500
+    return "500", 500

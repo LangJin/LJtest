@@ -6,6 +6,9 @@ from . import userbp
 from ..utils.dbtools import Db
 from config import db_config
 from ..utils.othertools import checkuserinfo,create_token,setcors,checkloginstatus,checkContentType,is_number,checkvalueisNone
+# from werkzeug import secure_filename
+
+
 
 db = Db(db_config)
 
@@ -897,6 +900,7 @@ def usercommentdelete():
             return setcors(msg="删除的评论不存在")
     else:
         return setcors(msg=loginstatus)
+
 
 
 @userbp.route("/test")
