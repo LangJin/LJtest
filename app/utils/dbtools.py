@@ -33,7 +33,7 @@ class Db:
                     row[descs[i]] = res[i]
                 results.append(row)
         except Exception as e:
-            raise e
+            results = "%s" % e
         finally:
             cursor.close()
             db.close()  # 关闭连接
@@ -53,7 +53,7 @@ class Db:
             db.commit()
         except Exception as e:
             db.rollback()
-            res = False
+            res = "%s" % e
         finally:
             cursor.close()
             db.close()

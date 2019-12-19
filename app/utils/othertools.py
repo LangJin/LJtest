@@ -48,7 +48,7 @@ def checkpasswd(password):
         password = str(password)
         if len(password) >= 8 and len(password) <= 16:
             for i in password:
-                if i not in "0123456789qazwsxedcrfvtgbyhnujmikolp_!@#$%^&*<>?-=+|":
+                if i not in "0123456789qazwsxedcrfvtgbyhnujmikolpQAZWSXEDCRFVTGBYHNUJMIKOLP_!@#$%^&*<>?-=+|":
                     return "密码不能输入特殊字符！"
             return True
         else:
@@ -126,8 +126,10 @@ def is_number(s):
     '''
     if s != None and s != "":
         try:
-            int(s)
-            return True
+            if int(s) > 0:
+                return True
+            else:
+                return "数字必须大于0"
         except ValueError:
             return "【{}】应该是数字才行！".format(s)
     else:

@@ -11,7 +11,7 @@ def get_title_img():
     '''
     获取首页轮播图
     '''
-    res = db.query("select id,title,content,imghost from t_title_img;")
+    res = db.query("select id,title,content,imghost,rurl from t_title_img;")
     return setcors(data=res,status=200)
 
 @userbp.route("/getcoures")
@@ -20,11 +20,11 @@ def getcoures():
     教程
     '''
     num = request.args.get("num")
-    if num is None:
+    if num is None or num == '':
         num = '4'
     nummsg = is_number(num)
     if nummsg == True:
-        res = db.query("select id,title,content,ximg from t_coures where status = 0 limit {};".format(num))
+        res = db.query("select id,title,content,ximg,brief from t_coures where status = 0 limit {};".format(num))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=nummsg)
@@ -37,7 +37,7 @@ def getcourecid():
     cid = request.args.get("cid")
     nummsg = is_number(cid)
     if nummsg == True:
-        res = db.query("select id,title,content,ximg from t_coures where status = 0 and id = {};".format(cid))
+        res = db.query("select id,title,content,ximg,brief from t_coures where status = 0 and id = {};".format(cid))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=nummsg)
@@ -49,11 +49,11 @@ def getquestions():
     讨论
     '''
     num = request.args.get("num")
-    if num is None:
+    if num is None or num == '':
         num = '6'
     nummsg = is_number(num)
     if nummsg == True:
-        res = db.query("select id,title,content,tags,ximg,uid from t_questions where status = 0 limit {};".format(num))
+        res = db.query("select id,title,content,tags,ximg,uid,brief from t_questions where status = 0 limit {};".format(num))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=nummsg)
@@ -67,7 +67,7 @@ def getquestionqid():
     qid = request.args.get("qid")
     nummsg = is_number(qid)
     if nummsg == True:
-        res = db.query("select id,title,content,tags,ximg,uid from t_questions where status = 0 and id = {};".format(qid))
+        res = db.query("select id,title,content,tags,ximg,uid,brief from t_questions where status = 0 and id = {};".format(qid))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=nummsg)
@@ -79,11 +79,11 @@ def getarticle():
     文章
     '''
     num = request.args.get("num")
-    if num is None:
+    if num is None or num == '':
         num = '6'
     nummsg = is_number(num)
     if nummsg == True:
-        res = db.query("select id,title,content,tags,ximg,uid from t_article where status = 0  limit {};".format(num))
+        res = db.query("select id,title,content,tags,ximg,uid,brief from t_article where status = 0  limit {};".format(num))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=nummsg)
@@ -97,7 +97,7 @@ def getarticleaid():
     aid = request.args.get("aid")
     nummsg = is_number(aid)
     if nummsg == True:
-        res = db.query("select id,title,content,tags,ximg,uid from t_article where status = 0  and id = {};".format(aid))
+        res = db.query("select id,title,content,tags,ximg,uid,brief from t_article where status = 0  and id = {};".format(aid))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=nummsg)
@@ -109,7 +109,7 @@ def getinspirer():
     灵感
     '''
     num = request.args.get("num")
-    if num is None:
+    if num is None or num == '':
         num = '6'
     nummsg = is_number(num)
     if nummsg == True:
@@ -139,7 +139,7 @@ def gethighusers():
     活跃用户
     '''
     num = request.args.get("num")
-    if num is None:
+    if num is None or num == '':
         num = '15'
     nummsg = is_number(num)
     if nummsg == True:

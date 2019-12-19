@@ -74,9 +74,7 @@ def userlogin():
                     data["token"] = token
                     return setcors(msg="登录成功！",data=data,status=200)
                 else:
-                    data["msg"] = "密码错误！"
-                    data["data"] = None
-                    data["status"] = 401
+                    return setcors(msg="密码错误")
         else:
             return setcors(msg=userregmsg)
 
@@ -757,7 +755,7 @@ def userfollows():
                     else:  #取消点赞
                         return setcors(msg="你还没有对该文章关注过！")
                 else:
-                    fstatus = db.query("select fstatus from t_coures_user_status where cid = {} and uid = {};".format(cid,uid))[0]["fstatus"]
+                    fstatus = db.query("select fstatus from t_coures_user_status where cid = {} and uid = {};".format(fid,uid))[0]["fstatus"]
                     if status == 0: # 点赞
                         if fstatus == 0:  
                             return setcors(msg="已经关注过了")                    
@@ -815,8 +813,90 @@ def userfollows():
         return setcors(msg=loginstatus)
 
 
+@userbp.route("/comment/new",methods=["post"])
+def usercomment():
+    '''
+    评论  # {"ctype":"0","comment":0,"fid":1}
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    ctype = requestdata.get("ctype")
+    comment = requestdata.get("comment")
+    fid = requestdata.get("fid")
+    valuemsg = checkvalueisNone([ctype,comment,fid])
+    if valuemsg != True:
+        return setcors(msg=valuemsg)
+    idmsg = is_number(fid)
+    if idmsg != True:
+        return setcors(msg=idmsg)
+    token = request.headers.get("token")
+    loginstatus = checkloginstatus(session,token) 
+    if loginstatus is True:
+        uid = session["userinfo"]["uid"]
+        dbres = db.commit("insert into t_user_comments (ctype,fid,uid,comment) values ('{}',{},{},'{}');".format(ctype,fid,uid,comment))
+        return setcors(msg=dbres,status=200)
+    else:
+        return setcors(msg=loginstatus)
 
 
+@userbp.route("/comment/update",methods=["post"])
+def usercommentupdate():
+    '''
+    修改评论  # {"comment":0,"cid":1}
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    comment = requestdata.get("comment")
+    cid = requestdata.get("cid")
+    valuemsg = checkvalueisNone([comment,cid])
+    if valuemsg != True:
+        return setcors(msg=valuemsg)
+    idmsg = is_number(cid)
+    if idmsg != True:
+        return setcors(msg=idmsg)
+    token = request.headers.get("token")
+    loginstatus = checkloginstatus(session,token) 
+    if loginstatus is True:
+        uid = session["userinfo"]["uid"]
+        comments = db.query("select comment from t_user_comments where id = {} and uid ={} and status = 0;".format(cid,uid))
+        if len(comments) != 0:
+            dbres = db.commit("update t_user_comments set comment = '{}' where id = {};".format(comment,cid))
+            return setcors(msg=dbres,status=200)
+        else:
+            return setcors(msg="修改的评论不存在")
+    else:
+        return setcors(msg=loginstatus)
+
+
+@userbp.route("/comment/delete",methods=["post"])
+def usercommentdelete():
+    '''
+    删除评论  # {"cid":1}
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    cid = requestdata.get("cid")
+    idmsg = is_number(cid)
+    if idmsg != True:
+        return setcors(msg=idmsg)
+    token = request.headers.get("token")
+    loginstatus = checkloginstatus(session,token) 
+    if loginstatus is True:
+        uid = session["userinfo"]["uid"]
+        comments = db.query("select comment from t_user_comments where id = {} and uid ={} and status = 0;".format(cid,uid))
+        if len(comments) != 0:
+            dbres = db.commit("update t_user_comments set status = 1 where id = {};".format(cid))
+            return setcors(msg=dbres,status=200)
+        else:
+            return setcors(msg="删除的评论不存在")
+    else:
+        return setcors(msg=loginstatus)
 
 
 @userbp.route("/test")
