@@ -1,11 +1,11 @@
 # -*- coding:utf-8 -*-
 __author__ = 'LangJin'
 
-from flask import request,render_template,session,make_response
+from flask import request,session,make_response
 from . import userbp
 from ..utils.dbtools import Db
 from config import db_config
-from ..utils.othertools import checkuserinfo,create_token,setcors,checkloginstatus,checkContentType,is_number,checkvalueisNone
+from ..utils.othertools import checkuserinfo,create_token,setcors,checkloginstatus,checkContentType,is_number,checkvalueisNone,encryption
 # from werkzeug import secure_filename
 
 
@@ -34,7 +34,7 @@ def regist():
                 msg = "用户名已存在，请重新设置！"
                 return setcors(msg=msg)
             else:
-                # password = encryption(username,password,"user")
+                password = encryption(username,password,"user")
                 sql = "insert into t_user (username,password) values ('{}','{}');".format(username,password)
                 dbmsg = db.commit(sql)
                 return setcors(msg=dbmsg,status=200)
@@ -63,9 +63,10 @@ def userlogin():
             if len(res) != 1:
                 return setcors(msg="账号不存在或者账号异常")
             else:
-                # password = encryption(username,password,"user")
+                password = encryption(username,password,"user")
                 if password == res[0].get("password"):
                     token = create_token()
+                    session.clear()
                     session["userinfo"] = {"token":token,"uid":res[0]["id"]}
                     userinfo = {
                         "nickname":res[0]["nickname"],
@@ -81,6 +82,22 @@ def userlogin():
         else:
             return setcors(msg=userregmsg)
 
+
+@userbp.route("/loginout",methods=["get"])
+def loginout():
+    '''
+    用户退出登录接口
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    token = request.headers.get("token")
+    loginstatus = checkloginstatus(session,token)
+    if loginstatus is True:
+        session.clear()
+        return setcors(msg="退出成功！",status=200)
+    else:
+        return setcors(msg=loginstatus)
 
 
 @userbp.route("/question/new",methods=["post"])
@@ -826,6 +843,8 @@ def usercomment():
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
     ctype = requestdata.get("ctype")
+    if ctype not in ["0","1","2","3",0,1,2,3]:
+        return setcors(msg="ctype类型不正确！")
     comment = requestdata.get("comment")
     fid = requestdata.get("fid")
     valuemsg = checkvalueisNone([ctype,comment,fid])

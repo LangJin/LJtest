@@ -3,7 +3,7 @@ __author__ = 'LangJin'
 
 import os, hashlib,urllib
 from flask import jsonify,make_response,session,request
-
+from config import keys
 
 
 def create_token():
@@ -88,7 +88,7 @@ def checkloginstatus(session,token):
 
 
 
-def setcors(data=None,msg="成功！",status=401):
+def setcors(data=None,msg="操作成功！",status=401):
     '''
     解决跨域问题
     '''
