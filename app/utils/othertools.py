@@ -32,7 +32,7 @@ def checkusername(username):
         if len(username) >= 5 and len(username) <= 12:
             for i in username:
                 if i not in "0123456789qazwsxedcrfvtgbyhnujmikolp":
-                    return "账号仅能由数字和字母组成！"
+                    return "账号仅能由数字和小写字母组成！"
             return True
         else:
             return "账号长度必须大于等于5位，并且小于等于12位"
