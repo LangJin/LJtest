@@ -37,7 +37,7 @@ def adminlogin():
                 if password == res[0].get("password"):
                     token = create_token()
                     session.clear()
-                    session["userinfo"] = {"token":token,"uid":res[0]["id"]}
+                    session["admininfo"] = {"token":token,"uid":res[0]["id"]}
                     userinfo = {
                         "nickname":res[0]["nickname"],
                         "uid":res[0]["id"],
@@ -53,3 +53,30 @@ def adminlogin():
             return setcors(msg=userregmsg)
 
 
+# 教程的增删改查
+# 灵感的搜索、删除
+# 文章的搜索删除
+# 问题的搜索删除
+# 用户的搜索删除
+@adminbp.route("/userlist",methods=["get"])
+def userlist():
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    pagenum = int(request.args.get("pagenum"))
+    endnum = 10
+    if pagenum == 1:
+        startnum = 0
+    else:
+        startnum = (pagenum-1)*10
+    loginstatus = checkloginstatus(session,token)
+    if loginstatus is True:
+        allusernum = db.query("select count(*) usernum  from t_user where status = 0 ;")
+        res = db.query("select * from t_user where status = 0 limit {},{};".format(startnum,endnum))
+        data = {
+            "userlist":res,
+            "usernum":allusernum[0].get("usernum")
+        }
+        return setcors(data=data,status=200)
+    else:
+        return setcors(msg=loginstatus)
