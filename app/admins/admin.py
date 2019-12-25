@@ -158,6 +158,7 @@ def questionslist():
     else:
         return setcors(msg=loginstatus)
 
+
 @adminbp.route("/questionsdelete",methods=["post"])
 def questionsdelete():
     headrsmsg = checkContentType(request)
