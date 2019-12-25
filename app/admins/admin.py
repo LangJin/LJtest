@@ -54,6 +54,30 @@ def adminlogin():
 
 
 # 教程的增删改查
+@adminbp.route("/coureslist",methods=["get"])
+def coureslist():
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    pagenum = int(request.args.get("pagenum"))
+    endnum = 10
+    if pagenum == 1:
+        startnum = 0
+    else:
+        startnum = (pagenum-1)*10
+    loginstatus = checkloginstatus(session,token)
+    if loginstatus is True:
+        couresnum = db.query("select count(*) couresnum  from t_coures where status = 0;")
+        res = db.query("select * from t_coures where status = 0 limit {},{};".format(startnum,endnum))
+        data = {
+            "coureslist":res,
+            "couresnum":couresnum[0].get("couresnum")
+        }
+        return setcors(data=data,status=200)
+    else:
+        return setcors(msg=loginstatus)
+
+
 # 灵感的搜索、删除
 @adminbp.route("/inspirlist",methods=["get"])
 def inspirlist():
@@ -68,7 +92,7 @@ def inspirlist():
         startnum = (pagenum-1)*10
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
-        inspirnum = db.query("select count(*) inspirnum  from t_inspirer where status = 0 ;")
+        inspirnum = db.query("select count(*) inspirnum  from t_inspirer where status = 0;")
         res = db.query("select * from t_inspirer where status = 0 limit {},{};".format(startnum,endnum))
         data = {
             "inspirlist":res,
@@ -80,19 +104,36 @@ def inspirlist():
 
 
 @adminbp.route("/inspirdelete",methods=["post"])
-def inspirlist():
+def inspirdelete():
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
     dlist = tuple(requestdata.get("dlist"))
-
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
         res = db.commit("update t_inspirer set status = 1 where id in {};".format(dlist))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
+
+
+
+@adminbp.route("/inspirupdate",methods=["post"])
+def inspirupdate():
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    iid = requestdata.get("iid")
+    content = requestdata.get("content")
+    loginstatus = checkloginstatus(session,token)
+    if loginstatus is True:
+        dbres = db.commit("update t_inspirer set content = '{}' where id = {} ;".format(content,iid))
+        return setcors(data=dbres,status=200)
+    else:
+        return setcors(msg=loginstatus)
+
 
 # 文章的搜索删除
 @adminbp.route("/articlelist",methods=["get"])
