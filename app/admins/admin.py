@@ -37,7 +37,7 @@ def adminlogin():
                 if password == res[0].get("password"):
                     token = create_token()
                     session.clear()
-                    session["admininfo"] = {"token":token,"uid":res[0]["id"]}
+                    session["userinfo"] = {"token":token,"uid":res[0]["id"]}
                     userinfo = {
                         "nickname":res[0]["nickname"],
                         "uid":res[0]["id"],
@@ -59,6 +59,7 @@ def coureslist():
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
+    token = request.headers.get("token")
     pagenum = int(request.args.get("pagenum"))
     endnum = 10
     if pagenum == 1:
@@ -90,6 +91,7 @@ def inspirlist():
         startnum = 0
     else:
         startnum = (pagenum-1)*10
+    token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
         inspirnum = db.query("select count(*) inspirnum  from t_inspirer where status = 0;")
@@ -110,6 +112,7 @@ def inspirdelete():
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
     dlist = tuple(requestdata.get("dlist"))
+    token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
         res = db.commit("update t_inspirer set status = 1 where id in {};".format(dlist))
@@ -127,6 +130,7 @@ def inspirupdate():
     requestdata = request.get_json()
     iid = requestdata.get("iid")
     content = requestdata.get("content")
+    token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
         dbres = db.commit("update t_inspirer set content = '{}' where id = {} ;".format(content,iid))
@@ -147,6 +151,7 @@ def articlelist():
         startnum = 0
     else:
         startnum = (pagenum-1)*10
+    token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
         articlenum = db.query("select count(*) articlenum  from t_article where status = 0 ;")
@@ -166,7 +171,7 @@ def articledelete():
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
     dlist = tuple(requestdata.get("dlist"))
-
+    token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
         res = db.commit("update t_article set status = 1 where id in {};".format(dlist))
@@ -187,6 +192,7 @@ def questionslist():
         startnum = 0
     else:
         startnum = (pagenum-1)*10
+    token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
         questionsnum = db.query("select count(*) questionsnum  from t_questions where status = 0 ;")
@@ -207,6 +213,7 @@ def questionsdelete():
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
     dlist = tuple(requestdata.get("dlist"))
+    token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
         res = db.commit("update t_questions set status = 1 where id in {};".format(dlist))
@@ -226,6 +233,7 @@ def userlist():
         startnum = 0
     else:
         startnum = (pagenum-1)*10
+    token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
         allusernum = db.query("select count(*) usernum  from t_user where status = 0 ;")
@@ -245,6 +253,7 @@ def usersdelete():
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
     dlist = tuple(requestdata.get("dlist"))
+    token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
         res = db.commit("update t_user set status = 1 where id in {};".format(dlist))
