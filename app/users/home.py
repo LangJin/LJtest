@@ -24,7 +24,7 @@ def getcoures():
         num = '4'
     nummsg = is_number(num)
     if nummsg == True:
-        res = db.query("select id,title,content,ximg,brief from t_coures where status = 0 limit {};".format(num))
+        res = db.query("select id,title,content,ximg,brief,author,DATE_FORMAT(updatetime,'%Y-%m-%d %T') times from t_coures where status = 0 limit {};".format(num))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=nummsg)
@@ -37,7 +37,7 @@ def getcourecid():
     cid = request.args.get("cid")
     nummsg = is_number(cid)
     if nummsg == True:
-        res = db.query("select id,title,content,ximg,brief from t_coures where status = 0 and id = {};".format(cid))
+        res = db.query("select id,title,content,ximg,brief,author,DATE_FORMAT(updatetime,'%Y-%m-%d %T') times from t_coures where status = 0 and id = {};".format(cid))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=nummsg)
@@ -53,7 +53,7 @@ def getquestions():
         num = '6'
     nummsg = is_number(num)
     if nummsg == True:
-        res = db.query("select id,title,content,tags,ximg,uid,brief from t_questions where status = 0 limit {};".format(num))
+        res = db.query("select id,title,content,tags,ximg,brief,author,DATE_FORMAT(updatetime,'%Y-%m-%d %T') times  from t_questions where status = 0 limit {};".format(num))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=nummsg)
@@ -67,7 +67,7 @@ def getquestionqid():
     qid = request.args.get("qid")
     nummsg = is_number(qid)
     if nummsg == True:
-        res = db.query("select id,title,content,tags,ximg,uid,brief from t_questions where status = 0 and id = {};".format(qid))
+        res = db.query("select id,title,content,tags,ximg,brief,author,DATE_FORMAT(updatetime,'%Y-%m-%d %T') times from t_questions where status = 0 and id = {};".format(qid))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=nummsg)
@@ -83,7 +83,7 @@ def getarticle():
         num = '6'
     nummsg = is_number(num)
     if nummsg == True:
-        res = db.query("select id,title,content,tags,ximg,uid,brief from t_article where status = 0  limit {};".format(num))
+        res = db.query("select id,title,content,tags,ximg,brief,author,DATE_FORMAT(updatetime,'%Y-%m-%d %T') times from t_article where status = 0  limit {};".format(num))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=nummsg)
@@ -97,7 +97,7 @@ def getarticleaid():
     aid = request.args.get("aid")
     nummsg = is_number(aid)
     if nummsg == True:
-        res = db.query("select id,title,content,tags,ximg,uid,brief from t_article where status = 0  and id = {};".format(aid))
+        res = db.query("select id,title,content,tags,ximg,brief,author,DATE_FORMAT(updatetime,'%Y-%m-%d %T') times from t_article where status = 0  and id = {};".format(aid))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=nummsg)
@@ -113,7 +113,7 @@ def getinspirer():
         num = '6'
     nummsg = is_number(num)
     if nummsg == True:
-        res = db.query("select id,content,ximg,uid from t_inspirer where status = 0  limit {};".format(num))
+        res = db.query("select id,content,ximg,author,DATE_FORMAT(updatetime,'%Y-%m-%d %T') times from t_inspirer where status = 0  limit {};".format(num))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=nummsg)
@@ -127,7 +127,7 @@ def getinspireriid():
     iid = request.args.get("iid")
     nummsg = is_number(iid)
     if nummsg == True:
-        res = db.query("select id,content,ximg,uid from t_inspirer where status = 0  and id = {};".format(iid))
+        res = db.query("select id,content,ximg,author,DATE_FORMAT(updatetime,'%Y-%m-%d %T') times from t_inspirer where status = 0  and id = {};".format(iid))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=nummsg)

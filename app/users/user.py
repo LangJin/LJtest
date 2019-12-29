@@ -67,7 +67,7 @@ def userlogin():
                 if password == res[0].get("password"):
                     token = create_token()
                     session.clear()
-                    session["userinfo"] = {"token":token,"uid":res[0]["id"]}
+                    session["userinfo"] = {"token":token,"uid":res[0]["id"],"nickname":res[0]["nickname"]}
                     userinfo = {
                         "nickname":res[0]["nickname"],
                         "uid":res[0]["id"],
@@ -121,7 +121,8 @@ def question():
         loginstatus = checkloginstatus(session,token)
         if loginstatus is True:
             uid = session["userinfo"]["uid"]
-            dbres = db.commit("insert into t_questions (title,brief,content,tags,uid) values ('{}','{}','{}','{}',{});".format(title,brief,content,tags,uid))
+            author = session["userinfo"]["nickname"]
+            dbres = db.commit("insert into t_questions (title,brief,content,tags,uid,author) values ('{}','{}','{}','{}',{},'{}');".format(title,brief,content,tags,uid,author))
             return setcors(msg=dbres,status=200)
         else:
             return setcors(msg=loginstatus)
@@ -205,7 +206,8 @@ def inspirer():
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
-        dbres = db.commit("insert into t_inspirer (content,uid) values ('{}',{});".format(content,uid))
+        author = session["userinfo"]["nickname"]
+        dbres = db.commit("insert into t_inspirer (content,uid,author) values ('{}',{},'{}');".format(content,uid,author))
         return setcors(msg=dbres,status=200)
     else:
         return setcors(msg=loginstatus)
@@ -289,7 +291,8 @@ def article():
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
-        dbres = db.commit("insert into t_article (title,brief,content,tags,uid) values ('{}','{}','{}','{}',{});".format(title,brief,content,tags,uid))
+        author = session["userinfo"]["nickname"]
+        dbres = db.commit("insert into t_article (title,brief,content,tags,uid,author) values ('{}','{}','{}','{}',{},'{}');".format(title,brief,content,tags,uid,author))
         return setcors(msg=dbres,status=200)
     else:
         return setcors(msg=loginstatus)
@@ -857,7 +860,8 @@ def usercomment():
     loginstatus = checkloginstatus(session,token) 
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
-        dbres = db.commit("insert into t_user_comments (ctype,fid,uid,comment) values ('{}',{},{},'{}');".format(ctype,fid,uid,comment))
+        author = session["userinfo"]["nickname"]
+        dbres = db.commit("insert into t_user_comments (ctype,fid,uid,comment,author) values ('{}',{},{},'{}','{}');".format(ctype,fid,uid,comment,author))
         return setcors(msg=dbres,status=200)
     else:
         return setcors(msg=loginstatus)

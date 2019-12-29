@@ -27,9 +27,11 @@ def fileupload():
         return setcors(msg="请上传正确的图片。")
 
 
-@userbp.route('/imgs/<filename>')
-def uploaded_file(filename):
+
+@userbp.route('/imgs')
+def uploaded_file():
     '''
     读取图片接口
     '''
-    return send_from_directory(os.getcwd()+upload_folder,filename)
+    imgname = request.args.get("imgname")
+    return send_from_directory(os.getcwd()+upload_folder,imgname)

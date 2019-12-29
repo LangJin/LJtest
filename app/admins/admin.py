@@ -37,7 +37,7 @@ def adminlogin():
                 if password == res[0].get("password"):
                     token = create_token()
                     session.clear()
-                    session["userinfo"] = {"token":token,"uid":res[0]["id"]}
+                    session["userinfo"] = {"token":token,"uid":res[0]["id"],"nickname":res[0]["nickname"]}
                     userinfo = {
                         "nickname":res[0]["nickname"],
                         "uid":res[0]["id"],
