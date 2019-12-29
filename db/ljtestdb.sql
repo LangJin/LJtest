@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50726
 File Encoding         : 65001
 
-Date: 2019-12-30 01:49:52
+Date: 2019-12-30 02:36:34
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -163,7 +163,7 @@ CREATE TABLE `t_questions` (
   `uid` int(11) NOT NULL COMMENT '提问人ID',
   `remark` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1534 DEFAULT CHARSET=utf8 COMMENT='交流讨论表';
+) ENGINE=InnoDB AUTO_INCREMENT=1571 DEFAULT CHARSET=utf8 COMMENT='交流讨论表';
 
 -- ----------------------------
 -- Table structure for t_questions_user_status
@@ -232,6 +232,7 @@ CREATE TABLE `t_user_comments` (
   `fid` int(16) DEFAULT NULL COMMENT '评论的对象的ID',
   `uid` int(16) DEFAULT NULL,
   `comment` varchar(255) DEFAULT NULL COMMENT '评论',
+  `author` varchar(255) DEFAULT NULL COMMENT '作者',
   `status` int(16) NOT NULL DEFAULT '0' COMMENT '状态，0正常1删除',
   `remark` varchar(255) DEFAULT NULL,
   `createtime` datetime DEFAULT CURRENT_TIMESTAMP,
