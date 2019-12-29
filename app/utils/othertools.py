@@ -143,3 +143,5 @@ def checkvalueisNone(valuelist):
         if i == None or i == "":
             return "输入的参数不能有空值！"
     return True
+
+
