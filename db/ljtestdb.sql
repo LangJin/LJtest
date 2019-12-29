@@ -25,7 +25,7 @@ CREATE TABLE `t_admin` (
   `password` varchar(255) NOT NULL COMMENT '密码',
   `token` varchar(255) DEFAULT NULL COMMENT 'token',
   `nickname` varchar(255) DEFAULT NULL,
-  `headpic` varchar(255) DEFAULT '/static/images/headpic/headimg.jpg' COMMENT '头像',
+  `headpic` varchar(255) DEFAULT 'headimg.jpg' COMMENT '头像',
   `phone` varchar(255) DEFAULT NULL,
   `sex` varchar(255) DEFAULT NULL,
   `status` varchar(255) NOT NULL DEFAULT '0' COMMENT '0正常1删除2拉黑',
@@ -33,7 +33,7 @@ CREATE TABLE `t_admin` (
   `createtime` datetime DEFAULT CURRENT_TIMESTAMP,
   `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=249 DEFAULT CHARSET=utf8 COMMENT='用户表';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='用户表';
 
 -- ----------------------------
 -- Table structure for t_article
@@ -44,19 +44,19 @@ CREATE TABLE `t_article` (
   `title` varchar(255) NOT NULL COMMENT '题目',
   `brief` varchar(255) DEFAULT NULL,
   `content` varchar(255) DEFAULT NULL COMMENT '内容',
-  `ximg` varchar(255) NOT NULL DEFAULT '/static/images/ximg.jpg' COMMENT '图片显示',
+  `ximg` varchar(255) NOT NULL DEFAULT 'ximg.jpg' COMMENT '图片显示',
   `tags` varchar(255) DEFAULT NULL COMMENT '分类',
   `status` varchar(255) NOT NULL DEFAULT '0' COMMENT '状态，0正常1删除',
   `author` varchar(255) DEFAULT NULL COMMENT '作者',
   `uid` int(11) DEFAULT NULL COMMENT '用户id',
   `goods` int(16) NOT NULL DEFAULT '0' COMMENT '点赞数量',
   `collections` int(16) NOT NULL DEFAULT '0' COMMENT '收藏数量',
-  `createtime` datetime DEFAULT CURRENT_TIMESTAMP,
-  `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `follows` int(16) NOT NULL DEFAULT '0' COMMENT '关注数量',
   `remark` varchar(255) DEFAULT NULL,
+  `createtime` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3891 DEFAULT CHARSET=utf8 COMMENT='心得体会';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='心得体会';
 
 -- ----------------------------
 -- Table structure for t_article_user_status
@@ -71,29 +71,29 @@ CREATE TABLE `t_article_user_status` (
   `fstatus` int(11) NOT NULL DEFAULT '1' COMMENT '关注状态，0关注，1没关注',
   `remark` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=74 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for t_coures
 -- ----------------------------
 DROP TABLE IF EXISTS `t_coures`;
 CREATE TABLE `t_coures` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '编号',
   `title` varchar(255) NOT NULL COMMENT '教程标题',
   `brief` varchar(255) DEFAULT NULL,
   `content` varchar(255) NOT NULL COMMENT '教程内容',
   `status` varchar(255) NOT NULL DEFAULT '0' COMMENT '状态0正常1删除',
   `author` varchar(255) DEFAULT NULL COMMENT '作者',
-  `ximg` varchar(255) NOT NULL DEFAULT '/static/images/ximg.jpg' COMMENT '显示的图片',
+  `ximg` varchar(255) NOT NULL DEFAULT 'ximg.jpg' COMMENT '显示的图片',
   `tags` varchar(255) DEFAULT NULL COMMENT '分类',
   `remark` varchar(255) DEFAULT NULL,
   `goods` int(16) DEFAULT '0' COMMENT '点赞数量',
   `collections` int(16) DEFAULT '0' COMMENT '收藏数量',
+  `follows` int(16) NOT NULL DEFAULT '0' COMMENT '关注数量',
   `createtime` datetime DEFAULT CURRENT_TIMESTAMP,
   `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `follows` int(16) NOT NULL DEFAULT '0' COMMENT '关注数量',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='教程表';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='教程表';
 
 -- ----------------------------
 -- Table structure for t_coures_user_status
@@ -108,7 +108,7 @@ CREATE TABLE `t_coures_user_status` (
   `fstatus` int(11) NOT NULL DEFAULT '1' COMMENT '关注状态，0关注，1没关注',
   `remark` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for t_inspirer
@@ -119,14 +119,14 @@ CREATE TABLE `t_inspirer` (
   `content` varchar(255) NOT NULL,
   `uid` int(11) DEFAULT NULL,
   `status` varchar(255) NOT NULL DEFAULT '0' COMMENT '状态 0正常 1删除',
-  `ximg` varchar(255) NOT NULL DEFAULT '/static/images/ximg.jpg' COMMENT '显示的图片',
+  `ximg` varchar(255) NOT NULL DEFAULT 'ximg.jpg' COMMENT '显示的图片',
   `author` varchar(255) DEFAULT NULL,
   `goods` int(16) DEFAULT '0' COMMENT '点赞数量',
   `collections` int(16) DEFAULT '0' COMMENT '收藏数量',
   `createtime` datetime DEFAULT CURRENT_TIMESTAMP,
   `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=201 DEFAULT CHARSET=utf8 COMMENT='灵光一闪';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='灵光一闪';
 
 -- ----------------------------
 -- Table structure for t_inspirer_user_status
@@ -140,7 +140,7 @@ CREATE TABLE `t_inspirer_user_status` (
   `cstatus` int(255) NOT NULL DEFAULT '1' COMMENT '收藏状态，0收藏，1没收藏',
   `remark` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for t_questions
@@ -155,15 +155,15 @@ CREATE TABLE `t_questions` (
   `author` varchar(255) DEFAULT NULL COMMENT '作者',
   `goods` int(11) DEFAULT '0' COMMENT '点赞数量',
   `collections` int(11) DEFAULT '0' COMMENT '收藏数量',
-  `createtime` datetime DEFAULT CURRENT_TIMESTAMP,
-  `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `follows` int(16) NOT NULL DEFAULT '0' COMMENT '关注数量',
   `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态 0正常1删除',
   `ximg` varchar(255) NOT NULL DEFAULT '/static/images/ximg.jpg' COMMENT '显示的图片',
   `uid` int(11) NOT NULL COMMENT '提问人ID',
   `remark` varchar(255) DEFAULT NULL,
+  `createtime` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1571 DEFAULT CHARSET=utf8 COMMENT='交流讨论表';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='交流讨论表';
 
 -- ----------------------------
 -- Table structure for t_questions_user_status
@@ -178,14 +178,14 @@ CREATE TABLE `t_questions_user_status` (
   `fstatus` int(11) NOT NULL DEFAULT '1' COMMENT '关注状态，0关注，1没关注',
   `remark` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for t_title_img
 -- ----------------------------
 DROP TABLE IF EXISTS `t_title_img`;
 CREATE TABLE `t_title_img` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) DEFAULT NULL COMMENT '轮播图标题',
   `content` varchar(255) DEFAULT NULL COMMENT '轮播图内容',
   `imghost` varchar(255) NOT NULL,
@@ -193,7 +193,7 @@ CREATE TABLE `t_title_img` (
   `remark` varchar(255) DEFAULT NULL,
   `createtime` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `updatetime` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='轮播图表';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='轮播图表';
 
 -- ----------------------------
 -- Table structure for t_user
@@ -205,8 +205,8 @@ CREATE TABLE `t_user` (
   `password` varchar(255) NOT NULL COMMENT '密码',
   `token` varchar(255) DEFAULT NULL COMMENT 'token',
   `nickname` varchar(255) DEFAULT NULL,
-  `titlepic` varchar(255) DEFAULT '/static/images/titlepic/titleimg.jpg',
-  `headpic` varchar(255) DEFAULT '/static/images/headpic/headimg.jpg' COMMENT '头像',
+  `titlepic` varchar(255) DEFAULT 'titleimg.jpg',
+  `headpic` varchar(255) DEFAULT 'headimg.jpg' COMMENT '头像',
   `phone` varchar(255) DEFAULT NULL,
   `sex` varchar(255) DEFAULT NULL,
   `job` varchar(255) DEFAULT NULL COMMENT '职业',
@@ -220,7 +220,7 @@ CREATE TABLE `t_user` (
   `createtime` datetime DEFAULT CURRENT_TIMESTAMP,
   `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1352 DEFAULT CHARSET=utf8 COMMENT='用户表';
+) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8 COMMENT='用户表';
 
 -- ----------------------------
 -- Table structure for t_user_comments
@@ -238,4 +238,4 @@ CREATE TABLE `t_user_comments` (
   `createtime` datetime DEFAULT CURRENT_TIMESTAMP,
   `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=123 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
