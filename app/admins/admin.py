@@ -59,7 +59,12 @@ def coureslist():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     token = request.headers.get("token")
-    pagenum = int(request.args.get("pagenum"))
+    pagenum = request.args.get("pagenum")
+    pagenummsg = is_number(pagenum)
+    if pagenummsg != True:
+        return setcors(msg=pagenummsg)
+    else:
+        pagenum = int(pagenum)
     endnum = 10
     if pagenum == 1:
         startnum = 0
@@ -135,7 +140,12 @@ def inspirlist():
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
-    pagenum = int(request.args.get("pagenum"))
+    pagenum = request.args.get("pagenum")
+    pagenummsg = is_number(pagenum)
+    if pagenummsg != True:
+        return setcors(msg=pagenummsg)
+    else:
+        pagenum = int(pagenum)
     endnum = 10
     if pagenum == 1:
         startnum = 0
@@ -196,7 +206,12 @@ def articlelist():
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
-    pagenum = int(request.args.get("pagenum"))
+    pagenum = request.args.get("pagenum")
+    pagenummsg = is_number(pagenum)
+    if pagenummsg != True:
+        return setcors(msg=pagenummsg)
+    else:
+        pagenum = int(pagenum)
     endnum = 10
     if pagenum == 1:
         startnum = 0
@@ -239,7 +254,12 @@ def questionslist():
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
-    pagenum = int(request.args.get("pagenum"))
+    pagenum = request.args.get("pagenum")
+    pagenummsg = is_number(pagenum)
+    if pagenummsg != True:
+        return setcors(msg=pagenummsg)
+    else:
+        pagenum = int(pagenum)
     endnum = 10
     if pagenum == 1:
         startnum = 0
@@ -281,7 +301,12 @@ def userlist():
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
-    pagenum = int(request.args.get("pagenum"))
+    pagenum = request.args.get("pagenum")
+    pagenummsg = is_number(pagenum)
+    if pagenummsg != True:
+        return setcors(msg=pagenummsg)
+    else:
+        pagenum = int(pagenum)
     endnum = 10
     if pagenum == 1:
         startnum = 0
