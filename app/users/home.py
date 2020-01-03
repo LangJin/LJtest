@@ -14,6 +14,7 @@ def get_title_img():
     res = db.query("select id,title,content,imghost,rurl from t_title_img;")
     return setcors(data=res,status=200)
 
+
 @userbp.route("/getcoures")
 def getcoures():
     '''
@@ -28,6 +29,7 @@ def getcoures():
         return setcors(data=res,status=200)
     else:
         return setcors(msg=nummsg)
+
 
 @userbp.route("/get/coure")
 def getcourecid():
@@ -161,5 +163,4 @@ def getuserinfo():
         return setcors(data=res,status=200)
     else:
         return setcors(msg=nummsg)
-
 
