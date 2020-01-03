@@ -12,7 +12,6 @@ from ..utils.othertools import checkuserinfo,create_token,encryption,setcors,che
 db = Db(db_config)
 
 
-
 @adminbp.route("/adminlogin",methods=["post"])
 def adminlogin():
     '''
@@ -68,8 +67,8 @@ def coureslist():
         startnum = (pagenum-1)*10
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
-        couresnum = db.query("select count(*) couresnum  from t_coures where status = 0;")
-        res = db.query("select * from t_coures where status = 0 limit {},{};".format(startnum,endnum))
+        couresnum = db.query("select  count(*) couresnum  from t_coures where status = 0;")
+        res = db.query("select id,title,brief,content,ximg,tags,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_coures where status = 0 limit {},{};".format(startnum,endnum))
         data = {
             "coureslist":res,
             "couresnum":couresnum[0].get("couresnum")
@@ -78,6 +77,57 @@ def coureslist():
     else:
         return setcors(msg=loginstatus)
 
+
+@adminbp.route("/couresnew",methods=["post"])
+def couresnew():
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    title = requestdata.get("title")
+    brief = requestdata.get("brief")
+    tags = requestdata.get("tags")
+    content = requestdata.get("content")
+    valuemsg = checkvalueisNone([title,brief,tags,content])
+    if valuemsg != True:
+        return setcors(msg=valuemsg)
+    token = request.headers.get("token")
+    loginstatus = checkloginstatus(session,token)
+    if loginstatus is True:
+        uid = session["userinfo"]["uid"]
+        author = session["userinfo"]["nickname"]
+        dbres = db.commit("insert into t_coures (title,brief,content,tags,uid,author) values ('{}','{}','{}','{}',{},'{}');".format(title,brief,content,tags,uid,author))
+        return setcors(msg=dbres,status=200)
+    else:
+        return setcors(msg=loginstatus)
+
+
+@adminbp.route("/couresupdate",methods=["post"])
+def couresupdate():
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    title = requestdata.get("title")
+    brief = requestdata.get("brief")
+    tags = requestdata.get("tags")
+    content = requestdata.get("content")
+    cid = requestdata.get("cid")
+    valuemsg = checkvalueisNone([title,brief,tags,content,cid])
+    if valuemsg != True:
+        return setcors(msg=valuemsg)
+    token = request.headers.get("token")
+    loginstatus = checkloginstatus(session,token)
+    if loginstatus is True:
+        uid = session["userinfo"]["uid"]
+        qres = db.query("select * from t_coures where uid ={} and status = 0 and id = {};".format(uid,cid))
+        if len(qres) != 0:
+            dbres = db.commit("update t_coures set title='{}',brief='{}',tags='{}',content='{}' where id = {} and uid = {};".format(title,brief,tags,content,cid,uid))
+            return setcors(msg=dbres,status=200)
+        else:
+            return setcors(msg="修改的教程不存在")
+    else:
+        return setcors(msg=loginstatus)
 
 # 灵感的搜索、删除
 @adminbp.route("/inspirlist",methods=["get"])
@@ -95,7 +145,7 @@ def inspirlist():
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
         inspirnum = db.query("select count(*) inspirnum  from t_inspirer where status = 0;")
-        res = db.query("select * from t_inspirer where status = 0 limit {},{};".format(startnum,endnum))
+        res = db.query("select id,content,ximg,author,goods,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_inspirer where status = 0 limit {},{};".format(startnum,endnum))
         data = {
             "inspirlist":res,
             "inspirnum":inspirnum[0].get("inspirnum")
@@ -111,7 +161,8 @@ def inspirdelete():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    dlist = tuple(requestdata.get("dlist"))
+    dlist = requestdata.get("dlist")
+    dlist = tuple(dlist.split(","))
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
@@ -155,7 +206,7 @@ def articlelist():
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
         articlenum = db.query("select count(*) articlenum  from t_article where status = 0 ;")
-        res = db.query("select * from t_article where status = 0 limit {},{};".format(startnum,endnum))
+        res = db.query("select id,title,brief,content,ximg,tags,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_article where status = 0 limit {},{};".format(startnum,endnum))
         data = {
             "articlelist":res,
             "articlenum":articlenum[0].get("articlenum")
@@ -164,13 +215,15 @@ def articlelist():
     else:
         return setcors(msg=loginstatus)
 
+
 @adminbp.route("/articledelete",methods=["post"])
 def articledelete():
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    dlist = tuple(requestdata.get("dlist"))
+    dlist = requestdata.get("dlist")
+    dlist = tuple(dlist.split(","))
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
@@ -196,7 +249,7 @@ def questionslist():
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
         questionsnum = db.query("select count(*) questionsnum  from t_questions where status = 0 ;")
-        res = db.query("select * from t_questions where status = 0 limit {},{};".format(startnum,endnum))
+        res = db.query("select id,title,brief,content,ximg,tags,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_questions where status = 0 limit {},{};".format(startnum,endnum))
         data = {
             "questionslist":res,
             "questionsnum":questionsnum[0].get("questionsnum")
@@ -212,7 +265,8 @@ def questionsdelete():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    dlist = tuple(requestdata.get("dlist"))
+    dlist = requestdata.get("dlist")
+    dlist = tuple(dlist.split(","))
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
@@ -237,7 +291,7 @@ def userlist():
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
         allusernum = db.query("select count(*) usernum  from t_user where status = 0 ;")
-        res = db.query("select * from t_user where status = 0 limit {},{};".format(startnum,endnum))
+        res = db.query("select id,nickname,titlepic,headpic,phone,sex,job,email,weixin,QQ,userinfo,address,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_user where status = 0 limit {},{};".format(startnum,endnum))
         data = {
             "userlist":res,
             "usernum":allusernum[0].get("usernum")
@@ -252,7 +306,8 @@ def usersdelete():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    dlist = tuple(requestdata.get("dlist"))
+    dlist = requestdata.get("dlist")
+    dlist = tuple(dlist.split(","))
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
