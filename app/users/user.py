@@ -26,6 +26,8 @@ def regist():
         userinfo = request.get_json()
         username = userinfo.get("username")
         password = userinfo.get("password")
+        phone = userinfo.get("phone")
+        email = userinfo.get("email")
         userregmsg = checkuserinfo(username,password)
         if userregmsg is True:
             sql = "select * from t_user where username = '{}'".format(username)
@@ -35,7 +37,7 @@ def regist():
                 return setcors(msg=msg)
             else:
                 password = encryption(username,password,"user")
-                sql = "insert into t_user (username,password) values ('{}','{}');".format(username,password)
+                sql = "insert into t_user (username,password,phone,email) values ('{}','{}','{}','{}');".format(username,password,phone,email)
                 dbmsg = db.commit(sql)
                 return setcors(msg=dbmsg,status=200)
         else:
