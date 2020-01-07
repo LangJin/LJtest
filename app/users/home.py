@@ -218,7 +218,7 @@ def getinspireriid():
         res = db.query("SELECT c.id,c.content,c.ximg,\
             c.goods,c.collections,c.uid,a.nickname,a.userinfo,a.headpic,\
             DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_inspirer c JOIN t_user a \
-            on c.uid = a.id WHERE c.STATUS = 0 id = {};".format(iid))
+            on c.uid = a.id WHERE c.STATUS = 0 and c.id = {};".format(iid))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=nummsg)

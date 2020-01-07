@@ -14,7 +14,7 @@ def showversion():
     查看系统版本
     '''
     data = {
-            "Version": "1.0.4",
-            "info":"新增了一些BUG，修改了时间显示，新增了图片的上传和读取接口"
+            "Version": "1.0.5",
+            "info":"修改了首页接口返回的数据"
         }
     return setcors(data=data,msg="查询成功",status=200)

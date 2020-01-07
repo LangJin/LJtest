@@ -8,7 +8,6 @@ from config import db_config
 from ..utils.othertools import checkuserinfo,create_token,encryption,setcors,checkloginstatus,checkContentType,is_number,checkvalueisNone
 # from werkzeug import secure_filename
 
-
 db = Db(db_config)
 
 
