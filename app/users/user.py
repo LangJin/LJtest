@@ -841,6 +841,7 @@ def userfollows():
 @userbp.route("/comment/new",methods=["post"])
 def usercomment():
     '''
+    文章类型，0教程1提问2灵感3心得体会4评论
     评论  # {"ctype":"0","comment":0,"fid":1}
     '''
     headrsmsg = checkContentType(request)
@@ -848,7 +849,7 @@ def usercomment():
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
     ctype = requestdata.get("ctype")
-    if ctype not in ["0","1","2","3",0,1,2,3]:
+    if ctype not in ["0","1","2","3","4",0,1,2,3,4]:
         return setcors(msg="ctype类型不正确！")
     comment = requestdata.get("comment")
     fid = requestdata.get("fid")

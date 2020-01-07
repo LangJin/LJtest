@@ -20,15 +20,34 @@ def getcoures():
     '''
     教程
     '''
-    num = request.args.get("num")
-    if num is None or num == '':
-        num = '4'
-    nummsg = is_number(num)
-    if nummsg == True:
-        res = db.query("select id,title,content,ximg,brief,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') times from t_coures where status = 0 limit {};".format(num))
+    pagenum = request.args.get("pagenum")
+    if pagenum is None or pagenum == '':
+        pagenum = '3'
+        res = db.query("SELECT c.id,c.title,c.content,c.ximg,c.brief,\
+            c.goods,c.collections,c.follows,a.nickname,a.userinfo,a.headpic,\
+            DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_coures c JOIN t_admin a \
+            on c.uid = a.id WHERE c.STATUS = 0 order by c.updatetime desc limit {};".format(pagenum))
         return setcors(data=res,status=200)
+    pagenummsg = is_number(pagenum)
+    if pagenummsg != True:
+        return setcors(msg=pagenummsg)
     else:
-        return setcors(msg=nummsg)
+        pagenum = int(pagenum)
+    endnum = 10
+    if pagenum == 1:
+        startnum = 0
+    else:
+        startnum = (pagenum-1)*10
+    counts = db.query("select  count(*) counts  from t_coures where status = 0;")
+    res = db.query("SELECT c.id,c.title,c.content,c.ximg,c.brief,\
+            c.goods,c.collections,c.follows,a.nickname,a.userinfo,a.headpic,\
+            DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_coures c JOIN t_admin a \
+            on c.uid = a.id WHERE c.STATUS = 0 order by c.updatetime desc limit {},{};".format(startnum,endnum))
+    data = {
+        "contentlist":res,
+        "counts":counts[0].get("counts")
+    }
+    return setcors(data=data,status=200)
 
 
 @userbp.route("/get/coure")
@@ -39,7 +58,10 @@ def getcourecid():
     cid = request.args.get("cid")
     nummsg = is_number(cid)
     if nummsg == True:
-        res = db.query("select id,title,content,ximg,brief,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') times from t_coures where status = 0 and id = {};".format(cid))
+        res = db.query("SELECT c.id,c.title,c.content,c.ximg,c.brief,\
+            c.goods,c.collections,c.follows,a.nickname,a.userinfo,a.headpic,\
+            DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_coures c JOIN t_admin a \
+            on c.uid = a.id WHERE c.STATUS = 0 and c.id = {};".format(cid))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=nummsg)
@@ -50,15 +72,34 @@ def getquestions():
     '''
     讨论
     '''
-    num = request.args.get("num")
-    if num is None or num == '':
-        num = '6'
-    nummsg = is_number(num)
-    if nummsg == True:
-        res = db.query("select id,title,content,tags,ximg,brief,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') times  from t_questions where status = 0 limit {};".format(num))
+    pagenum = request.args.get("pagenum")
+    if pagenum is None or pagenum == '':
+        pagenum = '3'
+        res = db.query("SELECT c.id,c.title,c.content,c.ximg,c.brief,\
+            c.goods,c.collections,c.follows,c.uid,a.nickname,a.userinfo,a.headpic,\
+            DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_questions c JOIN t_user a \
+            on c.uid = a.id WHERE c.STATUS = 0 order by c.updatetime desc limit {};".format(pagenum))
         return setcors(data=res,status=200)
+    pagenummsg = is_number(pagenum)
+    if pagenummsg != True:
+        return setcors(msg=pagenummsg)
     else:
-        return setcors(msg=nummsg)
+        pagenum = int(pagenum)
+    endnum = 10
+    if pagenum == 1:
+        startnum = 0
+    else:
+        startnum = (pagenum-1)*10
+    counts = db.query("select  count(*) counts  from t_questions where status = 0;")
+    res = db.query("SELECT c.id,c.title,c.content,c.ximg,c.brief,\
+            c.goods,c.collections,c.follows,c.uid,a.nickname,a.userinfo,a.headpic,\
+            DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_questions c JOIN t_user a \
+            on c.uid = a.id WHERE c.STATUS = 0 order by c.updatetime desc limit {},{};".format(startnum,endnum))
+    data = {
+        "contentlist":res,
+        "counts":counts[0].get("counts")
+    }
+    return setcors(data=data,status=200)
 
 
 @userbp.route("/get/question")
@@ -69,7 +110,10 @@ def getquestionqid():
     qid = request.args.get("qid")
     nummsg = is_number(qid)
     if nummsg == True:
-        res = db.query("select id,title,content,tags,ximg,brief,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') times from t_questions where status = 0 and id = {};".format(qid))
+        res = db.query("SELECT c.id,c.title,c.content,c.ximg,c.brief,\
+            c.goods,c.collections,c.follows,c.uid,a.nickname,a.userinfo,a.headpic,\
+            DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_questions c JOIN t_user a \
+            on c.uid = a.id WHERE c.STATUS = 0 and c.id = {};".format(qid))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=nummsg)
@@ -80,15 +124,35 @@ def getarticle():
     '''
     文章
     '''
-    num = request.args.get("num")
-    if num is None or num == '':
-        num = '6'
-    nummsg = is_number(num)
-    if nummsg == True:
-        res = db.query("select id,title,content,tags,ximg,brief,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') times from t_article where status = 0  limit {};".format(num))
+    pagenum = request.args.get("pagenum")
+    if pagenum is None or pagenum == '':
+        pagenum = '4'
+        res = db.query("SELECT c.id,c.title,c.content,c.ximg,c.brief,\
+            c.goods,c.collections,c.follows,c.uid,a.nickname,a.userinfo,a.headpic,\
+            DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_article c JOIN t_user a \
+            on c.uid = a.id WHERE c.STATUS = 0 order by c.updatetime desc limit {};".format(pagenum))
         return setcors(data=res,status=200)
+    pagenummsg = is_number(pagenum)
+    if pagenummsg != True:
+        return setcors(msg=pagenummsg)
     else:
-        return setcors(msg=nummsg)
+        pagenum = int(pagenum)
+    endnum = 10
+    if pagenum == 1:
+        startnum = 0
+    else:
+        startnum = (pagenum-1)*10
+    counts = db.query("select  count(*) counts  from t_article where status = 0;")
+    res = db.query("SELECT c.id,c.title,c.content,c.ximg,c.brief,\
+            c.goods,c.collections,c.follows,c.uid,a.nickname,a.userinfo,a.headpic,\
+            DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_article c JOIN t_user a \
+            on c.uid = a.id WHERE c.STATUS = 0 order by c.updatetime desc limit {},{};".format(startnum,endnum))
+    data = {
+        "contentlist":res,
+        "counts":counts[0].get("counts")
+    }
+    return setcors(data=data,status=200)
+
 
 
 @userbp.route("/get/article")
@@ -99,7 +163,10 @@ def getarticleaid():
     aid = request.args.get("aid")
     nummsg = is_number(aid)
     if nummsg == True:
-        res = db.query("select id,title,content,tags,ximg,brief,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') times from t_article where status = 0  and id = {};".format(aid))
+        res = db.query("SELECT c.id,c.title,c.content,c.ximg,c.brief,\
+            c.goods,c.collections,c.follows,c.uid,a.nickname,a.userinfo,a.headpic,\
+            DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_article c JOIN t_user a \
+            on c.uid = a.id WHERE c.STATUS = 0 and c.id = {};".format(aid))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=nummsg)
@@ -110,15 +177,34 @@ def getinspirer():
     '''
     灵感
     '''
-    num = request.args.get("num")
-    if num is None or num == '':
-        num = '6'
-    nummsg = is_number(num)
-    if nummsg == True:
-        res = db.query("select id,content,ximg,author,goods,DATE_FORMAT(updatetime,'%Y-%m-%d %T') times from t_inspirer where status = 0  limit {};".format(num))
+    pagenum = request.args.get("pagenum")
+    if pagenum is None or pagenum == '':
+        pagenum = '4'
+        res = db.query("SELECT c.id,c.content,c.ximg,\
+            c.goods,c.collections,c.uid,a.nickname,a.userinfo,a.headpic,\
+            DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_inspirer c JOIN t_user a \
+            on c.uid = a.id WHERE c.STATUS = 0 order by c.updatetime desc limit {};".format(pagenum))
         return setcors(data=res,status=200)
+    pagenummsg = is_number(pagenum)
+    if pagenummsg != True:
+        return setcors(msg=pagenummsg)
     else:
-        return setcors(msg=nummsg)
+        pagenum = int(pagenum)
+    endnum = 10
+    if pagenum == 1:
+        startnum = 0
+    else:
+        startnum = (pagenum-1)*10
+    counts = db.query("select  count(*) counts  from t_inspirer where status = 0;")
+    res = db.query("SELECT c.id,c.content,c.ximg,\
+            c.goods,c.collections,c.uid,a.nickname,a.userinfo,a.headpic,\
+            DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_inspirer c JOIN t_user a \
+            on c.uid = a.id WHERE c.STATUS = 0 order by c.updatetime desc limit {},{};".format(startnum,endnum))
+    data = {
+        "contentlist":res,
+        "counts":counts[0].get("counts")
+    }
+    return setcors(data=data,status=200)
 
 
 @userbp.route("/get/inspirer")
@@ -129,7 +215,10 @@ def getinspireriid():
     iid = request.args.get("iid")
     nummsg = is_number(iid)
     if nummsg == True:
-        res = db.query("select id,content,ximg,author,goods,DATE_FORMAT(updatetime,'%Y-%m-%d %T') times from t_inspirer where status = 0  and id = {};".format(iid))
+        res = db.query("SELECT c.id,c.content,c.ximg,\
+            c.goods,c.collections,c.uid,a.nickname,a.userinfo,a.headpic,\
+            DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_inspirer c JOIN t_user a \
+            on c.uid = a.id WHERE c.STATUS = 0 id = {};".format(iid))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=nummsg)
@@ -164,3 +253,37 @@ def getuserinfo():
     else:
         return setcors(msg=nummsg)
 
+
+@userbp.route("/getcomments",methods=["post"])
+def getcomments():
+    '''
+    getcomments
+    '''
+    requestdata = request.get_json()
+    ctype = requestdata["ctype"]
+    fid = requestdata["fid"]
+    pagenum = requestdata["pagenum"]
+    pagenummsg = is_number(pagenum)
+    if pagenummsg != True:
+        return setcors(msg=pagenummsg)
+    else:
+        pagenum = int(pagenum)
+    endnum = 10
+    if pagenum == 1:
+        startnum = 0
+    else:
+        startnum = (pagenum-1)*10
+    nummsg = is_number(fid)
+    if nummsg == True:
+        counts = db.query("select count(*) counts from t_user_comments where status = 0 and ctype = {} and fid = {};".format(ctype,fid))
+        res = db.query("select c.id,c.`comment`,c.uid,u.headpic,u.userinfo,\
+            u.nickname,DATE_FORMAT(c.updatetime,'%Y-%m-%d %T') times \
+            from t_user_comments c join t_user u on u.id = c.uid  \
+            where c.`status` = 0 and  c.ctype = {} and c.fid = {} order by times desc limit {},{};".format(ctype,fid,startnum,endnum))
+        data = {
+            "contentlist":res,
+            "counts":counts[0].get("counts")
+        }
+        return setcors(data=data,status=200)
+    else:
+        return setcors(msg=nummsg)

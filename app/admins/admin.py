@@ -124,10 +124,10 @@ def couresupdate():
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
-        uid = session["userinfo"]["uid"]
+        # uid = session["userinfo"]["uid"]
         qres = db.query("select * from t_coures where uid ={} and status = 0 and id = {};".format(uid,cid))
         if len(qres) != 0:
-            dbres = db.commit("update t_coures set title='{}',brief='{}',tags='{}',content='{}' where id = {} and uid = {};".format(title,brief,tags,content,cid,uid))
+            dbres = db.commit("update t_coures set title='{}',brief='{}',tags='{}',content='{}' where id = {};".format(title,brief,tags,content,cid))
             return setcors(msg=dbres,status=200)
         else:
             return setcors(msg="修改的教程不存在")
