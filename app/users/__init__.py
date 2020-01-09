@@ -5,7 +5,7 @@ from ..utils.othertools import setcors
 
 userbp = Blueprint("user", __name__)
 
-from . import home,user,upload
+from . import home,user,upload,userinfo
 
 
 @userbp.route("/showversion")
