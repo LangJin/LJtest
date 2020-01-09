@@ -85,7 +85,7 @@ def userlogin():
             return setcors(msg=userregmsg)
 
 
-@userbp.route("/loginout",methods=["get"])
+@userbp.route("/logout",methods=["get"])
 def loginout():
     '''
     用户退出登录接口
