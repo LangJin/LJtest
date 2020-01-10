@@ -126,7 +126,7 @@ def question():
             uid = session["userinfo"]["uid"]
             author = session["userinfo"]["nickname"]
             dbres = db.commit("insert into t_questions (title,brief,content,tags,uid,ximg,author) values ('{}','{}','{}','{}',{},'{}','{}');".format(title,brief,content,tags,uid,ximg,author))
-            dbqres = db.query("select id from t_questions where uid = {} order by updatetime desc limit 1;".format(uid))
+            dbqres = db.query("select id from t_questions where uid = {} order by updatetime desc limit 1;".format(uid))[0].get("id")
             data = {
                 "questionid":dbqres,
                 "status":dbres
