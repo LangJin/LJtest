@@ -115,6 +115,7 @@ def question():
         token = request.headers.get("token")
         title = requestdata.get("title")
         brief = requestdata.get("brief")
+        ximg = requestdata.get("ximg")
         tags = requestdata.get("tags")
         content = requestdata.get("content")
         valuemsg = checkvalueisNone([title,brief,tags,content])
@@ -124,8 +125,13 @@ def question():
         if loginstatus is True:
             uid = session["userinfo"]["uid"]
             author = session["userinfo"]["nickname"]
-            dbres = db.commit("insert into t_questions (title,brief,content,tags,uid,author) values ('{}','{}','{}','{}',{},'{}');".format(title,brief,content,tags,uid,author))
-            return setcors(msg=dbres,status=200)
+            dbres = db.commit("insert into t_questions (title,brief,content,tags,uid,ximg,author) values ('{}','{}','{}','{}',{},'{}','{}');".format(title,brief,content,tags,uid,ximg,author))
+            dbqres = db.query("select id from t_questions where uid = {} order by updatetime desc limit 1;".format(uid))
+            data = {
+                "questionid":dbqres,
+                "status":dbres
+            }
+            return setcors(msg=data,status=200)
         else:
             return setcors(msg=loginstatus)
 
@@ -286,6 +292,7 @@ def article():
     tags = requestdata.get("tags")
     content = requestdata.get("content")
     brief = requestdata.get("brief")
+    ximg = requestdata.get("ximg")
     valuemsg = checkvalueisNone([title,brief,tags,content])
     if valuemsg != True:
         return setcors(msg=valuemsg)
@@ -294,8 +301,13 @@ def article():
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         author = session["userinfo"]["nickname"]
-        dbres = db.commit("insert into t_article (title,brief,content,tags,uid,author) values ('{}','{}','{}','{}',{},'{}');".format(title,brief,content,tags,uid,author))
-        return setcors(msg=dbres,status=200)
+        dbres = db.commit("insert into t_article (title,brief,content,tags,uid,author,ximg) values ('{}','{}','{}','{}',{},'{}','{}');".format(title,brief,content,tags,uid,author,ximg))
+        dbqres = db.query("select id from t_article where uid = {} order by updatetime desc limit 1".format(uid))[0].get("id")
+        data = {
+            "articleid":dbqres,
+            "status":dbres
+        }
+        return setcors(data=data,status=200)
     else:
         return setcors(msg=loginstatus)
 

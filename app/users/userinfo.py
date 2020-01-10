@@ -16,9 +16,15 @@ def getuserinfo():
     uid = request.args.get("uid")
     nummsg = is_number(uid)
     if nummsg == True:
-        res = db.query("select id,nickname,titlepic,headpic,phone,sex,job,email,weixin,QQ,\
-            userinfo,address,DATE_FORMAT(updatetime,'%Y-%m-%d %T') times from t_user where status = 0 and id = {};".format(uid))
-        return setcors(data=res,status=200)
+        res = db.query("select id,nickname,titlepic,headpic,userinfo from t_user where status = 0 and id = {};".format(uid))
+        follows = db.query("select count(*) counts from t_user_follows where status = 0 and uid = {};".format(uid))[0].get("counts")
+        fens = db.query("select count(*) counts from t_user_follows where status = 0 and fid = {};".format(uid))[0].get("counts")
+        data = {
+            "userinfo":res,
+            "follows":follows,
+            "fens":fens
+        }
+        return setcors(data=data,status=200)
     else:
         return setcors(msg=nummsg)
 
@@ -140,3 +146,6 @@ def getuserfens():
         "counts":counts.get("counts")
     }
     return setcors(data=data,status=200)
+
+
+

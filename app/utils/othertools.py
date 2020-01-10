@@ -109,6 +109,28 @@ def setcors(data=None,msg="操作成功！",status=401):
     return res
 
 
+def setcorsimg(data=None,msg="操作成功！",errno=401):
+    '''
+    解决跨域问题
+    '''
+    res = {
+        "data":data,
+        "msg":msg,
+        "errno":errno
+    }
+    referrer = request.referrer
+    parse = urllib.parse
+    scheme = parse.urlsplit(referrer).scheme
+    netloc = parse.urlsplit(referrer).netloc
+    res = make_response(jsonify(res))
+    res.headers['Access-Control-Allow-Origin'] = "{scheme}://{netloc}".format(scheme=scheme, netloc=netloc)
+    res.headers['Access-Control-Allow-Method'] = '*'
+    res.headers['Access-Control-Allow-Headers'] = '*'
+    res.headers['Access-Control-Allow-Credentials'] = 'true'
+    return res
+
+
+
 def checkContentType(request):
     '''
     检查用户headers的状态
