@@ -943,6 +943,11 @@ def usercommentdelete():
         return setcors(msg=loginstatus)
 
 
+@userbp.route("/getgoodstatus",methods=["get"])
+def getgoodstatus():
+    pass
+
+
 
 @userbp.route("/test")
 def test():
