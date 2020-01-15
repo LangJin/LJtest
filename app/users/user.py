@@ -208,7 +208,7 @@ def inspirer():
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
     content = requestdata.get("content")
-    ximg = requestdata.get("ximg")[:-2]
+    ximg = requestdata.get("ximg")[:-1]
     valuemsg = checkvalueisNone([content])
     if valuemsg != True:
         return setcors(msg=valuemsg)
@@ -232,7 +232,7 @@ def inspirerupdate():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    ximg = requestdata.get("ximg").split(",")
+    ximg = requestdata.get("ximg")[:-1]
     content = requestdata.get("content")
     valuemsg = checkvalueisNone([content])
     if valuemsg != True:
