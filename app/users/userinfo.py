@@ -16,7 +16,7 @@ def getuserinfo():
     uid = request.args.get("uid")
     nummsg = is_number(uid)
     if nummsg == True:
-        res = db.query("select id,nickname,titlepic,headpic,userinfo from t_user where status = 0 and id = {};".format(uid))
+        res = db.query("select id,nickname,titlepic,headpic,userinfo,email,job from t_user where status = 0 and id = {};".format(uid))
         follows = db.query("select count(*) counts from t_user_follows where status = 0 and uid = {};".format(uid))[0].get("counts")
         fens = db.query("select count(*) counts from t_user_follows where status = 0 and fid = {};".format(uid))[0].get("counts")
         data = {

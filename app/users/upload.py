@@ -15,6 +15,8 @@ def fileupload():
     '''
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
+    loginstatus = True
+
     # if "file" not  in request.form:
     #     return setcors(msg="上传失败")
     file = request.files["file"]
@@ -32,8 +34,6 @@ def fileupload():
             return setcors(msg="请上传正确的图片。")
     else:
         return setcors(msg=loginstatus)
-
-
 
 
 @userbp.route("/uploadedit",methods=["post"])

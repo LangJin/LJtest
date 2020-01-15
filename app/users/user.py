@@ -5,6 +5,7 @@ from flask import request,session,make_response
 from . import userbp
 from ..utils.dbtools import Db
 from config import db_config
+import pymysql
 from ..utils.othertools import checkuserinfo,create_token,setcors,checkloginstatus,checkContentType,is_number,checkvalueisNone,encryption
 # from werkzeug import secure_filename
 
@@ -207,6 +208,7 @@ def inspirer():
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
     content = requestdata.get("content")
+    ximg = requestdata.get("ximg")[:-2]
     valuemsg = checkvalueisNone([content])
     if valuemsg != True:
         return setcors(msg=valuemsg)
@@ -215,7 +217,7 @@ def inspirer():
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         author = session["userinfo"]["nickname"]
-        dbres = db.commit("insert into t_inspirer (content,uid,author) values ('{}',{},'{}');".format(content,uid,author))
+        dbres = db.commit("insert into t_inspirer (content,uid,author,ximg) values ('{}',{},'{}','{}');".format(content,uid,author,ximg))
         return setcors(msg=dbres,status=200)
     else:
         return setcors(msg=loginstatus)
@@ -230,6 +232,7 @@ def inspirerupdate():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
+    ximg = requestdata.get("ximg").split(",")
     content = requestdata.get("content")
     valuemsg = checkvalueisNone([content])
     if valuemsg != True:
@@ -244,7 +247,7 @@ def inspirerupdate():
         uid = session["userinfo"]["uid"]
         qres = db.query("select * from t_inspirer where uid ={} and status = 0 and id = {};".format(uid,iid))
         if len(qres) != 0:
-            dbres = db.commit("update t_inspirer set content = '{}' where id = {} ;".format(content,iid))
+            dbres = db.commit("update t_inspirer set content = '{}',ximg = '{}' where id = {} ;".format(content,ximg,iid))
             return setcors(msg=dbres,status=200)
         else:
             return setcors(msg="修改的灵感不存在！")
