@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50726
 File Encoding         : 65001
 
-Date: 2020-01-15 17:19:31
+Date: 2020-01-16 18:03:04
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -57,7 +57,7 @@ CREATE TABLE `t_article` (
   `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `remark` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=27952 DEFAULT CHARSET=utf8 COMMENT='心得体会';
+) ENGINE=InnoDB AUTO_INCREMENT=42805 DEFAULT CHARSET=utf8 COMMENT='心得体会';
 
 -- ----------------------------
 -- Table structure for t_article_user_status
@@ -71,6 +71,8 @@ CREATE TABLE `t_article_user_status` (
   `cstatus` int(11) NOT NULL DEFAULT '1' COMMENT '收藏状态，0收藏，1没收藏',
   `fstatus` int(11) NOT NULL DEFAULT '1' COMMENT '关注状态，0关注，1没关注',
   `remark` varchar(255) DEFAULT NULL,
+  `createtime` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=74 DEFAULT CHARSET=utf8;
 
@@ -109,8 +111,10 @@ CREATE TABLE `t_coures_user_status` (
   `cstatus` int(11) NOT NULL DEFAULT '1' COMMENT '收藏状态，0收藏，1没收藏',
   `fstatus` int(11) NOT NULL DEFAULT '1' COMMENT '关注状态，0关注，1没关注',
   `remark` varchar(255) DEFAULT NULL,
+  `createtime` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for t_inspirer
@@ -120,15 +124,15 @@ CREATE TABLE `t_inspirer` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `content` varchar(255) NOT NULL,
   `uid` int(11) DEFAULT NULL,
+  `ximg` varchar(255) NOT NULL DEFAULT 'ximg.jpg',
   `status` varchar(255) NOT NULL DEFAULT '0' COMMENT '状态 0正常 1删除',
-  `ximg` varchar(255) NOT NULL DEFAULT 'ximg.jpg' COMMENT '显示的图片',
   `author` varchar(255) DEFAULT NULL,
   `goods` int(16) DEFAULT '0' COMMENT '点赞数量',
   `collections` int(16) DEFAULT '0' COMMENT '收藏数量',
   `createtime` datetime DEFAULT CURRENT_TIMESTAMP,
   `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=677 DEFAULT CHARSET=utf8 COMMENT='灵光一闪';
+) ENGINE=InnoDB AUTO_INCREMENT=702 DEFAULT CHARSET=utf8 COMMENT='灵光一闪';
 
 -- ----------------------------
 -- Table structure for t_inspirer_user_status
@@ -140,7 +144,10 @@ CREATE TABLE `t_inspirer_user_status` (
   `uid` int(11) NOT NULL COMMENT '用户ID',
   `gstatus` int(255) NOT NULL DEFAULT '1' COMMENT '点赞状态，0点赞，1没点赞',
   `cstatus` int(255) NOT NULL DEFAULT '1' COMMENT '收藏状态，0收藏，1没收藏',
+  `fstatus` int(16) NOT NULL DEFAULT '1',
   `remark` varchar(255) DEFAULT NULL,
+  `createtime` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
 
@@ -179,6 +186,8 @@ CREATE TABLE `t_questions_user_status` (
   `cstatus` int(11) NOT NULL DEFAULT '1' COMMENT '收藏状态，0收藏，1没收藏',
   `fstatus` int(11) NOT NULL DEFAULT '1' COMMENT '关注状态，0关注，1没关注',
   `remark` varchar(255) DEFAULT NULL,
+  `createtime` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8;
 
@@ -222,7 +231,7 @@ CREATE TABLE `t_user` (
   `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `remark` varchar(255) DEFAULT NULL COMMENT '昵称',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2949 DEFAULT CHARSET=utf8 COMMENT='用户表';
+) ENGINE=InnoDB AUTO_INCREMENT=2951 DEFAULT CHARSET=utf8 COMMENT='用户表';
 
 -- ----------------------------
 -- Table structure for t_user_comments
@@ -240,7 +249,7 @@ CREATE TABLE `t_user_comments` (
   `createtime` datetime DEFAULT CURRENT_TIMESTAMP,
   `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=318 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=327 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for t_user_follows
