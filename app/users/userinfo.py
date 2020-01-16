@@ -149,3 +149,12 @@ def getuserfens():
 
 
 
+'''
+select * from (
+    select '教程',title,brief,uid,updatetime from t_coures UNION 
+    select '问题',title,brief,uid,updatetime from t_article UNION 
+    select '文章',title,brief,uid,updatetime from t_questions UNION
+    select '灵感','title',content brief,uid,updatetime from t_inspirer UNION
+    select '评论','title',comment brief,uid,updatetime from t_user_comments 
+) as a where uid = 251 order by updatetime  limit 100;
+'''

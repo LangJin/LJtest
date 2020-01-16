@@ -410,13 +410,14 @@ def updateuserinfo():
 @userbp.route("/userfellgoods",methods=["post"])
 def userfellgoods():
     '''
-    点赞 # {"goodtype":"article","status":0,"gid":1}
+    点赞 # {"ctype":"0","status":0,"gid":1}
+    0教程1提问2灵感3心得体会
     '''
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    goodtype = requestdata.get("goodtype")
+    ctype = str(requestdata.get("ctype"))
     status = requestdata.get("status")
     gid = requestdata.get("gid")
     idmsg = is_number(gid)
@@ -428,7 +429,7 @@ def userfellgoods():
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
-        if goodtype == "article":
+        if ctype == "3":
             qres = db.query("select * from t_article_user_status where uid = {} and aid = {};".format(uid,gid))
             goods = db.query("select goods from t_article where id = {} and status = 0;".format(gid))
             if len(goods) != 0 :
@@ -461,7 +462,7 @@ def userfellgoods():
                             return setcors(msg="你还没有对该文章点赞过！") 
             else:        
                 return setcors(msg="不存在该文章")     
-        elif goodtype == "coures":
+        elif ctype == "0":
             qres = db.query("select * from t_coures_user_status where uid = {} and cid = {};".format(uid,gid))
             goods = db.query("select goods from t_coures where id = {} and status = 0;".format(gid))
             if len(goods) != 0 :
@@ -494,7 +495,7 @@ def userfellgoods():
                             return setcors(msg="你还没有对该教程点赞过！")     
             else:
                 return setcors(msg="不存在该教程")   
-        elif goodtype == "inspirer":
+        elif ctype == "2":
             qres = db.query("select * from t_inspirer_user_status where uid = {} and iid = {};".format(uid,gid))
             goods = db.query("select goods from t_inspirer where id = {} and status = 0;".format(gid))
             if len(goods) != 0 :
@@ -527,7 +528,7 @@ def userfellgoods():
                             return setcors(msg="你还没有对该灵感点赞过！") 
             else: 
                 return setcors(msg="不存在该灵感") 
-        elif goodtype == "questions":
+        elif ctype == "1":
             qres = db.query("select * from t_questions_user_status where uid = {} and qid = {};".format(uid,gid))
             goods = db.query("select goods from t_questions where id = {} and status = 0;".format(gid))
             if len(goods) != 0 :
@@ -561,7 +562,7 @@ def userfellgoods():
             else:
                 return setcors(msg="不存在该问题")    
         else:
-            return setcors(msg="goodtype类型不正确！")
+            return setcors(msg="ctype类型不正确！")
     else:
         return setcors(msg=loginstatus)
 
@@ -570,13 +571,14 @@ def userfellgoods():
 @userbp.route("/usercollections",methods=["post"])
 def usercollections():
     '''
-    收藏  # {"collectiontype":"article","status":0,"cid":1}
+    收藏  # {"ctype":"0","status":0,"cid":1}
+    0教程1提问2灵感3心得体会
     '''
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    collectiontype = requestdata.get("collectiontype")
+    ctype = str(requestdata.get("ctype"))
     status = requestdata.get("status")
     if status not in [0,1]:
         return setcors(msg="status仅能为0或1")
@@ -588,7 +590,7 @@ def usercollections():
     loginstatus = checkloginstatus(session,token) 
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
-        if collectiontype == "article":
+        if ctype == "3":
             qres = db.query("select * from t_article_user_status where uid = {} and aid = {};".format(uid,cid))
             collections = db.query("select collections from t_article where id = {}  and status = 0;".format(cid))
             if len(collections) != 0 :
@@ -621,7 +623,7 @@ def usercollections():
                             return setcors(msg="你还没有对该文章收藏过！")
             else:
                 return setcors(msg="不存在该文章")          
-        elif collectiontype == "coures":
+        elif ctype == "0":
             qres = db.query("select * from t_coures_user_status where uid = {} and cid = {};".format(uid,cid))
             collections = db.query("select collections from t_coures where id = {} and status = 0;".format(cid))
             if len(collections) != 0 :
@@ -654,7 +656,7 @@ def usercollections():
                             return setcors(msg="你还没有对该文章收藏过！")   
             else: 
                 return setcors(msg="不存在该教程")
-        elif collectiontype == "inspirer":
+        elif ctype == "2":
             qres = db.query("select * from t_inspirer_user_status where uid = {} and iid = {};".format(uid,cid))
             collections = db.query("select collections from t_inspirer where id = {} and status = 0;".format(cid))
             if len(collections) != 0 :
@@ -687,7 +689,7 @@ def usercollections():
                             return setcors(msg="你还没有对该文章收藏过！")
             else:
                 return setcors(msg="不存在该文章")
-        elif collectiontype == "questions":
+        elif ctype == "1":
             qres = db.query("select * from t_questions_user_status where uid = {} and qid = {};".format(uid,cid))
             collections = db.query("select collections from t_questions where id = {} and status = 0;".format(cid))
             if len(collections) != 0 :
@@ -730,13 +732,14 @@ def usercollections():
 @userbp.route("/userfollows",methods=["post"])
 def userfollows():
     '''
-    关注  # {"followtype":"article","status":0,"fid":1}
+    关注  # {"ctype":"0","status":0,"fid":1}
+    0教程1提问2灵感3心得体会
     '''
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    followtype = requestdata.get("followtype")
+    ctype = requestdata.get("ctype")
     status = requestdata.get("status")
     if status not in [0,1]:
         return setcors(msg="status仅能为0或1")
@@ -748,7 +751,7 @@ def userfollows():
     loginstatus = checkloginstatus(session,token) 
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
-        if followtype == "article":
+        if ctype == "3":
             qres = db.query("select * from t_article_user_status where uid = {} and aid = {};".format(uid,fid))
             follows = db.query("select follows from t_article where id = {}  and status = 0;".format(fid))
             if len(follows) != 0 :
@@ -781,7 +784,7 @@ def userfollows():
                             return setcors(msg="你还没有对该文章关注过！")
             else:
                 return setcors(msg="不存在该文章")          
-        elif followtype == "coures":
+        elif ctype == "0":
             qres = db.query("select * from t_coures_user_status where uid = {} and cid = {};".format(uid,fid))
             follows = db.query("select follows from t_coures where id = {} and status = 0;".format(fid))
             if len(follows) != 0 :
@@ -814,7 +817,7 @@ def userfollows():
                             return setcors(msg="你还没有对该文章关注过！")   
             else: 
                 return setcors(msg="不存在该教程")
-        elif followtype == "questions":
+        elif ctype == "1":
             qres = db.query("select * from t_questions_user_status where uid = {} and qid = {};".format(uid,fid))
             follows = db.query("select follows from t_questions where id = {} and status = 0;".format(fid))
             if len(follows) != 0 :
@@ -943,9 +946,39 @@ def usercommentdelete():
         return setcors(msg=loginstatus)
 
 
-@userbp.route("/getgoodstatus",methods=["get"])
-def getgoodstatus():
-    pass
+@userbp.route("/getuser4status",methods=["post"])
+def getuser4status():
+    '''
+    状态{"ctype":"","fid":""}
+    0教程1提问2灵感3心得体会
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    ctype = str(requestdata.get("ctype"))
+    fid = requestdata.get("fid")
+    valuemsg = checkvalueisNone([ctype,fid])
+    if valuemsg != True:
+        return setcors(msg=valuemsg)
+    token = request.headers.get("token")
+    loginstatus = checkloginstatus(session,token) 
+    if loginstatus is True:
+        uid = session["userinfo"]["uid"]
+        if ctype == "0":
+            dbres = db.query("select gstatus,fstatus,cstatus from t_coures_user_status where cid = {} and uid = {};".format(fid,uid))
+        elif ctype == "3":
+            dbres = db.query("select gstatus,fstatus,cstatus from t_article_user_status where cid = {} and uid = {};".format(fid,uid))
+        elif ctype == "2":
+            dbres = db.query("select gstatus,fstatus,cstatus from t_inspirer_user_status where cid = {} and uid = {};".format(fid,uid))
+        elif ctype == "1":
+            dbres = db.query("select gstatus,fstatus,cstatus from t_questions_user_status where cid = {} and uid = {};".format(fid,uid))
+        else:
+            return setcors(msg="不存在该类型！")
+        return setcors(data=dbres,status=200)
+    else:
+        return setcors(msg=loginstatus)
+
 
 
 
