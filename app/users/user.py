@@ -218,7 +218,12 @@ def inspirer():
         uid = session["userinfo"]["uid"]
         author = session["userinfo"]["nickname"]
         dbres = db.commit("insert into t_inspirer (content,uid,author,ximg) values ('{}',{},'{}','{}');".format(content,uid,author,ximg))
-        return setcors(msg=dbres,status=200)
+        dbqres = db.query("select id from t_inspirer where uid = {} order by updatetime desc limit 1;".format(uid))[0].get("id")
+        data = {
+            "inspirerid":dbqres,
+            "status":dbres
+        }
+        return setcors(msg=data,status=200)
     else:
         return setcors(msg=loginstatus)
 

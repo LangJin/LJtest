@@ -6,7 +6,7 @@ from config import db_config
 db = Db(db_config)
 
 
-@userbp.route("/get_title_img")
+@userbp.route("/get_title_img",methods=["get"])
 def get_title_img():
     '''
     获取首页轮播图
@@ -15,7 +15,7 @@ def get_title_img():
     return setcors(data=res,status=200)
 
 
-@userbp.route("/getcoures")
+@userbp.route("/getcoures",methods=["get"])
 def getcoures():
     '''
     教程
@@ -38,7 +38,7 @@ def getcoures():
         startnum = 0
     else:
         startnum = (pagenum-1)*10
-    counts = db.query("select  count(*) counts  from t_coures where status = 0;")
+    counts = db.query("SELECT count(*) counts FROM t_coures c JOIN t_admin a on c.uid = a.id WHERE c.STATUS = 0;")
     res = db.query("SELECT c.id,c.title,c.content,c.ximg,c.brief,\
             c.goods,c.collections,c.follows,a.nickname,a.userinfo,a.headpic,\
             DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_coures c JOIN t_admin a \
@@ -50,7 +50,7 @@ def getcoures():
     return setcors(data=data,status=200)
 
 
-@userbp.route("/get/coure")
+@userbp.route("/get/coure",methods=["get"])
 def getcourecid():
     '''
     获取具体的教程内容
@@ -67,7 +67,7 @@ def getcourecid():
         return setcors(msg=nummsg)
 
 
-@userbp.route("/getquestions")
+@userbp.route("/getquestions",methods=["get"])
 def getquestions():
     '''
     讨论
@@ -90,7 +90,7 @@ def getquestions():
         startnum = 0
     else:
         startnum = (pagenum-1)*10
-    counts = db.query("select  count(*) counts  from t_questions where status = 0;")
+    counts = db.query("SELECT count(*) counts FROM t_questions c JOIN t_user a on c.uid = a.id WHERE c.STATUS = 0;")
     res = db.query("SELECT c.id,c.title,c.content,c.ximg,c.brief,\
             c.goods,c.collections,c.follows,c.uid,a.nickname,a.userinfo,a.headpic,\
             DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_questions c JOIN t_user a \
@@ -102,7 +102,7 @@ def getquestions():
     return setcors(data=data,status=200)
 
 
-@userbp.route("/get/question")
+@userbp.route("/get/question",methods=["get"])
 def getquestionqid():
     '''
     获取具体的问题内容
@@ -119,7 +119,7 @@ def getquestionqid():
         return setcors(msg=nummsg)
 
 
-@userbp.route("/getarticle")
+@userbp.route("/getarticle",methods=["get"])
 def getarticle():
     '''
     文章
@@ -142,7 +142,7 @@ def getarticle():
         startnum = 0
     else:
         startnum = (pagenum-1)*10
-    counts = db.query("select  count(*) counts  from t_article where status = 0;")
+    counts = db.query("SELECT count(*) counts FROM t_article c JOIN t_user a on c.uid = a.id WHERE c.STATUS = 0;")
     res = db.query("SELECT c.id,c.title,c.content,c.ximg,c.brief,\
             c.goods,c.collections,c.follows,c.uid,a.nickname,a.userinfo,a.headpic,\
             DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_article c JOIN t_user a \
@@ -155,7 +155,7 @@ def getarticle():
 
 
 
-@userbp.route("/get/article")
+@userbp.route("/get/article",methods=["get"])
 def getarticleaid():
     '''
     获取具体的文章内容文章
@@ -172,7 +172,7 @@ def getarticleaid():
         return setcors(msg=nummsg)
 
 
-@userbp.route("/getinspirer")
+@userbp.route("/getinspirer",methods=["get"])
 def getinspirer():
     '''
     灵感
@@ -195,7 +195,7 @@ def getinspirer():
         startnum = 0
     else:
         startnum = (pagenum-1)*10
-    counts = db.query("select  count(*) counts  from t_inspirer where status = 0;")
+    counts = db.query("select  count(*) counts FROM t_inspirer c JOIN t_user a on c.uid = a.id WHERE c.STATUS = 0;")
     res = db.query("SELECT c.id,c.content,c.ximg,\
             c.goods,c.collections,c.uid,a.nickname,a.userinfo,a.headpic,\
             DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_inspirer c JOIN t_user a \
@@ -207,7 +207,7 @@ def getinspirer():
     return setcors(data=data,status=200)
 
 
-@userbp.route("/get/inspirer")
+@userbp.route("/get/inspirer",methods=["get"])
 def getinspireriid():
     '''
     灵感具体内容
@@ -224,7 +224,7 @@ def getinspireriid():
         return setcors(msg=nummsg)
 
 
-@userbp.route("/gethighusers")
+@userbp.route("/gethighusers",methods=["get"])
 def gethighusers():
     '''
     活跃用户
