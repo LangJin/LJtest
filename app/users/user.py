@@ -398,7 +398,7 @@ def updateuserinfo():
     email = requestdata.get("email")
     weixin = requestdata.get("weixin")
     qq = requestdata.get("qq")
-    qianming = requestdata.get("qm")
+    qianming = requestdata.get("userinfo")
     address = requestdata.get("address")
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
