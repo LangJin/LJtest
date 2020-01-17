@@ -398,14 +398,14 @@ def updateuserinfo():
     email = requestdata.get("email")
     weixin = requestdata.get("weixin")
     qq = requestdata.get("qq")
-    qianming = requestdata.get("userinfo")
+    qianming = requestdata.get("qm")
     address = requestdata.get("address")
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
-        dbres = db.commit("update t_user set nickname='{}', titlepic='{}', headpic='{}', phone='{}', sex='{}', job='{}', email='{}',\
-        weixin ='{}', QQ='{}', userinfo='{}', address='{}' where id={};".format(nickname,titlepic,headpic,phone,sex,job,email,weixin,qq,qianming,address,uid))
+        dbres = db.commit("update t_user set nickname='{}', phone='{}', sex='{}', job='{}', email='{}',\
+        weixin ='{}', QQ='{}', userinfo='{}', address='{}' where id={};".format(nickname,phone,sex,job,email,weixin,qq,qianming,address,uid))
         return setcors(msg=dbres,status=200)
     else:
         return setcors(msg=loginstatus)
