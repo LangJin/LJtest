@@ -208,10 +208,11 @@ def inspirer():
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
     content = requestdata.get("content")
-    ximg = requestdata.get("ximg")[:-1]
-    valuemsg = checkvalueisNone([content])
+    ximg = requestdata.get("ximg")
+    valuemsg = checkvalueisNone([content,ximg])
     if valuemsg != True:
         return setcors(msg=valuemsg)
+    ximg = ximg[:-1]
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
@@ -391,8 +392,6 @@ def updateuserinfo():
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
     nickname = requestdata.get("nickname")
-    titlepic = requestdata.get("titlepic")
-    headpic = requestdata.get("headpic")
     phone = requestdata.get("phone")
     sex = requestdata.get("sex")
     job = requestdata.get("job")
@@ -407,6 +406,45 @@ def updateuserinfo():
         uid = session["userinfo"]["uid"]
         dbres = db.commit("update t_user set nickname='{}', titlepic='{}', headpic='{}', phone='{}', sex='{}', job='{}', email='{}',\
         weixin ='{}', QQ='{}', userinfo='{}', address='{}' where id={};".format(nickname,titlepic,headpic,phone,sex,job,email,weixin,qq,qianming,address,uid))
+        return setcors(msg=dbres,status=200)
+    else:
+        return setcors(msg=loginstatus)
+
+
+@userbp.route("/updateuserheadpic",methods=["post"])
+def updateuserheadpic():
+    '''
+    修改个人头像接口
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    headpic = requestdata.get("ximg")
+    token = request.headers.get("token")
+    loginstatus = checkloginstatus(session,token)
+    if loginstatus is True:
+        uid = session["userinfo"]["uid"]
+        dbres = db.commit("update t_user set headpic='{}' where id={};".format(headpic,uid))
+        return setcors(msg=dbres,status=200)
+    else:
+        return setcors(msg=loginstatus)
+
+@userbp.route("/updateusertitlepic",methods=["post"])
+def updateusertitlepic():
+    '''
+    修改个人title图接口
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    titlepic = requestdata.get("ximg")
+    token = request.headers.get("token")
+    loginstatus = checkloginstatus(session,token)
+    if loginstatus is True:
+        uid = session["userinfo"]["uid"]
+        dbres = db.commit("update t_user set titlepic='{}' where id={};".format(titlepic,uid))
         return setcors(msg=dbres,status=200)
     else:
         return setcors(msg=loginstatus)
@@ -605,7 +643,7 @@ def usercollections():
                         collections = collections + 1
                         dzres = db.commit("insert into t_article_user_status (aid,uid,cstatus) values ({},{},0);".format(cid,uid))
                         upres = db.commit("update t_article set collections={} where id ={};".format(collections,cid))
-                        return setcors(msg=(dzres,upres))
+                        return setcors(msg=(dzres,upres),status=200)
                     else:  #取消点赞
                         return setcors(msg="你还没有对该文章收藏过！")
                 else:
@@ -617,13 +655,13 @@ def usercollections():
                             collections = collections + 1
                             dzres = db.commit("update t_article_user_status set cstatus = 0 where  uid = {} and aid = {};".format(uid,cid))
                             upres = db.commit("update t_article set collections={} where id ={};".format(collections,cid))
-                            return setcors(msg=(dzres,upres)) 
+                            return setcors(msg=(dzres,upres),status=200) 
                     else: # 取消点赞
                         if cstatus == 0:
                             collections = collections - 1
                             dzres = db.commit("update t_article_user_status set cstatus = 1 where  uid = {} and aid = {};".format(uid,cid))
                             upres = db.commit("update t_article set collections={} where id ={};".format(collections,cid))
-                            return setcors(msg=(dzres,upres))
+                            return setcors(msg=(dzres,upres),status=200)
                         else:
                             return setcors(msg="你还没有对该文章收藏过！")
             else:
@@ -638,7 +676,7 @@ def usercollections():
                         collections = collections + 1
                         dzres = db.commit("insert into t_coures_user_status (cid,uid,cstatus) values ({},{},0);".format(cid,uid))
                         upres = db.commit("update t_coures set collections={} where id ={};".format(collections,cid))
-                        return setcors(msg=(dzres,upres))
+                        return setcors(msg=(dzres,upres),status=200)
                     else:  #取消点赞
                         return setcors(msg="你还没有对该文章收藏过！")
                 else:
@@ -650,13 +688,13 @@ def usercollections():
                             collections = collections + 1
                             dzres = db.commit("update t_coures_user_status set cstatus = 0 where  uid = {} and cid = {};".format(uid,cid))
                             upres = db.commit("update t_coures set collections={} where id ={};".format(collections,cid))
-                            return setcors(msg=(dzres,upres))   
+                            return setcors(msg=(dzres,upres),status=200)   
                     else: # 取消点赞
                         if cstatus == 0:
                             collections = collections - 1
                             dzres = db.commit("update t_coures_user_status set cstatus = 1 where  uid = {} and cid = {};".format(uid,cid))
                             upres = db.commit("update t_coures set collections={} where id ={};".format(collections,cid))
-                            return setcors(msg=(dzres,upres))
+                            return setcors(msg=(dzres,upres),status=200)
                         else:
                             return setcors(msg="你还没有对该文章收藏过！")   
             else: 
@@ -671,7 +709,7 @@ def usercollections():
                         collections = collections + 1
                         dzres = db.commit("insert into t_inspirer_user_status (iid,uid,cstatus) values ({},{},0);".format(cid,uid))
                         upres = db.commit("update t_inspirer set collections={} where id ={};".format(collections,cid))
-                        return setcors(msg=(dzres,upres)) 
+                        return setcors(msg=(dzres,upres),status=200) 
                     else:  #取消点赞
                         return setcors(msg="你还没有对该文章收藏过！")
                 else:
@@ -683,13 +721,13 @@ def usercollections():
                             collections = collections + 1
                             dzres = db.commit("update t_inspirer_user_status set cstatus = 0 where  uid = {} and iid = {};".format(uid,cid))
                             upres = db.commit("update t_inspirer set collections={} where id ={};".format(collections,cid))
-                            return setcors(msg=(dzres,upres))  
+                            return setcors(msg=(dzres,upres),status=200)  
                     else: # 取消点赞
                         if cstatus == 0:
                             collections = collections - 1
                             dzres = db.commit("update t_inspirer_user_status set cstatus = 1 where  uid = {} and iid = {};".format(uid,cid))
                             upres = db.commit("update t_inspirer set collections={} where id ={};".format(collections,cid))
-                            return setcors(msg=(dzres,upres))
+                            return setcors(msg=(dzres,upres),status=200)
                         else:
                             return setcors(msg="你还没有对该文章收藏过！")
             else:
@@ -704,7 +742,7 @@ def usercollections():
                         collections = collections + 1
                         dzres = db.commit("insert into t_questions_user_status (qid,uid,cstatus) values ({},{},0);".format(cid,uid))
                         upres = db.commit("update t_questions set collections={} where id ={};".format(collections,cid))
-                        return setcors(msg=(dzres,upres))
+                        return setcors(msg=(dzres,upres),status=200)
                     else:  #取消点赞
                         return setcors(msg="你还没有对该文章收藏过！")
                 else:
@@ -716,13 +754,13 @@ def usercollections():
                             collections = collections + 1
                             dzres = db.commit("update t_questions_user_status set cstatus = 0 where  uid = {} and qid = {};".format(uid,cid))
                             upres = db.commit("update t_questions set collections={} where id ={};".format(collections,cid))
-                            return setcors(msg=(dzres,upres))
+                            return setcors(msg=(dzres,upres),status=200)
                     else: # 取消点赞
                         if cstatus == 0:
                             collections = collections - 1
                             dzres = db.commit("update t_questions_user_status set cstatus = 1 where  uid = {} and qid = {};".format(uid,cid))
                             upres = db.commit("update t_questions set collections={} where id ={};".format(collections,cid))
-                            return setcors(msg=(dzres,upres))
+                            return setcors(msg=(dzres,upres),status=200)
                         else:
                             return setcors(msg="你还没有对该文章收藏过！")
             else:
@@ -766,7 +804,7 @@ def userfollows():
                         follows = follows + 1
                         dzres = db.commit("insert into t_article_user_status (aid,uid,fstatus) values ({},{},0);".format(fid,uid))
                         upres = db.commit("update t_article set follows={} where id ={};".format(follows,fid))
-                        return setcors(msg=(dzres,upres))
+                        return setcors(msg=(dzres,upres),status=200)
                     else:  #取消点赞
                         return setcors(msg="你还没有对该文章关注过！")
                 else:
@@ -778,13 +816,13 @@ def userfollows():
                             follows = follows + 1
                             dzres = db.commit("update t_article_user_status set fstatus = 0 where  uid = {} and aid = {};".format(uid,fid))
                             upres = db.commit("update t_article set follows={} where id ={};".format(follows,fid))
-                            return setcors(msg=(dzres,upres)) 
+                            return setcors(msg=(dzres,upres),status=200) 
                     else: # 取消点赞
                         if fstatus == 0:
                             follows = follows - 1
                             dzres = db.commit("update t_article_user_status set fstatus = 1 where  uid = {} and aid = {};".format(uid,fid))
                             upres = db.commit("update t_article set follows={} where id ={};".format(follows,fid))
-                            return setcors(msg=(dzres,upres))
+                            return setcors(msg=(dzres,upres),status=200)
                         else:
                             return setcors(msg="你还没有对该文章关注过！")
             else:
@@ -799,7 +837,7 @@ def userfollows():
                         follows = follows + 1
                         dzres = db.commit("insert into t_coures_user_status (cid,uid,fstatus) values ({},{},0);".format(fid,uid))
                         upres = db.commit("update t_coures set follows={} where id ={};".format(follows,fid))
-                        return setcors(msg=(dzres,upres))
+                        return setcors(msg=(dzres,upres),status=200)
                     else:  #取消点赞
                         return setcors(msg="你还没有对该文章关注过！")
                 else:
@@ -811,13 +849,13 @@ def userfollows():
                             follows = follows + 1
                             dzres = db.commit("update t_coures_user_status set fstatus = 0 where  uid = {} and cid = {};".format(uid,fid))
                             upres = db.commit("update t_coures set follows={} where id ={};".format(follows,fid))
-                            return setcors(msg=(dzres,upres))   
+                            return setcors(msg=(dzres,upres),status=200)   
                     else: # 取消点赞
                         if fstatus == 0:
                             follows = follows - 1
                             dzres = db.commit("update t_coures_user_status set fstatus = 1 where  uid = {} and cid = {};".format(uid,fid))
                             upres = db.commit("update t_coures set follows={} where id ={};".format(follows,fid))
-                            return setcors(msg=(dzres,upres))
+                            return setcors(msg=(dzres,upres),status=200)
                         else:
                             return setcors(msg="你还没有对该文章关注过！")   
             else: 
@@ -832,7 +870,7 @@ def userfollows():
                         follows = follows + 1
                         dzres = db.commit("insert into t_questions_user_status (qid,uid,fstatus) values ({},{},0);".format(fid,uid))
                         upres = db.commit("update t_questions set follows={} where id ={};".format(follows,fid))
-                        return setcors(msg=(dzres,upres))
+                        return setcors(msg=(dzres,upres),status=200)
                     else:  #取消点赞
                         return setcors(msg="你还没有对该文章关注过！")
                 else:
@@ -844,13 +882,13 @@ def userfollows():
                             follows = follows + 1
                             dzres = db.commit("update t_questions_user_status set fstatus = 0 where  uid = {} and qid = {};".format(uid,fid))
                             upres = db.commit("update t_questions set follows={} where id ={};".format(follows,fid))
-                            return setcors(msg=(dzres,upres))
+                            return setcors(msg=(dzres,upres),status=200)
                     else: # 取消点赞
                         if fstatus == 0:
                             follows = follows - 1
                             dzres = db.commit("update t_questions_user_status set fstatus = 1 where  uid = {} and qid = {};".format(uid,fid))
                             upres = db.commit("update t_questions set follows={} where id ={};".format(follows,fid))
-                            return setcors(msg=(dzres,upres))
+                            return setcors(msg=(dzres,upres),status=200)
                         else:
                             return setcors(msg="你还没有对该文章关注过！")
             else:
@@ -973,11 +1011,11 @@ def getuser4status():
         if ctype == "0":
             dbres = db.query("select gstatus,fstatus,cstatus from t_coures_user_status where cid = {} and uid = {};".format(fid,uid))
         elif ctype == "3":
-            dbres = db.query("select gstatus,fstatus,cstatus from t_article_user_status where cid = {} and uid = {};".format(fid,uid))
+            dbres = db.query("select gstatus,fstatus,cstatus from t_article_user_status where aid = {} and uid = {};".format(fid,uid))
         elif ctype == "2":
-            dbres = db.query("select gstatus,fstatus,cstatus from t_inspirer_user_status where cid = {} and uid = {};".format(fid,uid))
+            dbres = db.query("select gstatus,fstatus,cstatus from t_inspirer_user_status where iid = {} and uid = {};".format(fid,uid))
         elif ctype == "1":
-            dbres = db.query("select gstatus,fstatus,cstatus from t_questions_user_status where cid = {} and uid = {};".format(fid,uid))
+            dbres = db.query("select gstatus,fstatus,cstatus from t_questions_user_status where qid = {} and uid = {};".format(fid,uid))
         else:
             return setcors(msg="不存在该类型！")
         return setcors(data=dbres,status=200)

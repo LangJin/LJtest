@@ -88,7 +88,7 @@ def userarticle():
     return setcors(data=data,status=200)
 
 
-@userbp.route("/userquestions")
+@userbp.route("/userquestions",methods=["get"])
 def userquestions():
     '''
     用户问题列表
@@ -149,12 +149,62 @@ def getuserfens():
 
 
 
+@userbp.route("/getuserdt",methods=["get"])
+def getuserdt():
+    '''
+    获取用户动态列表
+    '''
+    pagenum = request.args.get("pagenum")
+    uid = request.args.get("uid")
+    pagenummsg = is_number(pagenum)
+    if pagenummsg != True:
+        return setcors(msg=pagenummsg)
+    else:
+        pagenum = int(pagenum)
+    endnum = 10
+    if pagenum == 1:
+        startnum = 0
+    else:
+        startnum = (pagenum-1)*10
+    sql = "select * from (\
+        select '发表了问题'  as dt,id,title,1 as ctype,uid,ximg,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_article UNION \
+        select '发表了文章',id,title,3,uid,ximg,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_questions UNION \
+        select '发表了灵感',id,content,2,uid,ximg,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_inspirer UNION \
+        select '点赞了',b.id,b.title,0,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_coures_user_status a join t_coures b on a.cid = b.id where gstatus = 0 UNION \
+        select '收藏了',b.id,b.title,0,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_coures_user_status a join t_coures b on a.cid = b.id  where cstatus = 0 UNION \
+        select '关注了',b.id,b.title,0,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_coures_user_status  a join t_coures b on a.cid = b.id where fstatus = 0 UNION \
+        select '点赞了',b.id,b.title,3,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_article_user_status a join t_article b on a.aid = b.id where gstatus = 0 UNION \
+        select '收藏了',b.id,b.title,3,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_article_user_status a join t_article b on a.aid = b.id  where cstatus = 0 UNION \
+        select '关注了',b.id,b.title,3,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_article_user_status  a join t_article b on a.aid = b.id where fstatus = 0 UNION \
+        select '点赞了',b.id,b.content,2,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_inspirer_user_status a join t_inspirer b on a.iid = b.id where gstatus = 0 UNION \
+        select '收藏了',b.id,b.content,2,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_inspirer_user_status a join t_inspirer b on a.iid = b.id  where cstatus = 0 UNION \
+        select '点赞了',b.id,b.title,1,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_questions_user_status a join t_questions b on a.qid = b.id where gstatus = 0 UNION \
+        select '收藏了',b.id,b.title,1,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_questions_user_status a join t_questions b on a.qid = b.id  where cstatus = 0 UNION \
+        select '关注了',b.id,b.title,1,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_questions_user_status  a join t_questions b on a.qid = b.id where fstatus = 0 \
+        ) as a where uid = {} order by times desc limit {},{}; ".format(uid,startnum,endnum)
+    res = db.query(sql=sql)
+    data = {
+        "userlist":res,
+        "counts":88
+    }
+    return setcors(data=data,status=200)
+
 '''
 select * from (
-    select '教程',title,brief,uid,updatetime from t_coures UNION 
-    select '问题',title,brief,uid,updatetime from t_article UNION 
-    select '文章',title,brief,uid,updatetime from t_questions UNION
-    select '灵感','title',content brief,uid,updatetime from t_inspirer UNION
-    select '评论','title',comment brief,uid,updatetime from t_user_comments 
-) as a where uid = 251 order by updatetime  limit 100;
+    select '发表了问题'  as dt,id,title,1 as ctype,uid,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_article UNION 
+    select '发表了文章',id,title,3,uid,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_questions UNION
+    select '发表了灵感',id,content,2,uid,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_inspirer UNION
+    -- select '评论',id,comment,4,uid,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_user_comments UNION 
+    select '点赞了',b.id,b.title,0,a.uid,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_coures_user_status a join t_coures b on a.cid = b.id where gstatus = 0 UNION
+    select '收藏了',b.id,b.title,0,a.uid,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_coures_user_status a join t_coures b on a.cid = b.id  where cstatus = 0 UNION
+    select '关注了',b.id,b.title,0,a.uid,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_coures_user_status  a join t_coures b on a.cid = b.id where fstatus = 0 UNION
+    select '点赞了',b.id,b.title,3,a.uid,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_article_user_status a join t_article b on a.aid = b.id where gstatus = 0 UNION
+    select '收藏了',b.id,b.title,3,a.uid,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_article_user_status a join t_article b on a.aid = b.id  where cstatus = 0 UNION
+    select '关注了',b.id,b.title,3,a.uid,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_article_user_status  a join t_article b on a.aid = b.id where fstatus = 0 UNION
+    select '点赞了',b.id,b.content,2,a.uid,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_inspirer_user_status a join t_inspirer b on a.iid = b.id where gstatus = 0 UNION
+    select '收藏了',b.id,b.content,2,a.uid,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_inspirer_user_status a join t_inspirer b on a.iid = b.id  where cstatus = 0 UNION
+    select '点赞了',b.id,b.title,1,a.uid,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_questions_user_status a join t_questions b on a.qid = b.id where gstatus = 0 UNION
+    select '收藏了',b.id,b.title,1,a.uid,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_questions_user_status a join t_questions b on a.qid = b.id  where cstatus = 0 UNION
+    select '关注了',b.id,b.title,1,a.uid,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_questions_user_status  a join t_questions b on a.qid = b.id where fstatus = 0 
+) as a where uid = 251 order by times desc limit 100;
 '''

@@ -72,3 +72,6 @@ def uploaded_file():
     '''
     imgname = request.args.get("imgname")
     return send_from_directory(os.getcwd()+upload_folder,imgname)
+
+
+
