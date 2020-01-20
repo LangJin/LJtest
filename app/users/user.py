@@ -132,7 +132,7 @@ def question():
                 "questionid":dbqres,
                 "status":dbres
             }
-            return setcors(msg=data,status=200)
+            return setcors(data=data,status=200)
         else:
             return setcors(msg=loginstatus)
 
@@ -224,7 +224,7 @@ def inspirer():
             "inspirerid":dbqres,
             "status":dbres
         }
-        return setcors(msg=data,status=200)
+        return setcors(data=data,status=200)
     else:
         return setcors(msg=loginstatus)
 
