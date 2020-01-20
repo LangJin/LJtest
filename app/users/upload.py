@@ -71,6 +71,8 @@ def uploaded_file():
     读取图片接口
     '''
     imgname = request.args.get("imgname")
+    if imgname == None or imgname == "":
+        return setcors(msg="图片名称不能为空")
     return send_from_directory(os.getcwd()+upload_folder,imgname)
 
 
