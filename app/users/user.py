@@ -150,7 +150,8 @@ def questionupdate():
     brief = requestdata.get("brief")
     tags = requestdata.get("tags")
     content = requestdata.get("content")
-    valuemsg = checkvalueisNone([title,brief,tags,content])
+    ximg = requestdata.get("ximg")
+    valuemsg = checkvalueisNone([title,brief,tags,content,ximg])
     if valuemsg != True:
         return setcors(msg=valuemsg)
     qid = requestdata.get("qid")
@@ -163,7 +164,7 @@ def questionupdate():
         uid = session["userinfo"]["uid"]
         qres = db.query("select * from t_questions where uid ={} and status = 0 and id = {};".format(uid,qid))
         if len(qres) != 0:
-            dbres = db.commit("update t_questions set title='{}',brief='{}',tags='{}',content='{}' where id = {} and uid = {};".format(title,brief,tags,content,qid,uid))
+            dbres = db.commit("update t_questions set title='{}',brief='{}',tags='{}',content='{}',ximg = '{}' where id = {} and uid = {};".format(title,brief,tags,content,ximg,qid,uid))
             return setcors(msg=dbres,status=200)
         else:
             return setcors(msg="修改的问题不存在")
@@ -238,11 +239,12 @@ def inspirerupdate():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    ximg = requestdata.get("ximg")[:-1]
+    ximg = requestdata.get("ximg")
     content = requestdata.get("content")
-    valuemsg = checkvalueisNone([content])
+    valuemsg = checkvalueisNone([content,ximg])
     if valuemsg != True:
         return setcors(msg=valuemsg)
+    ximg = ximg[:-1]
     iid = requestdata.get("iid")
     idmsg = is_number(iid)
     if idmsg != True:
@@ -334,7 +336,8 @@ def articleupdate():
     tags = requestdata.get("tags")
     content = requestdata.get("content")
     brief = requestdata.get("brief")
-    valuemsg = checkvalueisNone([title,brief,tags,content])
+    ximg = requestdata.get("ximg")
+    valuemsg = checkvalueisNone([title,brief,tags,content,ximg])
     if valuemsg != True:
         return setcors(msg=valuemsg)
     aid = requestdata.get("aid")
@@ -347,7 +350,7 @@ def articleupdate():
         uid = session["userinfo"]["uid"]
         ares = db.query("select * from t_article where status =0 and uid ={} and id = {};".format(uid,aid))
         if len(ares) != 0: 
-            dbres = db.commit("update t_article set title='{}',tags='{}',content='{}',brief = '{}' where id ={};".format(title,tags,content,brief,aid))
+            dbres = db.commit("update t_article set title='{}',tags='{}',content='{}',brief = '{}',ximg = '{}' where id ={};".format(title,tags,content,brief,ximg,aid))
             return setcors(msg=dbres,status=200)
         else:
             return setcors(msg="修改的文章不存在！")
@@ -466,7 +469,7 @@ def userfellgoods():
     idmsg = is_number(gid)
     if idmsg != True:
         return setcors(msg=idmsg)
-    if status not in [0,1]:
+    if status not in [0,1,"0","1"]:
         return setcors(msg="status仅为0或者1")
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
@@ -623,7 +626,7 @@ def usercollections():
     requestdata = request.get_json()
     ctype = str(requestdata.get("ctype"))
     status = requestdata.get("status")
-    if status not in [0,1]:
+    if status not in [0,1,"0","1"]:
         return setcors(msg="status仅能为0或1")
     cid = requestdata.get("cid")
     idmsg = is_number(cid)
@@ -784,7 +787,7 @@ def userfollows():
     requestdata = request.get_json()
     ctype = requestdata.get("ctype")
     status = requestdata.get("status")
-    if status not in [0,1]:
+    if status not in [0,1,"0","1"]:
         return setcors(msg="status仅能为0或1")
     fid = requestdata.get("fid")
     idmsg = is_number(fid)

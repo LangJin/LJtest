@@ -58,7 +58,7 @@ def getcourecid():
     cid = request.args.get("cid")
     nummsg = is_number(cid)
     if nummsg == True:
-        res = db.query("SELECT c.id,c.title,c.content,c.ximg,c.brief,\
+        res = db.query("SELECT c.id,c.title,c.content,c.tags,c.ximg,c.brief,\
             c.goods,c.collections,c.follows,a.nickname,a.userinfo,a.headpic,\
             DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_coures c JOIN t_admin a \
             on c.uid = a.id WHERE c.STATUS = 0 and c.id = {};".format(cid))
