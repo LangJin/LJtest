@@ -194,10 +194,13 @@ def checkvaluelen(value,num):
     校验字符串的长度是否合法
     value是校验的值，num是长度的限制
     '''
-    if len(value) > num:
-        return "长度不能大于%s" % num
+    if value != None or value != "":
+        if len(value) > num:
+            return "长度不能大于%s" % num
+        else:
+            return True
     else:
-        return True
+        return "不能为空哦~"
 
 
 def checklistid(value):
