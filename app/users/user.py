@@ -6,7 +6,8 @@ from . import userbp
 from ..utils.dbtools import Db
 from config import db_config
 import pymysql
-from ..utils.othertools import checkuserinfo,create_token,setcors,checkloginstatus,checkContentType,is_number,checkvalueisNone,encryption
+from ..utils.othertools import checkuserinfo,create_token,setcors,checkloginstatus,checkContentType,is_number,checkvalueisNone,encryption,checkphonenum,checkemail
+from ..utils.othertools import checkvaluelen
 # from werkzeug import secure_filename
 
 
@@ -29,7 +30,16 @@ def regist():
         password = userinfo.get("password")
         phone = userinfo.get("phone")
         email = userinfo.get("email")
+        valuemsg = checkvalueisNone([username,password,phone,email])
         userregmsg = checkuserinfo(username,password)
+        phonemsg = checkphonenum(phone)
+        emailmsg = checkemail(email)
+        if phonemsg != True:
+            return setcors(msg=phonemsg)
+        if emailmsg != True:
+            return setcors(msg=emailmsg)
+        if valuemsg != True:
+            return setcors(msg=valuemsg)
         if userregmsg is True:
             sql = "select * from t_user where username = '{}'".format(username)
             res = db.query(sql)
@@ -120,8 +130,11 @@ def question():
         tags = requestdata.get("tags")
         content = requestdata.get("content")
         valuemsg = checkvalueisNone([title,brief,tags,content])
+        titlemsg = checkvaluelen(title,50)
         if valuemsg != True:
             return setcors(msg=valuemsg)
+        if titlemsg != True:
+            return setcors(msg="标题"+titlemsg)
         loginstatus = checkloginstatus(session,token)
         if loginstatus is True:
             uid = session["userinfo"]["uid"]
@@ -152,8 +165,11 @@ def questionupdate():
     content = requestdata.get("content")
     ximg = requestdata.get("ximg")
     valuemsg = checkvalueisNone([title,brief,tags,content,ximg])
+    titlemsg = checkvaluelen(title,50)
     if valuemsg != True:
         return setcors(msg=valuemsg)
+    if titlemsg != True:
+        return setcors(msg="标题"+titlemsg)
     qid = requestdata.get("qid")
     idmsg = is_number(qid)
     if idmsg != True:
@@ -211,8 +227,11 @@ def inspirer():
     content = requestdata.get("content")
     ximg = requestdata.get("ximg")
     valuemsg = checkvalueisNone([content,ximg])
+    contentmsg = checkvaluelen(content,200)
     if valuemsg != True:
         return setcors(msg=valuemsg)
+    if contentmsg != True:
+        return setcors(msg="内容"+contentmsg)
     ximg = ximg[:-1]
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
@@ -242,8 +261,11 @@ def inspirerupdate():
     ximg = requestdata.get("ximg")
     content = requestdata.get("content")
     valuemsg = checkvalueisNone([content,ximg])
+    contentmsg = checkvaluelen(content,200)
     if valuemsg != True:
         return setcors(msg=valuemsg)
+    if contentmsg != True:
+        return setcors(msg="内容"+contentmsg)
     ximg = ximg[:-1]
     iid = requestdata.get("iid")
     idmsg = is_number(iid)
@@ -305,8 +327,11 @@ def article():
     brief = requestdata.get("brief")
     ximg = requestdata.get("ximg")
     valuemsg = checkvalueisNone([title,brief,tags,content])
+    titlemsg = checkvaluelen(title,50)
     if valuemsg != True:
         return setcors(msg=valuemsg)
+    if titlemsg != True:
+        return setcors(msg="标题"+titlemsg)
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
@@ -338,8 +363,11 @@ def articleupdate():
     brief = requestdata.get("brief")
     ximg = requestdata.get("ximg")
     valuemsg = checkvalueisNone([title,brief,tags,content,ximg])
+    titlemsg = checkvaluelen(title,50)
     if valuemsg != True:
         return setcors(msg=valuemsg)
+    if titlemsg != True:
+        return setcors(msg="标题"+titlemsg)
     aid = requestdata.get("aid")
     idmsg = is_number(aid)
     if idmsg != True:
@@ -918,8 +946,11 @@ def usercomment():
     comment = requestdata.get("comment")
     fid = requestdata.get("fid")
     valuemsg = checkvalueisNone([ctype,comment,fid])
+    commentmsg = checkvaluelen(comment,500)
     if valuemsg != True:
         return setcors(msg=valuemsg)
+    if commentmsg != True:
+        return setcors(msg="评论"+commentmsg)
     idmsg = is_number(fid)
     if idmsg != True:
         return setcors(msg=idmsg)

@@ -246,12 +246,18 @@ def getcomments():
     getcomments
     '''
     requestdata = request.get_json()
-    ctype = requestdata["ctype"]
-    fid = requestdata["fid"]
-    pagenum = requestdata["pagenum"]
+    ctype = requestdata.get("ctype")
+    fid = requestdata.get("fid")
+    pagenum = requestdata.get("pagenum")
+    ctypemsg = is_number(ctype)
+    fidmsg = is_number(fid)
     pagenummsg = is_number(pagenum)
+    if ctypemsg != True:
+        return setcors(msg="ctype"+ctypemsg)
+    if fidmsg != True:
+        return setcors(msg="fid"+ctypemsg)
     if pagenummsg != True:
-        return setcors(msg=pagenummsg)
+        return setcors(msg="pagenum"+pagenummsg)
     else:
         pagenum = int(pagenum)
     endnum = 10

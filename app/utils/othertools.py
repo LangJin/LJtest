@@ -4,7 +4,7 @@ __author__ = 'LangJin'
 import os, hashlib,urllib
 from flask import jsonify,make_response,session,request
 from config import keys
-
+import re
 
 def create_token():
     '''
@@ -155,7 +155,7 @@ def is_number(s):
         except ValueError:
             return "【{}】应该是数字才行！".format(s)
     else:
-        return "id不能为空"
+        return "不能为空"
 
 def checkvalueisNone(valuelist):
     '''
@@ -167,3 +167,47 @@ def checkvalueisNone(valuelist):
     return True
 
 
+
+def checkphonenum(phone):
+    '''
+    正则判断手机号格式
+    '''
+    res = re.match("^(13[0-9]|14[5|7]|15[0|1|2|3|4|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$",phone)
+    if res:
+        return True
+    else:
+        return "请输入正确的手机号！"
+
+
+def checkemail(email):
+    '''
+    正则判断邮箱格式
+    '''
+    res = re.match("^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$",email)
+    if res:
+        return True
+    else:
+        return "请输入正确的邮箱！"
+
+def checkvaluelen(value,num):
+    '''
+    校验字符串的长度是否合法
+    value是校验的值，num是长度的限制
+    '''
+    if len(value) > num:
+        return "长度不能大于%s" % num
+    else:
+        return True
+
+
+def checklistid(value):
+    '''
+    检查输入的值是否符合规范
+    例：1,2,3,
+    '''
+    res = re.match("^([1-9]+,)+$",value)
+    print(res)
+    if res:
+        return True
+    else:
+        return "输入的值不符合规范，必须以数字开头逗号结尾，如1,2,3,"

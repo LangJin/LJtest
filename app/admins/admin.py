@@ -5,7 +5,7 @@ from flask import request,session,make_response
 from . import adminbp
 from ..utils.dbtools import Db
 from config import db_config
-from ..utils.othertools import checkuserinfo,create_token,encryption,setcors,checkloginstatus,checkContentType,is_number,checkvalueisNone
+from ..utils.othertools import checkuserinfo,create_token,encryption,setcors,checkloginstatus,checkContentType,is_number,checkvalueisNone,checklistid
 # from werkzeug import secure_filename
 
 db = Db(db_config)
@@ -54,6 +54,9 @@ def adminlogin():
 # 教程的增删改查
 @adminbp.route("/coureslist",methods=["get"])
 def coureslist():
+    '''
+    后台教程列表
+    '''
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
@@ -84,6 +87,9 @@ def coureslist():
 
 @adminbp.route("/couresnew",methods=["post"])
 def couresnew():
+    '''
+    后台新增教程
+    '''
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
@@ -108,6 +114,9 @@ def couresnew():
 
 @adminbp.route("/couresupdate",methods=["post"])
 def couresupdate():
+    '''
+    后台修改教程
+    '''
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
@@ -123,7 +132,7 @@ def couresupdate():
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
-        # uid = session["userinfo"]["uid"]
+        uid = session["userinfo"]["uid"]
         qres = db.query("select * from t_coures where uid ={} and status = 0 and id = {};".format(uid,cid))
         if len(qres) != 0:
             dbres = db.commit("update t_coures set title='{}',brief='{}',tags='{}',content='{}' where id = {};".format(title,brief,tags,content,cid))
@@ -136,6 +145,9 @@ def couresupdate():
 # 灵感的搜索、删除
 @adminbp.route("/inspirlist",methods=["get"])
 def inspirlist():
+    '''
+    后台灵感列表
+    '''
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
@@ -166,16 +178,22 @@ def inspirlist():
 
 @adminbp.route("/inspirdelete",methods=["post"])
 def inspirdelete():
+    '''
+    后台删除灵感
+    '''
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    dlist = requestdata.get("dlist")
-    dlist = tuple(dlist.split(","))
+    dlist = str(requestdata.get("dlist"))
+    listmsg = checklistid(dlist)
+    if listmsg != True:
+        return setcors(msg=listmsg)
+    dlist = dlist[:-1]
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
-        res = db.commit("update t_inspirer set status = 1 where id in {};".format(dlist))
+        res = db.commit("update t_inspirer set status = 1 where id in ({});".format(dlist))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
@@ -184,6 +202,9 @@ def inspirdelete():
 
 @adminbp.route("/inspirupdate",methods=["post"])
 def inspirupdate():
+    '''
+    后台修改灵感
+    '''
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
@@ -202,6 +223,9 @@ def inspirupdate():
 # 文章的搜索删除
 @adminbp.route("/articlelist",methods=["get"])
 def articlelist():
+    '''
+    后台文章列表
+    '''
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
@@ -232,16 +256,22 @@ def articlelist():
 
 @adminbp.route("/articledelete",methods=["post"])
 def articledelete():
+    '''
+    后台删除文章
+    '''
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    dlist = requestdata.get("dlist")
-    dlist = tuple(dlist.split(","))
+    dlist = str(requestdata.get("dlist"))
+    listmsg = checklistid(dlist)
+    if listmsg != True:
+        return setcors(msg=listmsg)
+    dlist = dlist[:-1]
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
-        res = db.commit("update t_article set status = 1 where id in {};".format(dlist))
+        res = db.commit("update t_article set status = 1 where id in ({});".format(dlist))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
@@ -250,6 +280,9 @@ def articledelete():
 # 问题的搜索删除
 @adminbp.route("/questionslist",methods=["get"])
 def questionslist():
+    '''
+    后台问题列表
+    '''
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
@@ -280,16 +313,22 @@ def questionslist():
 
 @adminbp.route("/questionsdelete",methods=["post"])
 def questionsdelete():
+    '''
+    后台删除问题
+    '''
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    dlist = requestdata.get("dlist")
-    dlist = tuple(dlist.split(","))
+    dlist = str(requestdata.get("dlist"))
+    listmsg = checklistid(dlist)
+    if listmsg != True:
+        return setcors(msg=listmsg)
+    dlist = dlist[:-1]
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
-        res = db.commit("update t_questions set status = 1 where id in {};".format(dlist))
+        res = db.commit("update t_questions set status = 1 where id in ({});".format(dlist))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
@@ -326,16 +365,22 @@ def userlist():
 
 @adminbp.route("/usersdelete",methods=["post"])
 def usersdelete():
+    '''
+    后台删除用户
+    '''
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    dlist = requestdata.get("dlist")
-    dlist = tuple(dlist.split(","))
+    dlist = str(requestdata.get("dlist"))
+    listmsg = checklistid(dlist)
+    if listmsg != True:
+        return setcors(msg=listmsg)
+    dlist = dlist[:-1]
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
-        res = db.commit("update t_user set status = 1 where id in {};".format(dlist))
+        res = db.commit("update t_user set status = 1 where id in ({});".format(dlist))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
