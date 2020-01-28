@@ -157,6 +157,17 @@ def is_number(s):
     else:
         return "不能为空"
 
+def checkctype(ctype):
+    '''
+    检查ctype的类型对不对
+    '''
+    if ctype in [0,1,2,3,"0","1","2","3"]:
+        return True
+    else:
+        return "ctype不在范围内，0教程1提问2灵感3心得体会"
+
+
+
 def checkvalueisNone(valuelist):
     '''
     检查输入的参数是否为空
@@ -208,8 +219,8 @@ def checklistid(value):
     检查输入的值是否符合规范
     例：1,2,3,
     '''
-    res = re.match("^([1-9]+,)+$",value)
-    print(res)
+    res = re.match("^([0-9]+,)+$",value)
+    # print(res)
     if res:
         return True
     else:

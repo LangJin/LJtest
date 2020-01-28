@@ -31,6 +31,8 @@ def regist():
         phone = userinfo.get("phone")
         email = userinfo.get("email")
         valuemsg = checkvalueisNone([username,password,phone,email])
+        if valuemsg != True:
+            return setcors(msg=valuemsg)
         userregmsg = checkuserinfo(username,password)
         phonemsg = checkphonenum(phone)
         emailmsg = checkemail(email)
@@ -38,8 +40,6 @@ def regist():
             return setcors(msg=phonemsg)
         if emailmsg != True:
             return setcors(msg=emailmsg)
-        if valuemsg != True:
-            return setcors(msg=valuemsg)
         if userregmsg is True:
             sql = "select * from t_user where username = '{}'".format(username)
             res = db.query(sql)
@@ -813,7 +813,7 @@ def userfollows():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    ctype = requestdata.get("ctype")
+    ctype = str(requestdata.get("ctype"))
     status = requestdata.get("status")
     if status not in [0,1,"0","1"]:
         return setcors(msg="status仅能为0或1")

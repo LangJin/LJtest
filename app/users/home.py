@@ -1,7 +1,7 @@
 from flask import render_template,request
 from . import userbp
 from ..utils.dbtools import Db
-from ..utils.othertools import setcors,is_number
+from ..utils.othertools import setcors,is_number,checkctype
 from config import db_config
 db = Db(db_config)
 
@@ -243,19 +243,19 @@ def gethighusers():
 @userbp.route("/getcomments",methods=["post"])
 def getcomments():
     '''
-    getcomments
+    获取评论列表
     '''
     requestdata = request.get_json()
     ctype = requestdata.get("ctype")
     fid = requestdata.get("fid")
     pagenum = requestdata.get("pagenum")
-    ctypemsg = is_number(ctype)
+    ctypemsg = checkctype(ctype)
     fidmsg = is_number(fid)
     pagenummsg = is_number(pagenum)
     if ctypemsg != True:
         return setcors(msg="ctype"+ctypemsg)
     if fidmsg != True:
-        return setcors(msg="fid"+ctypemsg)
+        return setcors(msg="fid"+fidmsg)
     if pagenummsg != True:
         return setcors(msg="pagenum"+pagenummsg)
     else:
