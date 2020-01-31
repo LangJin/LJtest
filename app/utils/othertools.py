@@ -87,6 +87,21 @@ def checkloginstatus(session,token):
         return "请先登录后再操作！"
 
 
+def checkadminloginstatus(session,token):
+    '''
+    检查管理员的登录状态
+    '''
+    userinfo = session.get("admininfo")
+    if userinfo != None and token != None:
+        tokenid = userinfo.get("token")
+        if tokenid == token:
+            return True
+        else:
+            return "token无效，请重新登录"
+    else:
+        return "请先登录后再操作！"
+
+
 
 def setcors(data=None,msg="操作成功！",status=401):
     '''

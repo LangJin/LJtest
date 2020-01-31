@@ -5,7 +5,7 @@ from flask import request,session,make_response
 from . import adminbp
 from ..utils.dbtools import Db
 from config import db_config
-from ..utils.othertools import checkuserinfo,create_token,encryption,setcors,checkloginstatus,checkContentType,is_number,checkvalueisNone,checklistid
+from ..utils.othertools import checkuserinfo,create_token,encryption,setcors,checkadminloginstatus,checkContentType,is_number,checkvalueisNone,checklistid
 # from werkzeug import secure_filename
 
 db = Db(db_config)
@@ -35,7 +35,7 @@ def adminlogin():
                 if password == res[0].get("password"):
                     token = create_token()
                     session.clear()
-                    session["userinfo"] = {"token":token,"uid":res[0]["id"],"nickname":res[0]["nickname"]}
+                    session["admininfo"] = {"token":token,"uid":res[0]["id"],"nickname":res[0]["nickname"]}
                     userinfo = {
                         "nickname":res[0]["nickname"],
                         "uid":res[0]["id"],
@@ -72,7 +72,7 @@ def coureslist():
         startnum = 0
     else:
         startnum = (pagenum-1)*10
-    loginstatus = checkloginstatus(session,token)
+    loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
         couresnum = db.query("select  count(*) couresnum  from t_coures where status = 0;")
         res = db.query("select id,title,brief,content,ximg,tags,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_coures where status = 0 limit {},{};".format(startnum,endnum))
@@ -102,10 +102,10 @@ def couresnew():
     if valuemsg != True:
         return setcors(msg=valuemsg)
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        uid = session["userinfo"]["uid"]
-        author = session["userinfo"]["nickname"]
+        uid = session["admininfo"]["uid"]
+        author = session["admininfo"]["nickname"]
         dbres = db.commit("insert into t_coures (title,brief,content,tags,uid,author) values ('{}','{}','{}','{}',{},'{}');".format(title,brief,content,tags,uid,author))
         return setcors(msg=dbres,status=200)
     else:
@@ -130,9 +130,9 @@ def couresupdate():
     if valuemsg != True:
         return setcors(msg=valuemsg)
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        uid = session["userinfo"]["uid"]
+        uid = session["admininfo"]["uid"]
         qres = db.query("select * from t_coures where uid ={} and status = 0 and id = {};".format(uid,cid))
         if len(qres) != 0:
             dbres = db.commit("update t_coures set title='{}',brief='{}',tags='{}',content='{}' where id = {};".format(title,brief,tags,content,cid))
@@ -163,7 +163,7 @@ def inspirlist():
     else:
         startnum = (pagenum-1)*10
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
         inspirnum = db.query("select count(*) inspirnum  from t_inspirer where status = 0;")
         res = db.query("select id,content,ximg,author,goods,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_inspirer where status = 0 limit {},{};".format(startnum,endnum))
@@ -191,7 +191,7 @@ def inspirdelete():
         return setcors(msg=listmsg)
     dlist = dlist[:-1]
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
         res = db.commit("update t_inspirer set status = 1 where id in ({});".format(dlist))
         return setcors(data=res,status=200)
@@ -212,7 +212,7 @@ def inspirupdate():
     iid = requestdata.get("iid")
     content = requestdata.get("content")
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
         dbres = db.commit("update t_inspirer set content = '{}' where id = {} ;".format(content,iid))
         return setcors(data=dbres,status=200)
@@ -241,7 +241,7 @@ def articlelist():
     else:
         startnum = (pagenum-1)*10
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
         articlenum = db.query("select count(*) articlenum  from t_article where status = 0 ;")
         res = db.query("select id,title,brief,content,ximg,tags,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_article where status = 0 limit {},{};".format(startnum,endnum))
@@ -269,7 +269,7 @@ def articledelete():
         return setcors(msg=listmsg)
     dlist = dlist[:-1]
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
         res = db.commit("update t_article set status = 1 where id in ({});".format(dlist))
         return setcors(data=res,status=200)
@@ -298,7 +298,7 @@ def questionslist():
     else:
         startnum = (pagenum-1)*10
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
         questionsnum = db.query("select count(*) questionsnum  from t_questions where status = 0 ;")
         res = db.query("select id,title,brief,content,ximg,tags,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_questions where status = 0 limit {},{};".format(startnum,endnum))
@@ -326,7 +326,7 @@ def questionsdelete():
         return setcors(msg=listmsg)
     dlist = dlist[:-1]
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
         res = db.commit("update t_questions set status = 1 where id in ({});".format(dlist))
         return setcors(data=res,status=200)
@@ -351,7 +351,7 @@ def userlist():
     else:
         startnum = (pagenum-1)*10
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
         allusernum = db.query("select count(*) usernum  from t_user where status = 0 ;")
         res = db.query("select id,nickname,titlepic,headpic,phone,sex,job,email,weixin,QQ,userinfo,address,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_user where status = 0 limit {},{};".format(startnum,endnum))
@@ -378,7 +378,7 @@ def usersdelete():
         return setcors(msg=listmsg)
     dlist = dlist[:-1]
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
         res = db.commit("update t_user set status = 1 where id in ({});".format(dlist))
         return setcors(data=res,status=200)
