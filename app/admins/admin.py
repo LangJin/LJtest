@@ -211,6 +211,9 @@ def inspirupdate():
     requestdata = request.get_json()
     iid = requestdata.get("iid")
     content = requestdata.get("content")
+    valuemsg = checkvalueisNone([iid,content])
+    if valuemsg != True:
+        return setcors(msg=valuemsg)
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
