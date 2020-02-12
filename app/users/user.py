@@ -256,13 +256,16 @@ def inspirer():
     requestdata = request.get_json()
     content = requestdata.get("content")
     ximg = requestdata.get("ximg")
-    valuemsg = checkvalueisNone([content,ximg])
+    if ximg != None:
+        ximg = ximg[:-1]
+    else:
+        ximg = "ximg.jpg"
+    valuemsg = checkvalueisNone([content])
     contentmsg = checkvaluelen(content,200)
     if valuemsg != True:
         return setcors(msg=valuemsg)
     if contentmsg != True:
         return setcors(msg="内容"+contentmsg)
-    ximg = ximg[:-1]
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
