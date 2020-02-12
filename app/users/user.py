@@ -101,6 +101,8 @@ def userlogin():
                     data["token"] = token
                     return setcors(msg="登录成功！",data=data,status=200)
                 else:
+                    if session.get("loginerrornum") == None:
+                        session["loginerrornum"] = 1
                     loginerrornum = session["loginerrornum"]
                     if loginerrornum >= 3:
                         sql = "update t_user set status = 2 where username = '{}';".format(username)
