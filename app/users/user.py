@@ -41,16 +41,25 @@ def regist():
         if emailmsg != True:
             return setcors(msg=emailmsg)
         if userregmsg is True:
-            sql = "select * from t_user where username = '{}'".format(username)
-            res = db.query(sql)
+            usernamesql = "select * from t_user where username = '{}'".format(username)
+            res = db.query(usernamesql)
             if len(res) != 0:
                 msg = "用户名已存在，请重新设置！"
                 return setcors(msg=msg)
-            else:
-                password = encryption(username,password,"user")
-                sql = "insert into t_user (username,password,phone,email) values ('{}','{}','{}','{}');".format(username,password,phone,email)
-                dbmsg = db.commit(sql)
-                return setcors(msg=dbmsg,status=200)
+            phonesql = "select * from t_user where phone = '{}'".format(phone)
+            res = db.query(phonesql)
+            if len(res) != 0:
+                msg = "电话已经注册，请重新设置！"
+                return setcors(msg=msg)
+            emailsql = "select * from t_user where phone = '{}'".format(email)
+            res = db.query(emailsql)
+            if len(res) != 0:
+                msg = "邮箱已经注册，请重新设置！"
+                return setcors(msg=msg)
+            password = encryption(username,password,"user")
+            sql = "insert into t_user (username,password,phone,email) values ('{}','{}','{}','{}');".format(username,password,phone,email)
+            dbmsg = db.commit(sql)
+            return setcors(msg=dbmsg,status=200)
         else:
             return setcors(msg=userregmsg)
 
@@ -81,6 +90,7 @@ def userlogin():
                     token = create_token()
                     session.clear()
                     session["userinfo"] = {"token":token,"uid":res[0]["id"],"nickname":res[0]["nickname"]}
+                    session["loginerrornum"] = 0
                     userinfo = {
                         "nickname":res[0]["nickname"],
                         "uid":res[0]["id"],
@@ -91,6 +101,12 @@ def userlogin():
                     data["token"] = token
                     return setcors(msg="登录成功！",data=data,status=200)
                 else:
+                    loginerrornum = session["loginerrornum"]
+                    if loginerrornum >= 3:
+                        sql = "update t_user set status = 2 where username = '{}';".format(username)
+                        res = db.commit(sql)
+                        return setcors(msg=("密码错误次数太多，账号已锁定！",res))
+                    session["loginerrornum"] = loginerrornum + 1
                     return setcors(msg="密码错误")
         else:
             return setcors(msg=userregmsg)
@@ -130,11 +146,17 @@ def question():
         tags = requestdata.get("tags")
         content = requestdata.get("content")
         valuemsg = checkvalueisNone([title,brief,tags,content])
-        titlemsg = checkvaluelen(title,50)
         if valuemsg != True:
             return setcors(msg=valuemsg)
+        titlemsg = checkvaluelen(title,50)
         if titlemsg != True:
             return setcors(msg="标题"+titlemsg)
+        briefmsg = checkvaluelen(brief,150)
+        if briefmsg != True:
+            return setcors(msg="简介"+briefmsg)
+        tagsmsg = checkvaluelen(tags,10)
+        if tagsmsg != True:
+            return setcors("标签"+tagsmsg)
         loginstatus = checkloginstatus(session,token)
         if loginstatus is True:
             uid = session["userinfo"]["uid"]
@@ -165,11 +187,17 @@ def questionupdate():
     content = requestdata.get("content")
     ximg = requestdata.get("ximg")
     valuemsg = checkvalueisNone([title,brief,tags,content,ximg])
-    titlemsg = checkvaluelen(title,50)
     if valuemsg != True:
         return setcors(msg=valuemsg)
+    titlemsg = checkvaluelen(title,50)
     if titlemsg != True:
         return setcors(msg="标题"+titlemsg)
+    briefmsg = checkvaluelen(brief,150)
+    if briefmsg != True:
+        return setcors(msg="简介"+briefmsg)
+    tagsmsg = checkvaluelen(tags,10)
+    if tagsmsg != True:
+        return setcors("标签"+tagsmsg)
     qid = requestdata.get("qid")
     idmsg = is_number(qid)
     if idmsg != True:
@@ -327,11 +355,17 @@ def article():
     brief = requestdata.get("brief")
     ximg = requestdata.get("ximg")
     valuemsg = checkvalueisNone([title,brief,tags,content])
-    titlemsg = checkvaluelen(title,50)
     if valuemsg != True:
         return setcors(msg=valuemsg)
+    titlemsg = checkvaluelen(title,50)
     if titlemsg != True:
         return setcors(msg="标题"+titlemsg)
+    briefmsg = checkvaluelen(brief,150)
+    if briefmsg != True:
+        return setcors(msg="简介"+briefmsg)
+    tagsmsg = checkvaluelen(tags,10)
+    if tagsmsg != True:
+        return setcors("标签"+tagsmsg)
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
@@ -363,11 +397,17 @@ def articleupdate():
     brief = requestdata.get("brief")
     ximg = requestdata.get("ximg")
     valuemsg = checkvalueisNone([title,brief,tags,content,ximg])
-    titlemsg = checkvaluelen(title,50)
     if valuemsg != True:
         return setcors(msg=valuemsg)
+    titlemsg = checkvaluelen(title,50)
     if titlemsg != True:
         return setcors(msg="标题"+titlemsg)
+    briefmsg = checkvaluelen(brief,150)
+    if briefmsg != True:
+        return setcors(msg="简介"+briefmsg)
+    tagsmsg = checkvaluelen(tags,10)
+    if tagsmsg != True:
+        return setcors("标签"+tagsmsg)
     aid = requestdata.get("aid")
     idmsg = is_number(aid)
     if idmsg != True:

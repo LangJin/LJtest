@@ -38,14 +38,16 @@ def getcoures():
         startnum = 0
     else:
         startnum = (pagenum-1)*10
-    counts = db.query("SELECT count(*) counts FROM t_coures c JOIN t_admin a on c.uid = a.id WHERE c.STATUS = 0;")
+    counts = db.query("SELECT count(*) counts FROM t_coures c JOIN t_admin a on c.uid = a.id WHERE c.STATUS = 0;")[0].get("counts")
+    if pagenum - counts/10 > 1:
+        return setcors(msg="页码超出范围")
     res = db.query("SELECT c.id,c.title,c.content,c.ximg,c.brief,\
             c.goods,c.collections,c.follows,a.nickname,a.userinfo,a.headpic,\
             DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_coures c JOIN t_admin a \
             on c.uid = a.id WHERE c.STATUS = 0 order by c.updatetime desc limit {},{};".format(startnum,endnum))
     data = {
         "contentlist":res,
-        "counts":counts[0].get("counts")
+        "counts":counts
     }
     return setcors(data=data,status=200)
 
@@ -90,14 +92,16 @@ def getquestions():
         startnum = 0
     else:
         startnum = (pagenum-1)*10
-    counts = db.query("SELECT count(*) counts FROM t_questions c JOIN t_user a on c.uid = a.id WHERE c.STATUS = 0;")
+    counts = db.query("SELECT count(*) counts FROM t_questions c JOIN t_user a on c.uid = a.id WHERE c.STATUS = 0;")[0].get("counts")
+    if pagenum - counts/10 > 1:
+        return setcors(msg="页码超出范围")
     res = db.query("SELECT c.id,c.title,c.content,c.ximg,c.brief,\
             c.goods,c.collections,c.follows,c.uid,a.nickname,a.userinfo,a.headpic,\
             DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_questions c JOIN t_user a \
             on c.uid = a.id WHERE c.STATUS = 0 order by c.updatetime desc limit {},{};".format(startnum,endnum))
     data = {
         "contentlist":res,
-        "counts":counts[0].get("counts")
+        "counts":counts
     }
     return setcors(data=data,status=200)
 
@@ -142,14 +146,16 @@ def getarticle():
         startnum = 0
     else:
         startnum = (pagenum-1)*10
-    counts = db.query("SELECT count(*) counts FROM t_article c JOIN t_user a on c.uid = a.id WHERE c.STATUS = 0;")
+    counts = db.query("SELECT count(*) counts FROM t_article c JOIN t_user a on c.uid = a.id WHERE c.STATUS = 0;")[0].get("counts")
+    if pagenum - counts/10 > 1:
+        return setcors(msg="页码超出范围")
     res = db.query("SELECT c.id,c.title,c.content,c.ximg,c.brief,\
             c.goods,c.collections,c.follows,c.uid,a.nickname,a.userinfo,a.headpic,\
             DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_article c JOIN t_user a \
             on c.uid = a.id WHERE c.STATUS = 0 order by c.updatetime desc limit {},{};".format(startnum,endnum))
     data = {
         "contentlist":res,
-        "counts":counts[0].get("counts")
+        "counts":counts
     }
     return setcors(data=data,status=200)
 
@@ -195,14 +201,16 @@ def getinspirer():
         startnum = 0
     else:
         startnum = (pagenum-1)*10
-    counts = db.query("select  count(*) counts FROM t_inspirer c JOIN t_user a on c.uid = a.id WHERE c.STATUS = 0;")
+    counts = db.query("select  count(*) counts FROM t_inspirer c JOIN t_user a on c.uid = a.id WHERE c.STATUS = 0;")[0].get("counts")
+    if pagenum - counts/10 > 1:
+        return setcors(msg="页码超出范围")
     res = db.query("SELECT c.id,c.content,c.ximg,\
             c.goods,c.collections,c.uid,a.nickname,a.userinfo,a.headpic,\
             DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_inspirer c JOIN t_user a \
             on c.uid = a.id WHERE c.STATUS = 0 order by c.updatetime desc limit {},{};".format(startnum,endnum))
     data = {
         "contentlist":res,
-        "counts":counts[0].get("counts")
+        "counts":counts
     }
     return setcors(data=data,status=200)
 
@@ -250,12 +258,12 @@ def getcomments():
     fid = requestdata.get("fid")
     pagenum = requestdata.get("pagenum")
     ctypemsg = checkctype(ctype)
-    fidmsg = is_number(fid)
-    pagenummsg = is_number(pagenum)
     if ctypemsg != True:
         return setcors(msg="ctype"+ctypemsg)
+    fidmsg = is_number(fid)
     if fidmsg != True:
         return setcors(msg="fid"+fidmsg)
+    pagenummsg = is_number(pagenum)
     if pagenummsg != True:
         return setcors(msg="pagenum"+pagenummsg)
     else:
@@ -267,14 +275,16 @@ def getcomments():
         startnum = (pagenum-1)*10
     nummsg = is_number(fid)
     if nummsg == True:
-        counts = db.query("select count(*) counts from t_user_comments where status = 0 and ctype = {} and fid = {};".format(ctype,fid))
+        counts = db.query("select count(*) counts from t_user_comments c join t_user u on c.uid = u.id where c.`status` = 0 and c.ctype = {} and c.fid = {};".format(ctype,fid))[0].get("counts")
+        if pagenum - counts/10 > 1:
+            return setcors(msg="页码超出范围")
         res = db.query("select c.id,c.`comment`,c.uid,u.headpic,u.userinfo,\
             u.nickname,DATE_FORMAT(c.updatetime,'%Y-%m-%d %T') times \
             from t_user_comments c join t_user u on u.id = c.uid  \
             where c.`status` = 0 and  c.ctype = {} and c.fid = {} order by times desc limit {},{};".format(ctype,fid,startnum,endnum))
         data = {
             "contentlist":res,
-            "counts":counts[0].get("counts")
+            "counts":counts
         }
         return setcors(data=data,status=200)
     else:

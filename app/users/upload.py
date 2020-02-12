@@ -14,13 +14,14 @@ def fileupload():
     上传图片接口，支持'png', 'jpg', 'jpeg', 'gif'格式。
     '''
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    # loginstatus = checkloginstatus(session,token)
     loginstatus = True
 
     # if "file" not  in request.form:
     #     return setcors(msg="上传失败")
     file = request.files["file"]
     if loginstatus is True:
+        print(file.filename)
         if file and ('.' in file.filename and \
             file.filename.rsplit('.', 1)[1] in set(['png', 'jpg', 'jpeg', 'gif'])):
             filename = secure_filename(file.filename)

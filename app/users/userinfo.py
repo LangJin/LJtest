@@ -167,9 +167,9 @@ def getuserdt():
     else:
         startnum = (pagenum-1)*10
     sql = "select * from (\
-        select '发表了问题'  as dt,id,title,1 as ctype,uid,ximg,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_article UNION \
-        select '发表了文章',id,title,3,uid,ximg,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_questions UNION \
-        select '发表了灵感',id,content,2,uid,ximg,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_inspirer UNION \
+        select '发表了文章'  as dt,id,title,3 as ctype,uid,ximg,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_article where status = 0 UNION \
+        select '发表了问题',id,title,1,uid,ximg,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_questions where status = 0 UNION \
+        select '发表了灵感',id,content,2,uid,ximg,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_inspirer where status = 0 UNION \
         select '点赞了',b.id,b.title,0,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_coures_user_status a join t_coures b on a.cid = b.id where gstatus = 0 UNION \
         select '收藏了',b.id,b.title,0,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_coures_user_status a join t_coures b on a.cid = b.id  where cstatus = 0 UNION \
         select '关注了',b.id,b.title,0,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_coures_user_status  a join t_coures b on a.cid = b.id where fstatus = 0 UNION \
