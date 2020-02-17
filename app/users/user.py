@@ -89,7 +89,7 @@ def userlogin():
                 if password == res[0].get("password"):
                     token = create_token()
                     session.clear()
-                    session["userinfo"] = {"token":token,"uid":res[0]["id"],"nickname":res[0]["nickname"]}
+                    session["userinfo"] = {"token":token,"uid":res[0]["id"],"nickname":res[0]["nickname"],"username":res[0]["username"]}
                     session["loginerrornum"] = 0
                     userinfo = {
                         "nickname":res[0]["nickname"],
@@ -129,6 +129,37 @@ def loginout():
         return setcors(msg="退出成功！",status=200)
     else:
         return setcors(msg=loginstatus)
+
+
+@userbp.route("/userupdateps",methods=["post"])
+def userupdateps():
+    '''
+    用户修改密码接口
+    {oldps:111,newps:222}
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    oldps = requestdata.get("oldps")
+    newps = requestdata.get("newps")
+    token = request.headers.get("token")
+    loginstatus = checkloginstatus(session,token)
+    if loginstatus is True:
+        uid = session["userinfo"]["uid"]
+        username = session["userinfo"]["username"]
+        oldps = encryption(username,oldps,"user")
+        password = db.query("select password from t_user where id = {};".format(uid))[0]["password"]
+        if oldps == password:
+            password = encryption(username,newps,"user")
+            res = db.commit("update t_user set password = '{}' where id = {};".format(password,uid))
+            session.clear()
+            return setcors(data=res,msg="密码修改成功！请重新登录！",status=200)
+        else:
+            return setcors(msg="旧密码不正确！")
+    else:
+        return setcors(msg=loginstatus)
+
 
 
 @userbp.route("/question/new",methods=["post"])
