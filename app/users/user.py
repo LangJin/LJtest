@@ -145,7 +145,7 @@ def question():
         title = requestdata.get("title")
         brief = requestdata.get("brief")
         ximg = requestdata.get("ximg")
-        if ximg == None:
+        if ximg == None or ximg == "":
             ximg = "ximg.jpg"
         tags = requestdata.get("tags")
         content = requestdata.get("content")
@@ -190,7 +190,7 @@ def questionupdate():
     tags = requestdata.get("tags")
     content = requestdata.get("content")
     ximg = requestdata.get("ximg")
-    if ximg == None:
+    if ximg == None or ximg == "":
         ximg = "ximg.jpg"
     valuemsg = checkvalueisNone([title,brief,tags,content,ximg])
     if valuemsg != True:
@@ -260,7 +260,7 @@ def inspirer():
     requestdata = request.get_json()
     content = requestdata.get("content")
     ximg = requestdata.get("ximg")
-    if ximg != None:
+    if ximg != None and ximg != "":
         ximg = ximg[:-1]
     else:
         ximg = "ximg.jpg"
@@ -296,7 +296,7 @@ def inspirerupdate():
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
     ximg = requestdata.get("ximg")
-    if ximg != None:
+    if ximg != None and ximg != "" :
         ximg = ximg[:-1]
     else:
         ximg = "ximg.jpg"
@@ -366,7 +366,7 @@ def article():
     content = requestdata.get("content")
     brief = requestdata.get("brief")
     ximg = requestdata.get("ximg")
-    if ximg == None:
+    if ximg == None or ximg == "":
         ximg = "ximg.jpg"
     valuemsg = checkvalueisNone([title,brief,tags,content])
     if valuemsg != True:
@@ -410,7 +410,7 @@ def articleupdate():
     content = requestdata.get("content")
     brief = requestdata.get("brief")
     ximg = requestdata.get("ximg")
-    if ximg == None:
+    if ximg == None or ximg == "":
         ximg = "ximg.jpg"
     valuemsg = checkvalueisNone([title,brief,tags,content,ximg])
     if valuemsg != True:
