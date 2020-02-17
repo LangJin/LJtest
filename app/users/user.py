@@ -1114,6 +1114,57 @@ def getuser4status():
 
 
 
+@userbp.route("/getuserfstatus",methods=["get"])
+def getuserfstatus():
+    '''
+    查询用户是否被关注
+    '''
+    fid = request.args.get("fid")
+    token = request.headers.get("token")
+    loginstatus = checkloginstatus(session,token) 
+    if loginstatus is True:
+        uid = session["userinfo"]["uid"]
+        res = db.query("select * from t_user_follows where uid = {} and fid = {} and status = 0".format(uid,fid))
+        if len(res) == 0:
+            return setcors(data=1,msg="未关注",status=200)
+        else:
+            fstatus = res[0].get("status")
+            if fstatus == 0:
+                return setcors(data=0,msg="已关注",status=200)
+            else:
+                return setcors(data=1,msg="未关注",status=200)
+    else:
+        return setcors(msg=loginstatus)
+
+
+@userbp.route("/userfuser",methods=["get"])
+def userfuser():
+    '''
+    用户关注用户接口
+    '''
+    fid = request.args.get("fid")
+    token = request.headers.get("token")
+    loginstatus = checkloginstatus(session,token) 
+    if loginstatus is True:
+        uid = session["userinfo"]["uid"]
+        res = db.query("select * from t_user_follows where uid = {} and fid = {}".format(uid,fid))
+        if len(res) == 0:
+            # 关注
+            res = db.commit("insert into t_user_follows (fid,uid,status) values ({},{},0);".format(fid,uid))
+            return setcors(data=res,msg="关注成功！",status=200)
+        else:
+            fstatus = res[0].get("status")
+            rid = res[0].get("id")
+            if fstatus == 0:
+                res = db.commit("update t_user_follows set status = 1 where id = {};".format(rid))
+                return setcors(data=res,msg="取消关注成功！",status=200)
+                # 取消关注
+            else:
+                res = db.commit("update t_user_follows set status = 0 where id = {};".format(rid))
+                return setcors(data=res,msg="关注成功！",status=200)
+    else:
+        return setcors(msg=loginstatus)
+
 
 @userbp.route("/test")
 def test():
