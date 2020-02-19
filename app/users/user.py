@@ -51,7 +51,7 @@ def regist():
             if len(res) != 0:
                 msg = "电话已经注册，请重新设置！"
                 return setcors(msg=msg)
-            emailsql = "select * from t_user where phone = '{}'".format(email)
+            emailsql = "select * from t_user where email = '{}'".format(email)
             res = db.query(emailsql)
             if len(res) != 0:
                 msg = "邮箱已经注册，请重新设置！"
@@ -104,7 +104,7 @@ def userlogin():
                     if session.get("loginerrornum") == None:
                         session["loginerrornum"] = 1
                     loginerrornum = session["loginerrornum"]
-                    if loginerrornum >= 3:
+                    if loginerrornum > 2:
                         sql = "update t_user set status = 2 where username = '{}';".format(username)
                         res = db.commit(sql)
                         return setcors(msg=("密码错误次数太多，账号已锁定！",res))
@@ -331,9 +331,9 @@ def inspirer():
     else:
         ximg = "ximg.jpg"
     valuemsg = checkvalueisNone([content])
-    contentmsg = checkvaluelen(content,200)
     if valuemsg != True:
         return setcors(msg=valuemsg)
+    contentmsg = checkvaluelen(content,200)
     if contentmsg != True:
         return setcors(msg="内容"+contentmsg)
     token = request.headers.get("token")
@@ -544,11 +544,17 @@ def updateuserinfo():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    nickname = requestdata.get("nickname")
     phone = requestdata.get("phone")
+    phonemsg = checkphonenum(phone)
+    if phonemsg != True:
+        return setcors(msg="手机格式不对！")
+    email = requestdata.get("email")
+    emailmsg = checkemail(email)
+    if emailmsg != True:
+        return setcors(msg="邮箱格式不对！")
+    nickname = requestdata.get("nickname")
     sex = requestdata.get("sex")
     job = requestdata.get("job")
-    email = requestdata.get("email")
     weixin = requestdata.get("weixin")
     qq = requestdata.get("qq")
     qianming = requestdata.get("userinfo")
@@ -556,6 +562,16 @@ def updateuserinfo():
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
+        phonesql = "select * from t_user where phone = '{}'".format(phone)
+        res = db.query(phonesql)
+        if len(res) != 0:
+            msg = "电话已经注册，请重新设置！"
+            return setcors(msg=msg)
+        emailsql = "select * from t_user where email = '{}'".format(email)
+        res = db.query(emailsql)
+        if len(res) != 0:
+            msg = "邮箱已经注册，请重新设置！"
+            return setcors(msg=msg)
         uid = session["userinfo"]["uid"]
         dbres = db.commit("update t_user set nickname='{}', phone='{}', sex='{}', job='{}', email='{}',\
         weixin ='{}', QQ='{}', userinfo='{}', address='{}' where id={};".format(nickname,phone,sex,job,email,weixin,qq,qianming,address,uid))
@@ -958,13 +974,10 @@ def usercomment():
     if ctype not in ["0","1","2","3","4",0,1,2,3,4]:
         return setcors(msg="ctype类型不正确！")
     comment = requestdata.get("comment")
-    fid = requestdata.get("fid")
-    valuemsg = checkvalueisNone([ctype,comment,fid])
     commentmsg = checkvaluelen(comment,500)
-    if valuemsg != True:
-        return setcors(msg=valuemsg)
     if commentmsg != True:
         return setcors(msg="评论"+commentmsg)
+    fid = requestdata.get("fid")
     idmsg = is_number(fid)
     if idmsg != True:
         return setcors(msg=idmsg)
@@ -989,10 +1002,13 @@ def usercommentupdate():
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
     comment = requestdata.get("comment")
-    cid = requestdata.get("cid")
+    commentmsg = checkvaluelen(comment,500)
+    if commentmsg != True:
+        return setcors(msg="评论"+commentmsg)
     valuemsg = checkvalueisNone([comment,cid])
     if valuemsg != True:
         return setcors(msg=valuemsg)
+    cid = requestdata.get("cid")
     idmsg = is_number(cid)
     if idmsg != True:
         return setcors(msg=idmsg)
