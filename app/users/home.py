@@ -18,7 +18,7 @@ def get_title_img():
 @userbp.route("/getcoures",methods=["get"])
 def getcoures():
     '''
-    教程
+    获取推荐教程
     '''
     pagenum = request.args.get("pagenum")
     if pagenum is None or pagenum == '':
@@ -291,3 +291,11 @@ def getcomments():
         return setcors(msg=nummsg)
 
 
+
+@userbp.route("/getmblist",methods=["get"])
+def getmblist():
+    '''
+    获取密保问题列表
+    '''
+    res = db.query("select id,question from t_user_mbq where status = 0;")
+    return setcors(data=res,status=200)

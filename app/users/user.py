@@ -131,6 +131,7 @@ def loginout():
         return setcors(msg=loginstatus)
 
 
+
 @userbp.route("/userupdateps",methods=["post"])
 def userupdateps():
     '''
@@ -157,6 +158,40 @@ def userupdateps():
             return setcors(data=res,msg="密码修改成功！请重新登录！",status=200)
         else:
             return setcors(msg="旧密码不正确！")
+    else:
+        return setcors(msg=loginstatus)
+
+
+
+@userbp.route("/usersertmb",methods=["post"])
+def usersertmb():
+    '''
+    用户设置密保接口
+    {"password":"","mb":{题目id:答案}}
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    password = requestdata.get("password")
+    mb = requestdata.get("mb")
+    token = request.headers.get("token")
+    loginstatus = checkloginstatus(session,token)
+    if loginstatus is True:
+        uid = session["userinfo"]["uid"]
+        username = session["userinfo"]["username"]
+        password = encryption(username,password,"user")
+        password1 = db.query("select password from t_user where id = {};".format(uid))[0]["password"]
+        if password == password1:
+            mblist = []
+            for i in mb:
+                mblist.append(i)
+                mblist.append(mb[i])
+            mb = tuple(mblist)
+            res = db.commit("update t_user set mb = JSON_OBJECT{} where id = {}".format(mb,uid))
+            return setcors(data=res,msg="密保设置成功！",status=200)
+        else:
+            return setcors(msg="密码不正确！")
     else:
         return setcors(msg=loginstatus)
 
@@ -571,7 +606,7 @@ def updateusertitlepic():
 @userbp.route("/userfellgoods",methods=["post"])
 def userfellgoods():
     '''
-    点赞 # {"ctype":"0","status":0,"gid":1}
+    点赞 # {"ctype":"0","gid":1}
     0教程1提问2灵感3心得体会
     '''
     headrsmsg = checkContentType(request)
@@ -579,13 +614,10 @@ def userfellgoods():
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
     ctype = str(requestdata.get("ctype"))
-    status = requestdata.get("status")
     gid = requestdata.get("gid")
     idmsg = is_number(gid)
     if idmsg != True:
         return setcors(msg=idmsg)
-    if status not in [0,1,"0","1"]:
-        return setcors(msg="status仅为0或者1")
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
@@ -595,65 +627,47 @@ def userfellgoods():
             goods = db.query("select goods from t_article where id = {} and status = 0;".format(gid))
             if len(goods) != 0 :
                 goods = goods[0]["goods"]
-                if len(qres) == 0:  # 从来没有点过赞
-                    if status == 0: # 点赞
-                        goods = goods + 1
-                        dzres = db.commit("insert into t_article_user_status (aid,uid,gstatus) values ({},{},0);".format(gid,uid))
-                        upres = db.commit("update t_article set goods={} where id ={};".format(goods,gid))
-                        return setcors(msg=(dzres,upres),status=200)
-                    else:  #取消点赞
-                        return setcors(msg="你还没有对该文章点赞过！")
+                if len(qres) == 0:  # 从来没有点过赞   
+                    goods = goods + 1
+                    dzres = db.commit("insert into t_article_user_status (aid,uid,gstatus) values ({},{},0);".format(gid,uid))
+                    upres = db.commit("update t_article set goods={} where id ={};".format(goods,gid))
+                    return setcors(data=(dzres,upres),msg="点赞成功！",status=200)
                 else:
-                    gstatus = db.query("select gstatus from t_article_user_status where aid = {} and uid = {};".format(gid,uid))[0]["gstatus"]
-                    if status == 0: # 点赞
-                        if gstatus == 0:  
-                            return setcors(msg="已经点过赞了")                    
-                        else:
-                            goods = goods + 1
-                            dzres = db.commit("update t_article_user_status set gstatus = 0 where  uid = {} and aid = {};".format(uid,gid))
-                            upres = db.commit("update t_article set goods={} where id ={};".format(goods,gid))
-                            return setcors(msg=(dzres,upres),status=200) 
-                    else: # 取消点赞
-                        if gstatus == 0:
-                            goods = goods - 1
-                            dzres = db.commit("update t_article_user_status set gstatus = 1 where  uid = {} and aid = {};".format(uid,gid))
-                            upres = db.commit("update t_article set goods={} where id ={};".format(goods,gid))
-                            return setcors(msg=(dzres,upres),status=200) 
-                        else:
-                            return setcors(msg="你还没有对该文章点赞过！") 
+                    gstatus = qres[0]["gstatus"]
+                    if gstatus == 0:  
+                        goods = goods - 1
+                        dzres = db.commit("update t_article_user_status set gstatus = 1 where  uid = {} and aid = {};".format(uid,gid))
+                        upres = db.commit("update t_article set goods={} where id ={};".format(goods,gid))
+                        return setcors(data=(dzres,upres),msg="取消点赞成功！",status=200)                    
+                    else:
+                        goods = goods + 1
+                        dzres = db.commit("update t_article_user_status set gstatus = 0 where  uid = {} and aid = {};".format(uid,gid))
+                        upres = db.commit("update t_article set goods={} where id ={};".format(goods,gid))
+                        return setcors(data=(dzres,upres),msg="点赞成功！",status=200) 
             else:        
-                return setcors(msg="不存在该文章")     
+                return setcors(msg="不存在该文章")
         elif ctype == "0":
             qres = db.query("select * from t_coures_user_status where uid = {} and cid = {};".format(uid,gid))
             goods = db.query("select goods from t_coures where id = {} and status = 0;".format(gid))
             if len(goods) != 0 :
                 goods = goods[0]["goods"]
                 if len(qres) == 0:  # 从来没有点过赞
-                    if status == 0: # 点赞
-                        goods = goods + 1
-                        dzres = db.commit("insert into t_coures_user_status (cid,uid,gstatus) values ({},{},0);".format(gid,uid))
-                        upres = db.commit("update t_coures set goods={} where id ={};".format(goods,gid))
-                        return setcors(msg=(dzres,upres),status=200) 
-                    else:  #取消点赞
-                        return setcors(msg="你还没有对该教程点赞过！")  
+                    goods = goods + 1
+                    dzres = db.commit("insert into t_coures_user_status (cid,uid,gstatus) values ({},{},0);".format(gid,uid))
+                    upres = db.commit("update t_coures set goods={} where id ={};".format(goods,gid))
+                    return setcors(data=(dzres,upres),msg="点赞成功！",status=200) 
                 else:
-                    gstatus = db.query("select gstatus from t_coures_user_status where cid = {} and uid = {};".format(gid,uid))[0]["gstatus"]
-                    if status == 0: # 点赞
-                        if gstatus == 0:   
-                            return setcors(msg="已经点过赞了")                      
-                        else:
-                            goods = goods + 1
-                            dzres = db.commit("update t_coures_user_status set gstatus = 0 where  uid = {} and cid = {};".format(uid,gid))
-                            upres = db.commit("update t_coures set goods={} where id ={};".format(goods,gid))
-                            return setcors(msg=(dzres,upres),status=200)  
-                    else: # 取消点赞
-                        if gstatus == 0:
-                            goods = goods - 1
-                            dzres = db.commit("update t_coures_user_status set gstatus = 1 where  uid = {} and cid = {};".format(uid,gid))
-                            upres = db.commit("update t_coures set goods={} where id ={};".format(goods,gid))
-                            return setcors(msg=(dzres,upres),status=200) 
-                        else:
-                            return setcors(msg="你还没有对该教程点赞过！")     
+                    gstatus = qres[0]["gstatus"]  
+                    if gstatus == 0:   
+                        goods = goods - 1
+                        dzres = db.commit("update t_coures_user_status set gstatus = 1 where  uid = {} and cid = {};".format(uid,gid))
+                        upres = db.commit("update t_coures set goods={} where id ={};".format(goods,gid))
+                        return setcors(data=(dzres,upres),msg="取消点赞成功！",status=200)                    
+                    else:
+                        goods = goods + 1
+                        dzres = db.commit("update t_coures_user_status set gstatus = 0 where  uid = {} and cid = {};".format(uid,gid))
+                        upres = db.commit("update t_coures set goods={} where id ={};".format(goods,gid))
+                        return setcors(data=(dzres,upres),msg="点赞成功！",status=200)
             else:
                 return setcors(msg="不存在该教程")   
         elif ctype == "2":
@@ -661,32 +675,23 @@ def userfellgoods():
             goods = db.query("select goods from t_inspirer where id = {} and status = 0;".format(gid))
             if len(goods) != 0 :
                 goods = goods[0]["goods"]
-                if len(qres) == 0:  # 从来没有点过赞
-                    if status == 0: # 点赞
-                        goods = goods + 1
-                        dzres = db.commit("insert into t_inspirer_user_status (iid,uid,gstatus) values ({},{},0);".format(gid,uid))
-                        upres = db.commit("update t_inspirer set goods={} where id ={};".format(goods,gid))
-                        return setcors(msg=(dzres,upres),status=200) 
-                    else:  #取消点赞
-                        return setcors(msg="你还没有对该灵感点赞过！") 
+                if len(qres) == 0:  # 从来没有点过赞           
+                    goods = goods + 1
+                    dzres = db.commit("insert into t_inspirer_user_status (iid,uid,gstatus) values ({},{},0);".format(gid,uid))
+                    upres = db.commit("update t_inspirer set goods={} where id ={};".format(goods,gid))
+                    return setcors(data=(dzres,upres),msg="点赞成功！",status=200)
                 else:
-                    gstatus = db.query("select gstatus from t_inspirer_user_status where iid = {} and uid = {}".format(gid,uid))[0]["gstatus"]
-                    if status == 0: # 点赞
-                        if gstatus == 0:
-                            return setcors(msg="已经点过赞了")                       
-                        else:
-                            goods = goods + 1
-                            dzres = db.commit("update t_inspirer_user_status set gstatus = 0 where  uid = {} and iid = {};".format(uid,gid))
-                            upres = db.commit("update t_inspirer set goods={} where id ={};".format(goods,gid))
-                            return setcors(msg=(dzres,upres),status=200)   
-                    else: # 取消点赞
-                        if gstatus == 0:
-                            goods = goods - 1
-                            dzres = db.commit("update t_inspirer_user_status set gstatus = 1 where  uid = {} and iid = {};".format(uid,gid))
-                            upres = db.commit("update t_inspirer set goods={} where id ={};".format(goods,gid))
-                            return setcors(msg=(dzres,upres),status=200) 
-                        else:  
-                            return setcors(msg="你还没有对该灵感点赞过！") 
+                    gstatus = qres[0]["gstatus"]
+                    if gstatus == 0:
+                        goods = goods - 1
+                        dzres = db.commit("update t_inspirer_user_status set gstatus = 1 where  uid = {} and iid = {};".format(uid,gid))
+                        upres = db.commit("update t_inspirer set goods={} where id ={};".format(goods,gid))
+                        return setcors(data=(dzres,upres),msg="取消点赞成功！",status=200)                       
+                    else:
+                        goods = goods + 1
+                        dzres = db.commit("update t_inspirer_user_status set gstatus = 0 where  uid = {} and iid = {};".format(uid,gid))
+                        upres = db.commit("update t_inspirer set goods={} where id ={};".format(goods,gid))
+                        return setcors(data=(dzres,upres),msg="点赞成功！",status=200)
             else: 
                 return setcors(msg="不存在该灵感") 
         elif ctype == "1":
@@ -695,31 +700,22 @@ def userfellgoods():
             if len(goods) != 0 :
                 goods = goods[0]["goods"]
                 if len(qres) == 0:  # 从来没有点过赞
-                    if status == 0: # 点赞
-                        goods = goods + 1
-                        dzres = db.commit("insert into t_questions_user_status (qid,uid,gstatus) values ({},{},0);".format(gid,uid))
-                        upres = db.commit("update t_questions set goods={} where id ={};".format(goods,gid))
-                        return setcors(msg=(dzres,upres),status=200) 
-                    else:  #取消点赞
-                        return setcors(msg="你还没有对该问题点赞过！")
+                    goods = goods + 1
+                    dzres = db.commit("insert into t_questions_user_status (qid,uid,gstatus) values ({},{},0);".format(gid,uid))
+                    upres = db.commit("update t_questions set goods={} where id ={};".format(goods,gid))
+                    return setcors(data=(dzres,upres),msg="点赞成功！",status=200)
                 else:
-                    gstatus = db.query("select gstatus from t_questions_user_status where qid = {} and uid = {};".format(gid,uid))[0]["gstatus"]
-                    if status == 0: # 点赞
-                        if gstatus == 0:
-                            return setcors(msg="已经点过赞了")                       
-                        else:
-                            goods = goods + 1
-                            dzres = db.commit("update t_questions_user_status set gstatus = 0 where  uid = {} and qid = {};".format(uid,gid))
-                            upres = db.commit("update t_questions set goods={} where id ={};".format(goods,gid))
-                            return setcors(msg=(dzres,upres),status=200)    
-                    else: # 取消点赞
-                        if gstatus == 0:
-                            goods = goods - 1
-                            dzres = db.commit("update t_questions_user_status set gstatus = 1 where  uid = {} and qid = {};".format(uid,gid))
-                            upres = db.commit("update t_questions set goods={} where id ={};".format(goods,gid))
-                            return setcors(msg=(dzres,upres),status=200) 
-                        else: 
-                            return setcors(msg="你还没有对该问题点赞过！") 
+                    gstatus = qres[0]["gstatus"]         
+                    if gstatus == 0:
+                        goods = goods - 1
+                        dzres = db.commit("update t_questions_user_status set gstatus = 1 where  uid = {} and qid = {};".format(uid,gid))
+                        upres = db.commit("update t_questions set goods={} where id ={};".format(goods,gid))
+                        return setcors(data=(dzres,upres),msg="取消点赞成功！",status=200)                       
+                    else:
+                        goods = goods + 1
+                        dzres = db.commit("update t_questions_user_status set gstatus = 0 where  uid = {} and qid = {};".format(uid,gid))
+                        upres = db.commit("update t_questions set goods={} where id ={};".format(goods,gid))
+                        return setcors(data=(dzres,upres),msg="点赞成功！",status=200)
             else:
                 return setcors(msg="不存在该问题")    
         else:
@@ -732,7 +728,7 @@ def userfellgoods():
 @userbp.route("/usercollections",methods=["post"])
 def usercollections():
     '''
-    收藏  # {"ctype":"0","status":0,"cid":1}
+    收藏  # {"ctype":"0","cid":1}
     0教程1提问2灵感3心得体会
     '''
     headrsmsg = checkContentType(request)
@@ -740,9 +736,6 @@ def usercollections():
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
     ctype = str(requestdata.get("ctype"))
-    status = requestdata.get("status")
-    if status not in [0,1,"0","1"]:
-        return setcors(msg="status仅能为0或1")
     cid = requestdata.get("cid")
     idmsg = is_number(cid)
     if idmsg != True:
@@ -757,31 +750,22 @@ def usercollections():
             if len(collections) != 0 :
                 collections = collections[0]["collections"]
                 if len(qres) == 0:  # 从来没有点过赞
-                    if status == 0: # 点赞
-                        collections = collections + 1
-                        dzres = db.commit("insert into t_article_user_status (aid,uid,cstatus) values ({},{},0);".format(cid,uid))
-                        upres = db.commit("update t_article set collections={} where id ={};".format(collections,cid))
-                        return setcors(msg=(dzres,upres),status=200)
-                    else:  #取消点赞
-                        return setcors(msg="你还没有对该文章收藏过！")
+                    collections = collections + 1
+                    dzres = db.commit("insert into t_article_user_status (aid,uid,cstatus) values ({},{},0);".format(cid,uid))
+                    upres = db.commit("update t_article set collections={} where id ={};".format(collections,cid))
+                    return setcors(data=(dzres,upres),msg="收藏成功！",status=200)
                 else:
-                    cstatus = db.query("select cstatus from t_article_user_status where aid = {} and uid = {};".format(cid,uid))[0]["cstatus"]
-                    if status == 0: # 点赞
-                        if cstatus == 0:     
-                            return setcors(msg="已经收藏过了")                 
-                        else:
-                            collections = collections + 1
-                            dzres = db.commit("update t_article_user_status set cstatus = 0 where  uid = {} and aid = {};".format(uid,cid))
-                            upres = db.commit("update t_article set collections={} where id ={};".format(collections,cid))
-                            return setcors(msg=(dzres,upres),status=200) 
-                    else: # 取消点赞
-                        if cstatus == 0:
-                            collections = collections - 1
-                            dzres = db.commit("update t_article_user_status set cstatus = 1 where  uid = {} and aid = {};".format(uid,cid))
-                            upres = db.commit("update t_article set collections={} where id ={};".format(collections,cid))
-                            return setcors(msg=(dzres,upres),status=200)
-                        else:
-                            return setcors(msg="你还没有对该文章收藏过！")
+                    cstatus = qres[0]["cstatus"]
+                    if cstatus == 0:     
+                        collections = collections - 1
+                        dzres = db.commit("update t_article_user_status set cstatus = 1 where  uid = {} and aid = {};".format(uid,cid))
+                        upres = db.commit("update t_article set collections={} where id ={};".format(collections,cid))
+                        return setcors(data=(dzres,upres),msg="取消收藏成功！",status=200)              
+                    else:
+                        collections = collections + 1
+                        dzres = db.commit("update t_article_user_status set cstatus = 0 where  uid = {} and aid = {};".format(uid,cid))
+                        upres = db.commit("update t_article set collections={} where id ={};".format(collections,cid))
+                        return setcors(data=(dzres,upres),msg="收藏成功！",status=200) 
             else:
                 return setcors(msg="不存在该文章")          
         elif ctype == "0":
@@ -790,31 +774,22 @@ def usercollections():
             if len(collections) != 0 :
                 collections = collections[0]["collections"]
                 if len(qres) == 0:  # 从来没有点过赞
-                    if status == 0: # 点赞
-                        collections = collections + 1
-                        dzres = db.commit("insert into t_coures_user_status (cid,uid,cstatus) values ({},{},0);".format(cid,uid))
-                        upres = db.commit("update t_coures set collections={} where id ={};".format(collections,cid))
-                        return setcors(msg=(dzres,upres),status=200)
-                    else:  #取消点赞
-                        return setcors(msg="你还没有对该文章收藏过！")
+                    collections = collections + 1
+                    dzres = db.commit("insert into t_coures_user_status (cid,uid,cstatus) values ({},{},0);".format(cid,uid))
+                    upres = db.commit("update t_coures set collections={} where id ={};".format(collections,cid))
+                    return setcors(data=(dzres,upres),msg="收藏成功！",status=200)
                 else:
-                    cstatus = db.query("select cstatus from t_coures_user_status where cid = {} and uid = {};".format(cid,uid))[0]["cstatus"]
-                    if status == 0: # 点赞
-                        if cstatus == 0:  
-                            return setcors(msg="已经收藏过了")                    
-                        else:
-                            collections = collections + 1
-                            dzres = db.commit("update t_coures_user_status set cstatus = 0 where  uid = {} and cid = {};".format(uid,cid))
-                            upres = db.commit("update t_coures set collections={} where id ={};".format(collections,cid))
-                            return setcors(msg=(dzres,upres),status=200)   
-                    else: # 取消点赞
-                        if cstatus == 0:
-                            collections = collections - 1
-                            dzres = db.commit("update t_coures_user_status set cstatus = 1 where  uid = {} and cid = {};".format(uid,cid))
-                            upres = db.commit("update t_coures set collections={} where id ={};".format(collections,cid))
-                            return setcors(msg=(dzres,upres),status=200)
-                        else:
-                            return setcors(msg="你还没有对该文章收藏过！")   
+                    cstatus = qres[0]["cstatus"]
+                    if cstatus == 0:  
+                        collections = collections - 1
+                        dzres = db.commit("update t_coures_user_status set cstatus = 1 where  uid = {} and cid = {};".format(uid,cid))
+                        upres = db.commit("update t_coures set collections={} where id ={};".format(collections,cid))
+                        return setcors(data=(dzres,upres),msg="取消收藏成功！",status=200)              
+                    else:
+                        collections = collections + 1
+                        dzres = db.commit("update t_coures_user_status set cstatus = 0 where  uid = {} and cid = {};".format(uid,cid))
+                        upres = db.commit("update t_coures set collections={} where id ={};".format(collections,cid))
+                        return setcors(data=(dzres,upres),msg="收藏成功！",status=200)  
             else: 
                 return setcors(msg="不存在该教程")
         elif ctype == "2":
@@ -822,69 +797,51 @@ def usercollections():
             collections = db.query("select collections from t_inspirer where id = {} and status = 0;".format(cid))
             if len(collections) != 0 :
                 collections = collections[0]["collections"]
-                if len(qres) == 0:  # 从来没有点过赞
-                    if status == 0: # 点赞
-                        collections = collections + 1
-                        dzres = db.commit("insert into t_inspirer_user_status (iid,uid,cstatus) values ({},{},0);".format(cid,uid))
-                        upres = db.commit("update t_inspirer set collections={} where id ={};".format(collections,cid))
-                        return setcors(msg=(dzres,upres),status=200) 
-                    else:  #取消点赞
-                        return setcors(msg="你还没有对该文章收藏过！")
+                if len(qres) == 0:  # 从来没有点过赞   
+                    collections = collections + 1
+                    dzres = db.commit("insert into t_inspirer_user_status (iid,uid,cstatus) values ({},{},0);".format(cid,uid))
+                    upres = db.commit("update t_inspirer set collections={} where id ={};".format(collections,cid))
+                    return setcors(data=(dzres,upres),msg="收藏成功！",status=200) 
                 else:
-                    cstatus = db.query("select cstatus from t_inspirer_user_status where iid = {} and uid = {};".format(cid,uid))[0]["cstatus"]
-                    if status == 0: # 点赞
-                        if cstatus == 0:   
-                            return setcors(msg="已经收藏过了")                  
-                        else:
-                            collections = collections + 1
-                            dzres = db.commit("update t_inspirer_user_status set cstatus = 0 where  uid = {} and iid = {};".format(uid,cid))
-                            upres = db.commit("update t_inspirer set collections={} where id ={};".format(collections,cid))
-                            return setcors(msg=(dzres,upres),status=200)  
-                    else: # 取消点赞
-                        if cstatus == 0:
-                            collections = collections - 1
-                            dzres = db.commit("update t_inspirer_user_status set cstatus = 1 where  uid = {} and iid = {};".format(uid,cid))
-                            upres = db.commit("update t_inspirer set collections={} where id ={};".format(collections,cid))
-                            return setcors(msg=(dzres,upres),status=200)
-                        else:
-                            return setcors(msg="你还没有对该文章收藏过！")
+                    cstatus = qres[0]["cstatus"]
+                    if cstatus == 0:   
+                        collections = collections - 1
+                        dzres = db.commit("update t_inspirer_user_status set cstatus = 1 where  uid = {} and iid = {};".format(uid,cid))
+                        upres = db.commit("update t_inspirer set collections={} where id ={};".format(collections,cid))
+                        return setcors(data=(dzres,upres),msg="取消收藏成功！",status=200)                
+                    else:
+                        collections = collections + 1
+                        dzres = db.commit("update t_inspirer_user_status set cstatus = 0 where  uid = {} and iid = {};".format(uid,cid))
+                        upres = db.commit("update t_inspirer set collections={} where id ={};".format(collections,cid))
+                        return setcors(data=(dzres,upres),msg="收藏成功！",status=200)  
             else:
-                return setcors(msg="不存在该文章")
+                return setcors(msg="不存在该灵感")
         elif ctype == "1":
             qres = db.query("select * from t_questions_user_status where uid = {} and qid = {};".format(uid,cid))
             collections = db.query("select collections from t_questions where id = {} and status = 0;".format(cid))
             if len(collections) != 0 :
                 collections = collections[0]["collections"]
                 if len(qres) == 0:  # 从来没有点过赞
-                    if status == 0: # 点赞
-                        collections = collections + 1
-                        dzres = db.commit("insert into t_questions_user_status (qid,uid,cstatus) values ({},{},0);".format(cid,uid))
-                        upres = db.commit("update t_questions set collections={} where id ={};".format(collections,cid))
-                        return setcors(msg=(dzres,upres),status=200)
-                    else:  #取消点赞
-                        return setcors(msg="你还没有对该文章收藏过！")
+                    collections = collections + 1
+                    dzres = db.commit("insert into t_questions_user_status (qid,uid,cstatus) values ({},{},0);".format(cid,uid))
+                    upres = db.commit("update t_questions set collections={} where id ={};".format(collections,cid))
+                    return setcors(data=(dzres,upres),msg="收藏成功！",status=200)
                 else:
-                    cstatus = db.query("select cstatus from t_questions_user_status where qid = {} and uid = {}".format(cid,uid))[0]["cstatus"]
-                    if status == 0: # 点赞
-                        if cstatus == 0:    
-                            return setcors(msg="已经收藏过了")               
-                        else:
-                            collections = collections + 1
-                            dzres = db.commit("update t_questions_user_status set cstatus = 0 where  uid = {} and qid = {};".format(uid,cid))
-                            upres = db.commit("update t_questions set collections={} where id ={};".format(collections,cid))
-                            return setcors(msg=(dzres,upres),status=200)
-                    else: # 取消点赞
-                        if cstatus == 0:
-                            collections = collections - 1
-                            dzres = db.commit("update t_questions_user_status set cstatus = 1 where  uid = {} and qid = {};".format(uid,cid))
-                            upres = db.commit("update t_questions set collections={} where id ={};".format(collections,cid))
-                            return setcors(msg=(dzres,upres),status=200)
-                        else:
-                            return setcors(msg="你还没有对该文章收藏过！")
+                    cstatus = qres[0]["cstatus"]
+                    if cstatus == 0:    
+                        collections = collections - 1
+                        dzres = db.commit("update t_questions_user_status set cstatus = 1 where  uid = {} and qid = {};".format(uid,cid))
+                        upres = db.commit("update t_questions set collections={} where id ={};".format(collections,cid))
+                        return setcors(data=(dzres,upres),msg="取消收藏成功！",status=200)             
+                    else:
+                        collections = collections + 1
+                        dzres = db.commit("update t_questions_user_status set cstatus = 0 where  uid = {} and qid = {};".format(uid,cid))
+                        upres = db.commit("update t_questions set collections={} where id ={};".format(collections,cid))
+                        return setcors(data=(dzres,upres),msg="收藏成功！",status=200)
             else:
-                return setcors(msg="不存在该文章")
+                return setcors(msg="不存在该问题")
         else:
-            return setcors(msg="不存在该文章类型")
+            return setcors(msg="ctype类型不对")
     else:
         return setcors(msg=loginstatus)
 
@@ -893,17 +850,14 @@ def usercollections():
 @userbp.route("/userfollows",methods=["post"])
 def userfollows():
     '''
-    关注  # {"ctype":"0","status":0,"fid":1}
-    0教程1提问2灵感3心得体会
+    关注  # {"ctype":"0","fid":1}
+    0教程1提问3文章
     '''
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
     ctype = str(requestdata.get("ctype"))
-    status = requestdata.get("status")
-    if status not in [0,1,"0","1"]:
-        return setcors(msg="status仅能为0或1")
     fid = requestdata.get("fid")
     idmsg = is_number(fid)
     if idmsg != True:
@@ -918,31 +872,22 @@ def userfollows():
             if len(follows) != 0 :
                 follows = follows[0]["follows"]
                 if len(qres) == 0:  # 从来没有点过赞
-                    if status == 0: # 点赞
-                        follows = follows + 1
-                        dzres = db.commit("insert into t_article_user_status (aid,uid,fstatus) values ({},{},0);".format(fid,uid))
-                        upres = db.commit("update t_article set follows={} where id ={};".format(follows,fid))
-                        return setcors(msg=(dzres,upres),status=200)
-                    else:  #取消点赞
-                        return setcors(msg="你还没有对该文章关注过！")
+                    follows = follows + 1
+                    dzres = db.commit("insert into t_article_user_status (aid,uid,fstatus) values ({},{},0);".format(fid,uid))
+                    upres = db.commit("update t_article set follows={} where id ={};".format(follows,fid))
+                    return setcors(data=(dzres,upres),msg="关注成功！",status=200)
                 else:
-                    fstatus = db.query("select fstatus from t_article_user_status where aid = {} and uid = {};".format(fid,uid))[0]["fstatus"]
-                    if status == 0: # 点赞
-                        if fstatus == 0:     
-                            return setcors(msg="已经关注过了")                 
-                        else:
-                            follows = follows + 1
-                            dzres = db.commit("update t_article_user_status set fstatus = 0 where  uid = {} and aid = {};".format(uid,fid))
-                            upres = db.commit("update t_article set follows={} where id ={};".format(follows,fid))
-                            return setcors(msg=(dzres,upres),status=200) 
-                    else: # 取消点赞
-                        if fstatus == 0:
-                            follows = follows - 1
-                            dzres = db.commit("update t_article_user_status set fstatus = 1 where  uid = {} and aid = {};".format(uid,fid))
-                            upres = db.commit("update t_article set follows={} where id ={};".format(follows,fid))
-                            return setcors(msg=(dzres,upres),status=200)
-                        else:
-                            return setcors(msg="你还没有对该文章关注过！")
+                    fstatus = qres[0]["fstatus"]
+                    if fstatus == 0:     
+                        follows = follows - 1
+                        dzres = db.commit("update t_article_user_status set fstatus = 1 where  uid = {} and aid = {};".format(uid,fid))
+                        upres = db.commit("update t_article set follows={} where id ={};".format(follows,fid))
+                        return setcors(data=(dzres,upres),msg="取消关注成功！",status=200)              
+                    else:
+                        follows = follows + 1
+                        dzres = db.commit("update t_article_user_status set fstatus = 0 where  uid = {} and aid = {};".format(uid,fid))
+                        upres = db.commit("update t_article set follows={} where id ={};".format(follows,fid))
+                        return setcors(data=(dzres,upres),msg="关注成功！",status=200) 
             else:
                 return setcors(msg="不存在该文章")          
         elif ctype == "0":
@@ -951,31 +896,22 @@ def userfollows():
             if len(follows) != 0 :
                 follows = follows[0]["follows"]
                 if len(qres) == 0:  # 从来没有点过赞
-                    if status == 0: # 点赞
-                        follows = follows + 1
-                        dzres = db.commit("insert into t_coures_user_status (cid,uid,fstatus) values ({},{},0);".format(fid,uid))
-                        upres = db.commit("update t_coures set follows={} where id ={};".format(follows,fid))
-                        return setcors(msg=(dzres,upres),status=200)
-                    else:  #取消点赞
-                        return setcors(msg="你还没有对该文章关注过！")
+                    follows = follows + 1
+                    dzres = db.commit("insert into t_coures_user_status (cid,uid,fstatus) values ({},{},0);".format(fid,uid))
+                    upres = db.commit("update t_coures set follows={} where id ={};".format(follows,fid))
+                    return setcors(data=(dzres,upres),msg="关注成功！",status=200)
                 else:
-                    fstatus = db.query("select fstatus from t_coures_user_status where cid = {} and uid = {};".format(fid,uid))[0]["fstatus"]
-                    if status == 0: # 点赞
-                        if fstatus == 0:  
-                            return setcors(msg="已经关注过了")                    
-                        else:
-                            follows = follows + 1
-                            dzres = db.commit("update t_coures_user_status set fstatus = 0 where  uid = {} and cid = {};".format(uid,fid))
-                            upres = db.commit("update t_coures set follows={} where id ={};".format(follows,fid))
-                            return setcors(msg=(dzres,upres),status=200)   
-                    else: # 取消点赞
-                        if fstatus == 0:
-                            follows = follows - 1
-                            dzres = db.commit("update t_coures_user_status set fstatus = 1 where  uid = {} and cid = {};".format(uid,fid))
-                            upres = db.commit("update t_coures set follows={} where id ={};".format(follows,fid))
-                            return setcors(msg=(dzres,upres),status=200)
-                        else:
-                            return setcors(msg="你还没有对该文章关注过！")   
+                    fstatus = qres[0]["fstatus"]
+                    if fstatus == 0:  
+                        follows = follows - 1
+                        dzres = db.commit("update t_coures_user_status set fstatus = 1 where  uid = {} and cid = {};".format(uid,fid))
+                        upres = db.commit("update t_coures set follows={} where id ={};".format(follows,fid))
+                        return setcors(data=(dzres,upres),msg="取消关注成功！",status=200)                 
+                    else:
+                        follows = follows + 1
+                        dzres = db.commit("update t_coures_user_status set fstatus = 0 where  uid = {} and cid = {};".format(uid,fid))
+                        upres = db.commit("update t_coures set follows={} where id ={};".format(follows,fid))
+                        return setcors(data=(dzres,upres),msg="关注成功！",status=200)
             else: 
                 return setcors(msg="不存在该教程")
         elif ctype == "1":
@@ -984,35 +920,26 @@ def userfollows():
             if len(follows) != 0 :
                 follows = follows[0]["follows"]
                 if len(qres) == 0:  # 从来没有点过赞
-                    if status == 0: # 点赞
-                        follows = follows + 1
-                        dzres = db.commit("insert into t_questions_user_status (qid,uid,fstatus) values ({},{},0);".format(fid,uid))
-                        upres = db.commit("update t_questions set follows={} where id ={};".format(follows,fid))
-                        return setcors(msg=(dzres,upres),status=200)
-                    else:  #取消点赞
-                        return setcors(msg="你还没有对该文章关注过！")
+                    follows = follows + 1
+                    dzres = db.commit("insert into t_questions_user_status (qid,uid,fstatus) values ({},{},0);".format(fid,uid))
+                    upres = db.commit("update t_questions set follows={} where id ={};".format(follows,fid))
+                    return setcors(data=(dzres,upres),msg="关注成功！",status=200)
                 else:
-                    fstatus = db.query("select fstatus from t_questions_user_status where qid = {} and uid = {}".format(fid,uid))[0]["fstatus"]
-                    if status == 0: # 点赞
-                        if fstatus == 0:    
-                            return setcors(msg="已经关注过了")               
-                        else:
-                            follows = follows + 1
-                            dzres = db.commit("update t_questions_user_status set fstatus = 0 where  uid = {} and qid = {};".format(uid,fid))
-                            upres = db.commit("update t_questions set follows={} where id ={};".format(follows,fid))
-                            return setcors(msg=(dzres,upres),status=200)
-                    else: # 取消点赞
-                        if fstatus == 0:
-                            follows = follows - 1
-                            dzres = db.commit("update t_questions_user_status set fstatus = 1 where  uid = {} and qid = {};".format(uid,fid))
-                            upres = db.commit("update t_questions set follows={} where id ={};".format(follows,fid))
-                            return setcors(msg=(dzres,upres),status=200)
-                        else:
-                            return setcors(msg="你还没有对该文章关注过！")
+                    fstatus = qres[0]["fstatus"]  
+                    if fstatus == 0:    
+                        follows = follows - 1
+                        dzres = db.commit("update t_questions_user_status set fstatus = 1 where  uid = {} and qid = {};".format(uid,fid))
+                        upres = db.commit("update t_questions set follows={} where id ={};".format(follows,fid))
+                        return setcors(data=(dzres,upres),msg="取消关注成功！",status=200)               
+                    else:
+                        follows = follows + 1
+                        dzres = db.commit("update t_questions_user_status set fstatus = 0 where  uid = {} and qid = {};".format(uid,fid))
+                        upres = db.commit("update t_questions set follows={} where id ={};".format(follows,fid))
+                        return setcors(data=(dzres,upres),msg="关注成功！",status=200)
             else:
-                return setcors(msg="不存在该文章")
+                return setcors(msg="不存在该问题")
         else:
-            return setcors(msg="不存在该文章类型")
+            return setcors(msg="不存在该ctype类型")
     else:
         return setcors(msg=loginstatus)
 
@@ -1161,9 +1088,9 @@ def getuserfstatus():
         else:
             fstatus = res[0].get("status")
             if fstatus == 0:
-                return setcors(data=0,msg="已关注",status=200)
+                return setcors(data=fstatus,msg="已关注",status=200)
             else:
-                return setcors(data=1,msg="未关注",status=200)
+                return setcors(data=fstatus,msg="未关注",status=200)
     else:
         return setcors(msg=loginstatus)
 
@@ -1180,7 +1107,6 @@ def userfuser():
         uid = session["userinfo"]["uid"]
         res = db.query("select * from t_user_follows where uid = {} and fid = {}".format(uid,fid))
         if len(res) == 0:
-            # 关注
             res = db.commit("insert into t_user_follows (fid,uid,status) values ({},{},0);".format(fid,uid))
             return setcors(data=res,msg="关注成功！",status=200)
         else:
@@ -1200,4 +1126,11 @@ def userfuser():
 @userbp.route("/test")
 def test():
     headers  = request.args.get("token")
+    mb = {1:"哈哈"}
+    mblist = []
+    for i in mb:
+        mblist.append(i)
+        mblist.append(mb[i])
+    mb = tuple(mblist)
+    print(mb)
     return setcors(data=headers,status=200)

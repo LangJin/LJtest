@@ -1,8 +1,9 @@
 
 from flask import request
+import json
 from . import userbp
 from ..utils.dbtools import Db
-from ..utils.othertools import setcors,is_number
+from ..utils.othertools import setcors,is_number,encryption,checkuserinfo
 from config import db_config
 db = Db(db_config)
 
@@ -29,7 +30,7 @@ def getuserinfo():
         return setcors(msg=nummsg)
 
 
-@userbp.route("/userinspirer")
+@userbp.route("/userinspirer",methods=["get"])
 def userinspirer():
     '''
     获取用户的灵感列表
@@ -208,3 +209,30 @@ select * from (
     select '关注了',b.id,b.title,1,a.uid,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_questions_user_status  a join t_questions b on a.qid = b.id where fstatus = 0 
 ) as a where uid = 251 order by times desc limit 100;
 '''
+
+
+
+@userbp.route("/userfindps",methods=["post"])
+def userfindps():
+    '''
+    找回密码
+    {"username":"","password":"","mb":{题目id:答案}
+    '''
+    requestdata = request.get_json()
+    username = requestdata.get("username")
+    password = requestdata.get("password")
+    mb = requestdata.get("mb")
+    userregmsg = checkuserinfo(username,password)
+    if userregmsg != True:
+        return setcors(msg=userregmsg)
+    res = db.query("select mb from t_user where username = '{}';".format(username))
+    if len(res) == 1:
+        umb = json.loads(res[0].get("mb"))
+        if mb == umb:
+            password = encryption(username,password,"user")
+            res = db.commit("update t_user set password = '{}' where username = '{}';".format(password,username))
+            return setcors(data=res,msg="设置新密码成功！",status=200)
+        else:
+            return setcors(msg="密保错误！")
+    else:
+        return setcors(msg="账号不存在！")

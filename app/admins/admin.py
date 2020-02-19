@@ -339,6 +339,9 @@ def questionsdelete():
 # 用户的搜索删除
 @adminbp.route("/userlist",methods=["get"])
 def userlist():
+    '''
+    获取用户列表接口
+    '''
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
