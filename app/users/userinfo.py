@@ -203,7 +203,7 @@ def getuserdt():
     counts = db.query(sql=sql)[0].get("counts")
     data = {
         "userlist":res,
-        "counts":88
+        "counts":counts
     }
     return setcors(data=data,status=200)
 
