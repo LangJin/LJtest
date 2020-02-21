@@ -1001,13 +1001,10 @@ def usercommentupdate():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    comment = requestdata.get("comment")
+    comment = str(requestdata.get("comment"))
     commentmsg = checkvaluelen(comment,500)
     if commentmsg != True:
         return setcors(msg="评论"+commentmsg)
-    valuemsg = checkvalueisNone([comment,cid])
-    if valuemsg != True:
-        return setcors(msg=valuemsg)
     cid = requestdata.get("cid")
     idmsg = is_number(cid)
     if idmsg != True:
