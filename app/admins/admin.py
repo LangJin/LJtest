@@ -126,7 +126,10 @@ def couresupdate():
     tags = requestdata.get("tags")
     content = requestdata.get("content")
     cid = requestdata.get("cid")
-    valuemsg = checkvalueisNone([title,brief,tags,content,cid])
+    idmsg = is_number(cid)
+    if idmsg != True:
+        return setcors(msg=idmsg)
+    valuemsg = checkvalueisNone([title,brief,tags,content])
     if valuemsg != True:
         return setcors(msg=valuemsg)
     token = request.headers.get("token")

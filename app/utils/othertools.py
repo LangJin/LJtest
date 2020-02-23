@@ -198,7 +198,7 @@ def checkphonenum(phone):
     '''
     正则判断手机号格式
     '''
-    res = re.match("^(13[0-9]|14[5|7]|15[0|1|2|3|4|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$",phone)
+    res = re.match("^1(3|4|5|7|8)\d{9}$",phone)
     if res:
         return True
     else:
@@ -234,7 +234,7 @@ def checklistid(value):
     检查输入的值是否符合规范
     例：1,2,3,
     '''
-    res = re.match("^([0-9]+,)+$",value)
+    res = re.match("^([1-9]{1}[0-9]*,)+$",value)  
     # print(res)
     if res:
         return True
