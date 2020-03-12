@@ -57,7 +57,7 @@ def regist():
                 msg = "邮箱已经注册，请重新设置！"
                 return setcors(msg=msg)
             password = encryption(username,password,"user")
-            sql = "insert into t_user (username,password,phone,email) values ('{}','{}','{}','{}');".format(username,password,phone,email)
+            sql = "insert into t_user (username,password,phone,email,nickname) values ('{}','{}','{}','{}',CONCAT('用户',floor(rand()*10000000)));".format(username,password,phone,email)
             dbmsg = db.commit(sql)
             return setcors(msg=dbmsg,status=200)
         else:

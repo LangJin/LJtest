@@ -145,6 +145,30 @@ def couresupdate():
     else:
         return setcors(msg=loginstatus)
 
+
+@adminbp.route("/couresdelete",methods=["post"])
+def couresdelete():
+    '''
+    后台删除教程
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    dlist = str(requestdata.get("dlist"))
+    listmsg = checklistid(dlist)
+    if listmsg != True:
+        return setcors(msg=listmsg)
+    dlist = dlist[:-1]
+    token = request.headers.get("token")
+    loginstatus = checkadminloginstatus(session,token)
+    if loginstatus is True:
+        res = db.commit("update t_coures set status = 1 where id in ({});".format(dlist))
+        return setcors(data=res,status=200)
+    else:
+        return setcors(msg=loginstatus)
+
+
 # 灵感的搜索、删除
 @adminbp.route("/inspirlist",methods=["get"])
 def inspirlist():
@@ -362,8 +386,8 @@ def userlist():
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        allusernum = db.query("select count(*) usernum  from t_user where status = 0 ;")
-        res = db.query("select id,nickname,titlepic,headpic,phone,sex,job,email,weixin,QQ,userinfo,address,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_user where status = 0 limit {},{};".format(startnum,endnum))
+        allusernum = db.query("select count(*) usernum  from t_user;")
+        res = db.query("select id,nickname,titlepic,headpic,phone,sex,job,email,weixin,QQ,userinfo,address,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_user limit {},{};".format(startnum,endnum))
         data = {
             "userlist":res,
             "usernum":allusernum[0].get("usernum")
@@ -371,6 +395,7 @@ def userlist():
         return setcors(data=data,status=200)
     else:
         return setcors(msg=loginstatus)
+
 
 @adminbp.route("/usersdelete",methods=["post"])
 def usersdelete():
@@ -390,6 +415,129 @@ def usersdelete():
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
         res = db.commit("update t_user set status = 1 where id in ({});".format(dlist))
+        return setcors(data=res,status=200)
+    else:
+        return setcors(msg=loginstatus)
+
+
+
+@adminbp.route("/usersfreeze",methods=["post"])
+def usersfreeze():
+    '''
+    后台冻结/解冻用户
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    dlist = str(requestdata.get("dlist"))
+    listmsg = checklistid(dlist)
+    if listmsg != True:
+        return setcors(msg=listmsg)
+    dlist = dlist[:-1]
+    token = request.headers.get("token")
+    loginstatus = checkadminloginstatus(session,token)
+    if loginstatus is True:
+        res = db.commit("update t_user set status = (case when status !=3 then 3 else 0 end)  where id in ({});".format(dlist))
+        return setcors(data=res,status=200)
+    else:
+        return setcors(msg=loginstatus)
+
+
+@adminbp.route("/usersfind",methods=["post"])
+def usersfind():
+    '''
+    后台查找用户
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    username = str(requestdata.get("username"))
+    token = request.headers.get("token")
+    loginstatus = checkadminloginstatus(session,token)
+    if loginstatus is True:
+        res = db.query("select * from t_user where username like '%{}%';".format(username))
+        return setcors(data=res,status=200)
+    else:
+        return setcors(msg=loginstatus)
+
+
+@adminbp.route("/usersfindcoures",methods=["post"])
+def usersfindcoures():
+    '''
+    后台通过title查找教程
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    title = str(requestdata.get("title"))
+    token = request.headers.get("token")
+    loginstatus = checkadminloginstatus(session,token)
+    if loginstatus is True:
+        res = db.query("select * from t_coures where title like '%{}%';".format(title))
+        return setcors(data=res,status=200)
+    else:
+        return setcors(msg=loginstatus)
+
+
+@adminbp.route("/titleimglist",methods=["get"])
+def titleimglist():
+    '''
+    获取轮播图列表
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    token = request.headers.get("token")
+    loginstatus = checkadminloginstatus(session,token)
+    if loginstatus is True:
+        res = db.query("select * from t_title_img;")
+        return setcors(data=res,status=200)
+    else:
+        return setcors(msg=loginstatus)
+
+
+
+
+@adminbp.route("/newtitleimg",methods=["post"])
+def newtitleimg():
+    '''
+    新增轮播图
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    title = requestdata.get("title")
+    imghost = requestdata.get("imghost")
+    rurl = requestdata.get("rurl")
+    token = request.headers.get("token")
+    loginstatus = checkadminloginstatus(session,token)
+    if loginstatus is True:
+        res = db.commit("insert into t_title_img (title,imghost,rurl) values ('{}','{}','{}');".format(title,imghost,rurl))
+        return setcors(data=res,status=200)
+    else:
+        return setcors(msg=loginstatus)
+
+@adminbp.route("/updatetitleimg",methods=["post"])
+def updatetitleimg():
+    '''
+    修改轮播图
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    title = requestdata.get("title")
+    imghost = requestdata.get("imghost")
+    rurl = requestdata.get("rurl")
+    tid = requestdata.get("tid")
+    token = request.headers.get("token")
+    loginstatus = checkadminloginstatus(session,token)
+    if loginstatus is True:
+        res = db.commit("update t_title_img set title = '{}',imghost = '{}',rurl = '{}' where id = {};".format(title,imghost,rurl,tid))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
