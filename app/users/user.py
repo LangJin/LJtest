@@ -562,17 +562,17 @@ def updateuserinfo():
     token = request.headers.get("token")
     loginstatus = checkloginstatus(session,token)
     if loginstatus is True:
-        phonesql = "select * from t_user where phone = '{}'".format(phone)
+        uid = session["userinfo"]["uid"]
+        phonesql = "select * from t_user where phone = '{}' and id != {}".format(phone,uid)
         res = db.query(phonesql)
         if len(res) != 0:
             msg = "电话已经注册，请重新设置！"
             return setcors(msg=msg)
-        emailsql = "select * from t_user where email = '{}'".format(email)
+        emailsql = "select * from t_user where email = '{}' id != {}".format(email,uid)
         res = db.query(emailsql)
         if len(res) != 0:
             msg = "邮箱已经注册，请重新设置！"
             return setcors(msg=msg)
-        uid = session["userinfo"]["uid"]
         dbres = db.commit("update t_user set nickname='{}', phone='{}', sex='{}', job='{}', email='{}',\
         weixin ='{}', QQ='{}', userinfo='{}', address='{}' where id={};".format(nickname,phone,sex,job,email,weixin,qq,qianming,address,uid))
         return setcors(msg=dbres,status=200)
@@ -1123,15 +1123,10 @@ def userfuser():
             res = db.commit("insert into t_user_follows (fid,uid,status) values ({},{},0);".format(fid,uid))
             return setcors(data=res,msg="关注成功！",status=200)
         else:
-            fstatus = res[0].get("status")
             rid = res[0].get("id")
-            if fstatus == 0:
-                res = db.commit("update t_user_follows set status = 1 where id = {};".format(rid))
-                return setcors(data=res,msg="取消关注成功！",status=200)
-                # 取消关注
-            else:
-                res = db.commit("update t_user_follows set status = 0 where id = {};".format(rid))
-                return setcors(data=res,msg="关注成功！",status=200)
+            res = db.commit("update t_user_follows set status = (case when status = 0 then 1 else 0 end) where id = {};".format(rid))
+            return setcors(data=res,status=200)
+
     else:
         return setcors(msg=loginstatus)
 
