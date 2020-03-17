@@ -541,3 +541,22 @@ def updatetitleimg():
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
+
+@adminbp.route("/deletetitleimg",methods=["post"])
+def deletetitleimg():
+    '''
+    删除轮播图
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    tid = requestdata.get("tid")
+    token = request.headers.get("token")
+    loginstatus = checkadminloginstatus(session,token)
+    if loginstatus is True:
+        res = db.commit("update t_title_img set status = 1 where id = {};".format(tid))
+        return setcors(data=res,status=200)
+    else:
+        return setcors(msg=loginstatus)
+

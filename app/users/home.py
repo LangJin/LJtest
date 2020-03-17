@@ -299,3 +299,13 @@ def getmblist():
     '''
     res = db.query("select id,question from t_user_mbq where status = 0;")
     return setcors(data=res,status=200)
+
+
+@userbp.route("/gettagslist",methods=["get"])
+def gettagslist():
+    '''
+    获取标签列表
+    '''
+    ctype = request.args.get("type")
+    res = db.query("select tags from t_content_tags where ctype = {};".format(ctype))
+    return setcors(data=res,status=200)
