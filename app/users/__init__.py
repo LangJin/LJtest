@@ -14,7 +14,7 @@ def showversion():
     查看系统版本
     '''
     data = {
-            "Version": "1.0.9",
-            "info":"新增了修改密码和密保相关的接口，写了一些新的BUG。"
+            "Version": "1.0.10",
+            "info":"大幅度的修改了后台的接口，和部分BUG"
         }
     return setcors(data=data,msg="查询成功",status=200)

@@ -68,10 +68,10 @@ def titleimglist():
     if loginstatus is True:
         tid = request.args.get("id")
         if tid == "" or tid == None:
-            res = db.query("select id,title,imghost,rurl,status,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_title_img where status = 0;")
+            res = db.query("select id,title,imghost,rurl,status,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_title_img where status != 1;")
             return setcors(data=res,status=200)
         else:
-            res = db.query("select id,title,imghost,rurl,status,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_title_img where status = 0 and id = {};".format(tid))
+            res = db.query("select id,title,imghost,rurl,status,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_title_img where status != 1 and id = {};".format(tid))
             return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)

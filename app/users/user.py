@@ -568,7 +568,7 @@ def updateuserinfo():
         if len(res) != 0:
             msg = "电话已经注册，请重新设置！"
             return setcors(msg=msg)
-        emailsql = "select * from t_user where email = '{}' id != {}".format(email,uid)
+        emailsql = "select * from t_user where email = '{}' and id != {}".format(email,uid)
         res = db.query(emailsql)
         if len(res) != 0:
             msg = "邮箱已经注册，请重新设置！"
