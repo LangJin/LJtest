@@ -11,7 +11,7 @@ def get_title_img():
     '''
     获取首页轮播图
     '''
-    res = db.query("select id,title,content,imghost,rurl from t_title_img;")
+    res = db.query("select id,title,imghost,rurl from t_title_img where status = 0;")
     return setcors(data=res,status=200)
 
 
@@ -301,8 +301,8 @@ def getmblist():
     return setcors(data=res,status=200)
 
 
-@userbp.route("/gettagslist",methods=["get"])
-def gettagslist():
+@userbp.route("/gettaglist",methods=["get"])
+def gettaglist():
     '''
     获取标签列表
     '''
