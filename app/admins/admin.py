@@ -133,7 +133,7 @@ def settitleimgstatus():
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        res = db.commit("update t_title_img set status = (case when status = 2 then 0 else 1 end) where id = {};".format(tid))
+        res = db.commit("update t_title_img set status = (case when status = 2 then 0 else 2 end) where id = {};".format(tid))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
@@ -236,7 +236,7 @@ def usersfreeze():
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        res = db.commit("update t_user set status = (case when status !=3 then 3 else 0 end)  where id in ({});".format(dlist))
+        res = db.commit("update t_user set status = (case when status = 3 then 0 else 3 end)  where id in ({});".format(dlist))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
@@ -251,11 +251,11 @@ def usersfind():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    username = str(requestdata.get("username"))
+    search = str(requestdata.get("search"))
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        res = db.query("select * from t_user where status = 0 and username like '%{}%' or nickename like '%{}%';".format(username,username))
+        res = db.query("select * from t_user where status = 0 and username like '%{}%' or nickename like '%{}%';".format(search,search))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
@@ -395,7 +395,7 @@ def setcourestatus():
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        res = db.commit("update t_coures set status = (case when status = 2 then 0 else 1 end) where status = 0 and id = {};".format(cid))
+        res = db.commit("update t_coures set status = (case when status = 2 then 0 else 2 end) where status = 0 and id = {};".format(cid))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
@@ -410,11 +410,11 @@ def usersfindcoures():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    title = str(requestdata.get("title"))
+    search = str(requestdata.get("search"))
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        res = db.query("select * from t_coures where title like '%{}%';".format(title))
+        res = db.query("select * from t_coures where title like '%{}%';".format(search))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
@@ -494,11 +494,29 @@ def setinspirstatus():
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        res = db.commit("update t_inspirer set status = 1 where id = {};".format(iid))
+        res = db.commit("update t_inspirer set status = (case when status = 2 then 0 else 2 end) where id = {};".format(iid))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
 
+
+@adminbp.route("/usersfindinspirer",methods=["post"])
+def usersfindinspirer():
+    '''
+    后台通过content或者账号，昵称查找灵感
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    search = str(requestdata.get("search"))
+    token = request.headers.get("token")
+    loginstatus = checkadminloginstatus(session,token)
+    if loginstatus is True:
+        res = db.query("select * from t_inspirer where title like '%{}%';".format(search))
+        return setcors(data=res,status=200)
+    else:
+        return setcors(msg=loginstatus)
 
 
 """
@@ -572,7 +590,7 @@ def setarticletatus():
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        res = db.commit("update t_article set status = 1 where id = {};".format(iid))
+        res = db.commit("update t_article set status = (case when status = 2 then 0 else 2 end) where id = {};".format(iid))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
@@ -602,11 +620,11 @@ def questionslist():
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        questionsnum = db.query("select count(*) questionsnum  from t_questions where status = 0 ;")
+        questionsnum = db.query("select count(*) questionsnum  from t_questions where status = 0 ;")[0].get("questionsnum")
         res = db.query("select id,title,brief,content,ximg,tags,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_questions where status = 0 limit {},{};".format(startnum,endnum))
         data = {
             "questionslist":res,
-            "questionsnum":questionsnum[0].get("questionsnum")
+            "questionsnum":questionsnum
         }
         return setcors(data=data,status=200)
     else:
@@ -639,7 +657,7 @@ def questionsdelete():
 @adminbp.route("/setquestiontatus",methods=["get"])
 def setquestiontatus():
     '''
-    启用/禁用文章
+    启用/禁用问题
     '''
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
@@ -648,14 +666,14 @@ def setquestiontatus():
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        res = db.commit("update t_questions set status = 1 where id = {};".format(iid))
+        res = db.commit("update t_questions set status = (case when status = 2 then 0 else 2 end) where id = {};".format(iid))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
 
 
 """
-标签管理模块
+标签管理
 """
 
 @adminbp.route("/gettagslist",methods=["get"])
