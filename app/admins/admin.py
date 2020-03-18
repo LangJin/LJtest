@@ -120,7 +120,7 @@ def updatetitleimg():
         return setcors(msg=loginstatus)
 
 
-@adminbp.route("/settitleimgstatus",methods=["post"])
+@adminbp.route("/settitleimgstatus",methods=["get"])
 def settitleimgstatus():
     '''
     禁用/启用轮播图
@@ -128,8 +128,7 @@ def settitleimgstatus():
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
-    requestdata = request.get_json()
-    tid = requestdata.get("tid")
+    tid = request.args.get("id")
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
@@ -139,7 +138,7 @@ def settitleimgstatus():
         return setcors(msg=loginstatus)
 
 
-@adminbp.route("/deletetitleimg",methods=["post"])
+@adminbp.route("/deletetitleimg",methods=["get"])
 def deletetitleimg():
     '''
     删除轮播图
@@ -147,8 +146,7 @@ def deletetitleimg():
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
-    requestdata = request.get_json()
-    tid = requestdata.get("tid")
+    tid = request.args.get("id")
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
@@ -184,8 +182,8 @@ def userlist():
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        allusernum = db.query("select count(*) usernum  from t_user where status = 0;")[0].get("usernum")
-        res = db.query("select id,nickname,titlepic,headpic,phone,sex,job,email,weixin,QQ,userinfo,address,status,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_user where status = 0 limit {},{};".format(startnum,endnum))
+        allusernum = db.query("select count(*) usernum  from t_user where status != 1;")[0].get("usernum")
+        res = db.query("select id,nickname,titlepic,headpic,phone,sex,job,email,weixin,QQ,userinfo,address,status,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_user where status != 1 limit {},{};".format(startnum,endnum))
         data = {
             "userlist":res,
             "usernum":allusernum
@@ -255,7 +253,7 @@ def usersfind():
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        res = db.query("select * from t_user where status = 0 and username like '%{}%' or nickename like '%{}%';".format(search,search))
+        res = db.query("select id,nickname,titlepic,headpic,phone,sex,job,email,weixin,QQ,userinfo,address,status,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_user where status !=1 and username like '%{}%' or nickname like '%{}%';".format(search,search))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
@@ -288,8 +286,8 @@ def coureslist():
         startnum = (pagenum-1)*10
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        couresnum = db.query("select  count(*) couresnum  from t_coures where status = 0;")
-        res = db.query("select id,title,brief,content,ximg,tags,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_coures where status = 0 limit {},{};".format(startnum,endnum))
+        couresnum = db.query("select  count(*) couresnum  from t_coures where status != 1;")
+        res = db.query("select id,title,brief,content,status,ximg,tags,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_coures where status != 1 limit {},{};".format(startnum,endnum))
         data = {
             "coureslist":res,
             "couresnum":couresnum[0].get("couresnum")
@@ -350,7 +348,7 @@ def couresupdate():
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
         uid = session["admininfo"]["uid"]
-        qres = db.query("select * from t_coures where uid ={} and status = 0 and id = {};".format(uid,cid))
+        qres = db.query("select * from t_coures where uid ={} and status != 1 and id = {};".format(uid,cid))
         if len(qres) != 0:
             dbres = db.commit("update t_coures set title='{}',brief='{}',tags='{}',content='{}' where id = {};".format(title,brief,tags,content,cid))
             return setcors(msg=dbres,status=200)
@@ -363,7 +361,7 @@ def couresupdate():
 @adminbp.route("/couresdelete",methods=["post"])
 def couresdelete():
     '''
-    后台删除教程
+    后台批量删除教程
     '''
     headrsmsg = checkContentType(request)
     if headrsmsg != True:
@@ -395,7 +393,7 @@ def setcourestatus():
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        res = db.commit("update t_coures set status = (case when status = 2 then 0 else 2 end) where status = 0 and id = {};".format(cid))
+        res = db.commit("update t_coures set status = (case when status = 2 then 0 else 2 end) where id = {};".format(cid))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
@@ -414,7 +412,7 @@ def usersfindcoures():
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        res = db.query("select * from t_coures where title like '%{}%';".format(search))
+        res = db.query("select id,title,brief,content,status,ximg,tags,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_coures where status !=1 and title like '%{}%';".format(search))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
@@ -447,11 +445,11 @@ def inspirlist():
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        inspirnum = db.query("select count(*) inspirnum  from t_inspirer where status = 0;")
-        res = db.query("select id,content,ximg,author,goods,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_inspirer where status = 0 limit {},{};".format(startnum,endnum))
+        inspirnum = db.query("select count(*) inspirnum  from t_inspirer where status != 1;")[0].get("inspirnum")
+        res = db.query("select id,content,ximg,author,status,goods,collections,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_inspirer where status != 1 limit {},{};".format(startnum,endnum))
         data = {
             "inspirlist":res,
-            "inspirnum":inspirnum[0].get("inspirnum")
+            "inspirnum":inspirnum
         }
         return setcors(data=data,status=200)
     else:
@@ -513,7 +511,7 @@ def usersfindinspirer():
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        res = db.query("select * from t_inspirer where title like '%{}%';".format(search))
+        res = db.query("select id,content,ximg,author,status,goods,collections,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_inspirer where status !=1 and content like '%{}%' or author like '%{}%';".format(search,search))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
@@ -544,11 +542,11 @@ def articlelist():
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        articlenum = db.query("select count(*) articlenum  from t_article where status = 0 ;")
-        res = db.query("select id,title,brief,content,ximg,tags,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_article where status = 0 limit {},{};".format(startnum,endnum))
+        articlenum = db.query("select count(*) articlenum  from t_article where status != 1 ;")[0].get("articlenum")
+        res = db.query("select id,title,brief,content,ximg,status,tags,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_article where status != 1 limit {},{};".format(startnum,endnum))
         data = {
             "articlelist":res,
-            "articlenum":articlenum[0].get("articlenum")
+            "articlenum":articlenum
         }
         return setcors(data=data,status=200)
     else:
@@ -595,6 +593,26 @@ def setarticletatus():
     else:
         return setcors(msg=loginstatus)
 
+
+@adminbp.route("/usersfindarticle",methods=["post"])
+def usersfindarticle():
+    '''
+    后台通过title或者账号，昵称查找文章
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    search = str(requestdata.get("search"))
+    token = request.headers.get("token")
+    loginstatus = checkadminloginstatus(session,token)
+    if loginstatus is True:
+        res = db.query("select id,title,brief,content,ximg,status,tags,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_article where status !=1 and title like '%{}%' or author like '%{}%';".format(search,search))
+        return setcors(data=res,status=200)
+    else:
+        return setcors(msg=loginstatus)
+
+
 """
 问题管理模块
 """
@@ -620,8 +638,8 @@ def questionslist():
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        questionsnum = db.query("select count(*) questionsnum  from t_questions where status = 0 ;")[0].get("questionsnum")
-        res = db.query("select id,title,brief,content,ximg,tags,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_questions where status = 0 limit {},{};".format(startnum,endnum))
+        questionsnum = db.query("select count(*) questionsnum  from t_questions where status != 1 ;")[0].get("questionsnum")
+        res = db.query("select id,title,brief,content,ximg,tags,author,status,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_questions where status != 1 limit {},{};".format(startnum,endnum))
         data = {
             "questionslist":res,
             "questionsnum":questionsnum
@@ -672,8 +690,29 @@ def setquestiontatus():
         return setcors(msg=loginstatus)
 
 
+@adminbp.route("/usersfindquestions",methods=["post"])
+def usersfindquestions():
+    '''
+    后台通过title或者账号，昵称查找问题
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    search = str(requestdata.get("search"))
+    token = request.headers.get("token")
+    loginstatus = checkadminloginstatus(session,token)
+    if loginstatus is True:
+        res = db.query("select id,title,brief,content,ximg,tags,author,status,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_questions where status !=1 and title like '%{}%' or author like '%{}%';".format(search,search))
+        return setcors(data=res,status=200)
+    else:
+        return setcors(msg=loginstatus)
+
+
 """
 标签管理
+ctype：0教程1提问2灵感3心得体会
+状态0正常、1删除，2禁用
 """
 
 @adminbp.route("/gettagslist",methods=["get"])
@@ -689,11 +728,10 @@ def gettagslist():
     if loginstatus is True:
         tid = request.args.get("id")
         if tid == "" or tid == None:
-            res = db.query("select id,ctype,tags,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_content_tags;")
-            return setcors(data=res,status=200)
+            res = db.query("select id,ctype,tags,status,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_content_tags where status != 1;")
         else:
-            res = db.query("select id,ctype,tags,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_content_tags where id = {};".format(tid))
-            return setcors(data=res,status=200)
+            res = db.query("select id,ctype,tags,status,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_content_tags where status != 1 and id = {};".format(tid))
+        return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
 
@@ -713,7 +751,7 @@ def newtags():
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        res = db.commit("insert into t_content_tags (ctype,tags) values ({},{});".format(ctype,tags))
+        res = db.commit("insert into t_content_tags (ctype,tags) values ({},'{}');".format(ctype,tags))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
@@ -734,7 +772,48 @@ def updatetags():
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        res = db.commit("update t_content_tags set ctype = {},tags = {} where id = {};".format(ctype,tags,tid))
+        res = db.commit("update t_content_tags set ctype = {},tags = '{}' where id = {};".format(ctype,tags,tid))
+        return setcors(data=res,status=200)
+    else:
+        return setcors(msg=loginstatus)
+
+
+@adminbp.route("/deletetags",methods=["post"])
+def deletetags():
+    '''
+    后台删除标签列表
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    requestdata = request.get_json()
+    dlist = str(requestdata.get("dlist"))
+    listmsg = checklistid(dlist)
+    if listmsg != True:
+        return setcors(msg=listmsg)
+    dlist = dlist[:-1]
+    token = request.headers.get("token")
+    loginstatus = checkadminloginstatus(session,token)
+    if loginstatus is True:
+        res = db.commit("update t_content_tags set status = 1 where id in ({});".format(dlist))
+        return setcors(data=res,status=200)
+    else:
+        return setcors(msg=loginstatus)
+
+
+@adminbp.route("/settagstatus",methods=["get"])
+def settagstatus():
+    '''
+    启用/禁用标签
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    iid = request.args.get("id")
+    token = request.headers.get("token")
+    loginstatus = checkadminloginstatus(session,token)
+    if loginstatus is True:
+        res = db.commit("update t_content_tags set status = (case when status = 2 then 0 else 2 end) where id = {};".format(iid))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
