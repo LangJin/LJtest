@@ -69,29 +69,36 @@ class RedisDb:
     def __init__(self,db_config):
         self.db_config = db_config
 
-    def setredisvalue(self,token,value):
+    def setredisvalue(self,username,value):
         '''
         设置用户缓存，并返回结果
         '''
         redis = StrictRedis(**self.db_config)
         if type(value) is dict:
             value = json.dumps(value)
-        redis.set(token, value)
-        res = redis.get(token)
-        res = json.loads(res)
+        res = redis.set(username, value)  # 返回True
         return res
     
     
-    def getredisvalue(self,token):
+    def getredisvalue(self,username):
         '''
         根据token读取用户缓存
         '''
         redis = StrictRedis(**self.db_config)
-        res = redis.get(token)
+        res = redis.get(username)  # 返回json对象
         try:
             res = json.loads(res)
             return res
         except:
             return res
+
+    def delredisvalue(self,username):
+        '''
+        清空用户缓存
+        '''
+        redis = StrictRedis(**self.db_config)
+        res = redis.delete(username)  # 返回1
+        return res
+        
 
     

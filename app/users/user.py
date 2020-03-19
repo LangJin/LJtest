@@ -7,7 +7,7 @@ from ..utils.dbtools import Db,RedisDb
 from config import db_config,redis_config
 import pymysql
 from ..utils.othertools import checkuserinfo,create_token,setcors,checkloginstatus,checkContentType,is_number,checkvalueisNone,encryption,checkphonenum,checkemail
-from ..utils.othertools import checkvaluelen
+from ..utils.othertools import checkvaluelen,encryptiontoken,clearuserinfo
 # from werkzeug import secure_filename
 
 
@@ -64,57 +64,6 @@ def regist():
             return setcors(msg=userregmsg)
 
 
-
-@userbp.route("/loginbak",methods=["post"])
-def userlogin():
-    '''
-    用户登录接口\n
-    获取json格式的数据进行处理
-    '''
-    headrsmsg = checkContentType(request)
-    if headrsmsg != True:
-        return setcors(msg=headrsmsg)
-    else:
-        userinfo = request.get_json()
-        username = userinfo.get("username")
-        password = userinfo.get("password")
-        userregmsg = checkuserinfo(username,password)
-        if userregmsg is True:
-            sql = "select * from t_user where status = 0 and username = '{}'".format(username)
-            res = db.query(sql)
-            if len(res) != 1:
-                return setcors(msg="账号不存在或者账号异常")
-            else:
-                password = encryption(username,password,"user")
-                if password == res[0].get("password"):
-                    token = create_token()
-                    session.clear()
-                    session["userinfo"] = {"token":token,"uid":res[0]["id"],"nickname":res[0]["nickname"],"username":res[0]["username"]}
-                    session["loginerrornum"] = 0
-                    userinfo = {
-                        "nickname":res[0]["nickname"],
-                        "uid":res[0]["id"],
-                        "headpic":res[0]["headpic"]
-                    }
-                    data = {}
-                    data["userinfo"] = userinfo
-                    data["token"] = token
-                    return setcors(msg="登录成功！",data=data,status=200)
-                else:
-                    if session.get("loginerrornum") == None:
-                        session["loginerrornum"] = 1
-                    loginerrornum = session["loginerrornum"]
-                    if loginerrornum > 2:
-                        sql = "update t_user set status = 2 where username = '{}';".format(username)
-                        res = db.commit(sql)
-                        return setcors(msg=("密码错误次数太多，账号已锁定！",res))
-                    session["loginerrornum"] = loginerrornum + 1
-                    return setcors(msg="密码错误")
-        else:
-            return setcors(msg=userregmsg)
-
-
-
 @userbp.route("/login",methods=["post"])
 def loginredis():
     '''
@@ -140,24 +89,30 @@ def loginredis():
                     token = create_token()
                     redisdata = {}
                     redisdata["userinfo"] = {"token":token,"uid":res[0]["id"],"nickname":res[0]["nickname"],"username":res[0]["username"]}
-                    redisdb.setredisvalue(username,0)
                     redisdata["loginerrornum"] = 0
-                    userinfo = redisdb.setredisvalue(token,redisdata)
-                    data = {}
-                    data["userinfo"] = userinfo
-                    data["token"] = token
+                    resbool = redisdb.setredisvalue(username,redisdata)
+                    data = {"status":resbool}
+                    data["userinfo"] = {
+                        "nickname":res[0]["nickname"],
+                        "uid":res[0]["id"],
+                        "headpic":res[0]["headpic"]
+                    }
+                    data["token"] = encryptiontoken(username,token)
                     return setcors(msg="登录成功！",data=data,status=200)
                 else:
-                    loginerrornum = redisdb.getredisvalue(username)
-                    if loginerrornum == None:
-                        loginerrornum = 1
-                    loginerrornum = redisdb.getredisvalue(username)
-                    if loginerrornum > 2:
-                        sql = "update t_user set status = 2 where username = '{}';".format(username)
-                        res = db.commit(sql)
-                        return setcors(msg=("密码错误次数太多，账号已锁定！",res))
-                    redisdb.setredisvalue(username,loginerrornum + 1)
-                    return setcors(msg="密码错误")
+                    redisdata = redisdb.getredisvalue(username)
+                    if redisdata != None:
+                        loginerrornum = redisdata.get("loginerrornum")
+                        if loginerrornum > 2:
+                            sql = "update t_user set status = 2 where username = '{}';".format(username)
+                            res = db.commit(sql)
+                            return setcors(data=res,msg="密码错误次数太多，账号已锁定！")
+                        redisdata["loginerrornum"] = loginerrornum + 1
+                        res = redisdb.setredisvalue(username,redisdata)
+                    else:
+                        redisdata = {"loginerrornum":1}
+                        res = redisdb.setredisvalue(username,redisdata)
+                    return setcors(msg="密码错误",data=res)
         else:
             return setcors(msg=userregmsg)
 
@@ -171,10 +126,9 @@ def loginout():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
-    if loginstatus is True:
-        session.clear()
-        return setcors(msg="退出成功！",status=200)
+    loginstatus = clearuserinfo(token)
+    if loginstatus == True:
+        return setcors(msg="退出成功！",status=200,data=loginstatus)
     else:
         return setcors(msg=loginstatus)
 
@@ -193,7 +147,9 @@ def userupdateps():
     oldps = requestdata.get("oldps")
     newps = requestdata.get("newps")
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1]
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         username = session["userinfo"]["username"]
@@ -224,7 +180,9 @@ def usersertmb():
     password = requestdata.get("password")
     mb = requestdata.get("mb")
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1]
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         username = session["userinfo"]["username"]
@@ -275,7 +233,9 @@ def question():
         tagsmsg = checkvaluelen(tags,10)
         if tagsmsg != True:
             return setcors("标签"+tagsmsg)
-        loginstatus = checkloginstatus(session,token)
+        loginres = checkloginstatus(token)
+        loginstatus = loginres[0]
+        session = loginres[1]
         if loginstatus is True:
             uid = session["userinfo"]["uid"]
             author = session["userinfo"]["nickname"]
@@ -323,7 +283,9 @@ def questionupdate():
     if idmsg != True:
         return setcors(msg=idmsg)
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1]
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         qres = db.query("select * from t_questions where uid ={} and status = 0 and id = {};".format(uid,qid))
@@ -350,7 +312,9 @@ def questiondelete():
     if idmsg != True:
         return setcors(msg=idmsg)
     token = request.headers.get("token")
-    loginstatus =  checkloginstatus(session,token)
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1]
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         qres = db.query("select * from t_questions where uid ={} and status = 0 and id = {};".format(uid,qid))
@@ -385,7 +349,9 @@ def inspirer():
     if contentmsg != True:
         return setcors(msg="内容"+contentmsg)
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1]
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         author = session["userinfo"]["nickname"]
@@ -426,7 +392,9 @@ def inspirerupdate():
     if idmsg != True:
         return setcors(msg=idmsg)
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1]
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         qres = db.query("select * from t_inspirer where uid ={} and status = 0 and id = {};".format(uid,iid))
@@ -453,7 +421,9 @@ def inspirerdelete():
     if idmsg != True:
         return setcors(msg=idmsg)
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1]
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         ires = db.query("select * from t_inspirer where uid = {} and status = 0 and id = {};".format(uid,iid))
@@ -495,7 +465,9 @@ def article():
     if tagsmsg != True:
         return setcors("标签"+tagsmsg)
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1]
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         author = session["userinfo"]["nickname"]
@@ -543,7 +515,9 @@ def articleupdate():
     if idmsg != True:
         return setcors(msg=idmsg)
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1]
     if checkloginstatus(session,token) is True:
         uid = session["userinfo"]["uid"]
         ares = db.query("select * from t_article where status =0 and uid ={} and id = {};".format(uid,aid))
@@ -570,7 +544,9 @@ def articledelete():
     if idmsg != True:
         return setcors(msg=idmsg)
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1]
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         ares = db.query("select * from t_article where status =0 and uid ={} and id = {};".format(uid,aid))
@@ -608,7 +584,9 @@ def updateuserinfo():
     qianming = requestdata.get("userinfo")
     address = requestdata.get("address")
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1]
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         phonesql = "select * from t_user where phone = '{}' and id != {}".format(phone,uid)
@@ -639,7 +617,9 @@ def updateuserheadpic():
     requestdata = request.get_json()
     headpic = requestdata.get("ximg")
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1]
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         dbres = db.commit("update t_user set headpic='{}' where id={};".format(headpic,uid))
@@ -658,7 +638,9 @@ def updateusertitlepic():
     requestdata = request.get_json()
     titlepic = requestdata.get("ximg")
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1]
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         dbres = db.commit("update t_user set titlepic='{}' where id={};".format(titlepic,uid))
@@ -683,7 +665,9 @@ def userfellgoods():
     if idmsg != True:
         return setcors(msg=idmsg)
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token)
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1]
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         if ctype == "3":
@@ -805,7 +789,9 @@ def usercollections():
     if idmsg != True:
         return setcors(msg=idmsg)
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token) 
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1] 
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         if ctype == "3":
@@ -927,7 +913,9 @@ def userfollows():
     if idmsg != True:
         return setcors(msg=idmsg)
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token) 
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1] 
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         if ctype == "3":
@@ -1030,7 +1018,9 @@ def usercomment():
     if idmsg != True:
         return setcors(msg=idmsg)
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token) 
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1] 
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         author = session["userinfo"]["nickname"]
@@ -1058,7 +1048,9 @@ def usercommentupdate():
     if idmsg != True:
         return setcors(msg=idmsg)
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token) 
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1] 
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         comments = db.query("select comment from t_user_comments where id = {} and uid ={} and status = 0;".format(cid,uid))
@@ -1085,7 +1077,9 @@ def usercommentdelete():
     if idmsg != True:
         return setcors(msg=idmsg)
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token) 
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1] 
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         comments = db.query("select comment from t_user_comments where id = {} and uid ={} and status = 0;".format(cid,uid))
@@ -1114,7 +1108,9 @@ def getuser4status():
     if valuemsg != True:
         return setcors(msg=valuemsg)
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token) 
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1] 
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         if ctype == "0":
@@ -1140,7 +1136,9 @@ def getuserfstatus():
     '''
     fid = request.args.get("fid")
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token) 
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1] 
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         res = db.query("select * from t_user_follows where uid = {} and fid = {} and status = 0".format(uid,fid))
@@ -1163,7 +1161,9 @@ def userfuser():
     '''
     fid = request.args.get("fid")
     token = request.headers.get("token")
-    loginstatus = checkloginstatus(session,token) 
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1] 
     if loginstatus is True:
         uid = session["userinfo"]["uid"]
         res = db.query("select * from t_user_follows where uid = {} and fid = {}".format(uid,fid))

@@ -3,12 +3,15 @@ __author__ = 'LangJin'
 
 from flask import request,session,make_response
 from . import adminbp
-from ..utils.dbtools import Db
-from config import db_config
-from ..utils.othertools import checkuserinfo,create_token,encryption,setcors,checkadminloginstatus,checkContentType,is_number,checkvalueisNone,checklistid
+from ..utils.dbtools import Db,RedisDb
+from config import db_config,redis_aconfig
+from ..utils.othertools import checkuserinfo,create_token,encryption,setcors,checkContentType,is_number,checkvalueisNone,checklistid
+from ..utils.othertools import encryptiontoken,checkadminloginstatus
 # from werkzeug import secure_filename
 
 db = Db(db_config)
+redisdb = RedisDb(redis_aconfig) 
+
 
 
 @adminbp.route("/adminlogin",methods=["post"])
@@ -34,16 +37,17 @@ def adminlogin():
                 # password = encryption(username,password,"admin")
                 if password == res[0].get("password"):
                     token = create_token()
-                    session.clear()
-                    session["admininfo"] = {"token":token,"uid":res[0]["id"],"nickname":res[0]["nickname"]}
+                    redisdata = {}
+                    redisdata["admininfo"] = {"token":token,"uid":res[0]["id"],"nickname":res[0]["nickname"]}
+                    resbool = redisdb.setredisvalue(username,redisdata)
                     userinfo = {
                         "nickname":res[0]["nickname"],
                         "uid":res[0]["id"],
                         "headpic":res[0]["headpic"]
                     }
-                    data = {}
+                    data = {"status":resbool}
                     data["userinfo"] = userinfo
-                    data["token"] = token
+                    data["token"] = encryptiontoken(username,token)
                     return setcors(msg="登录成功！",data=data,status=200)
                 else:
                     return setcors(msg="密码错误")
@@ -64,7 +68,8 @@ def titleimglist():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         tid = request.args.get("id")
         if tid == "" or tid == None:
@@ -90,7 +95,8 @@ def newtitleimg():
     imghost = requestdata.get("imghost")
     rurl = requestdata.get("rurl")
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.commit("insert into t_title_img (title,imghost,rurl) values ('{}','{}','{}');".format(title,imghost,rurl))
         return setcors(data=res,status=200)
@@ -112,7 +118,8 @@ def updatetitleimg():
     rurl = requestdata.get("rurl")
     tid = requestdata.get("tid")
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.commit("update t_title_img set title = '{}',imghost = '{}',rurl = '{}' where id = {};".format(title,imghost,rurl,tid))
         return setcors(data=res,status=200)
@@ -130,7 +137,8 @@ def settitleimgstatus():
         return setcors(msg=headrsmsg)
     tid = request.args.get("id")
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.commit("update t_title_img set status = (case when status = 2 then 0 else 2 end) where id = {};".format(tid))
         return setcors(data=res,status=200)
@@ -148,7 +156,8 @@ def deletetitleimg():
         return setcors(msg=headrsmsg)
     tid = request.args.get("id")
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.commit("update t_title_img set status = 1 where id = {};".format(tid))
         return setcors(data=res,status=200)
@@ -180,7 +189,8 @@ def userlist():
     else:
         startnum = (pagenum-1)*10
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         allusernum = db.query("select count(*) usernum  from t_user where status != 1;")[0].get("usernum")
         res = db.query("select id,nickname,titlepic,headpic,phone,sex,job,email,weixin,QQ,userinfo,address,status,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_user where status != 1 limit {},{};".format(startnum,endnum))
@@ -208,7 +218,8 @@ def usersdelete():
         return setcors(msg=listmsg)
     dlist = dlist[:-1]
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.commit("update t_user set status = 1 where id in ({});".format(dlist))
         return setcors(data=res,status=200)
@@ -232,7 +243,8 @@ def usersfreeze():
         return setcors(msg=listmsg)
     dlist = dlist[:-1]
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.commit("update t_user set status = (case when status = 3 then 0 else 3 end)  where id in ({});".format(dlist))
         return setcors(data=res,status=200)
@@ -251,7 +263,8 @@ def usersfind():
     requestdata = request.get_json()
     search = str(requestdata.get("search"))
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.query("select id,nickname,titlepic,headpic,phone,sex,job,email,weixin,QQ,userinfo,address,status,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_user where status !=1 and username like '%{}%' or nickname like '%{}%';".format(search,search))
         return setcors(data=res,status=200)
@@ -284,7 +297,8 @@ def coureslist():
         startnum = 0
     else:
         startnum = (pagenum-1)*10
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         couresnum = db.query("select  count(*) couresnum  from t_coures where status != 1;")
         res = db.query("select id,title,brief,content,status,ximg,tags,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_coures where status != 1 limit {},{};".format(startnum,endnum))
@@ -314,7 +328,9 @@ def couresnew():
     if valuemsg != True:
         return setcors(msg=valuemsg)
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1]
     if loginstatus is True:
         uid = session["admininfo"]["uid"]
         author = session["admininfo"]["nickname"]
@@ -345,7 +361,9 @@ def couresupdate():
     if valuemsg != True:
         return setcors(msg=valuemsg)
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1]
     if loginstatus is True:
         uid = session["admininfo"]["uid"]
         qres = db.query("select * from t_coures where uid ={} and status != 1 and id = {};".format(uid,cid))
@@ -373,7 +391,8 @@ def couresdelete():
         return setcors(msg=listmsg)
     dlist = dlist[:-1]
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.commit("update t_coures set status = 1 where id in ({});".format(dlist))
         return setcors(data=res,status=200)
@@ -391,7 +410,8 @@ def setcourestatus():
         return setcors(msg=headrsmsg)
     cid = request.args.get("id")
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.commit("update t_coures set status = (case when status = 2 then 0 else 2 end) where id = {};".format(cid))
         return setcors(data=res,status=200)
@@ -410,7 +430,8 @@ def usersfindcoures():
     requestdata = request.get_json()
     search = str(requestdata.get("search"))
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.query("select id,title,brief,content,status,ximg,tags,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_coures where status !=1 and title like '%{}%';".format(search))
         return setcors(data=res,status=200)
@@ -443,7 +464,8 @@ def inspirlist():
     else:
         startnum = (pagenum-1)*10
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         inspirnum = db.query("select count(*) inspirnum  from t_inspirer where status != 1;")[0].get("inspirnum")
         res = db.query("select id,content,ximg,author,status,goods,collections,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_inspirer where status != 1 limit {},{};".format(startnum,endnum))
@@ -471,7 +493,8 @@ def inspirdelete():
         return setcors(msg=listmsg)
     dlist = dlist[:-1]
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.commit("update t_inspirer set status = 1 where id in ({});".format(dlist))
         return setcors(data=res,status=200)
@@ -490,7 +513,8 @@ def setinspirstatus():
         return setcors(msg=headrsmsg)
     iid = request.args.get("id")
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.commit("update t_inspirer set status = (case when status = 2 then 0 else 2 end) where id = {};".format(iid))
         return setcors(data=res,status=200)
@@ -509,7 +533,8 @@ def usersfindinspirer():
     requestdata = request.get_json()
     search = str(requestdata.get("search"))
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.query("select id,content,ximg,author,status,goods,collections,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_inspirer where status !=1 and content like '%{}%' or author like '%{}%';".format(search,search))
         return setcors(data=res,status=200)
@@ -540,7 +565,8 @@ def articlelist():
     else:
         startnum = (pagenum-1)*10
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         articlenum = db.query("select count(*) articlenum  from t_article where status != 1 ;")[0].get("articlenum")
         res = db.query("select id,title,brief,content,ximg,status,tags,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_article where status != 1 limit {},{};".format(startnum,endnum))
@@ -568,7 +594,8 @@ def articledelete():
         return setcors(msg=listmsg)
     dlist = dlist[:-1]
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.commit("update t_article set status = 1 where id in ({});".format(dlist))
         return setcors(data=res,status=200)
@@ -586,7 +613,8 @@ def setarticletatus():
         return setcors(msg=headrsmsg)
     iid = request.args.get("id")
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.commit("update t_article set status = (case when status = 2 then 0 else 2 end) where id = {};".format(iid))
         return setcors(data=res,status=200)
@@ -605,7 +633,8 @@ def usersfindarticle():
     requestdata = request.get_json()
     search = str(requestdata.get("search"))
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.query("select id,title,brief,content,ximg,status,tags,author,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_article where status !=1 and title like '%{}%' or author like '%{}%';".format(search,search))
         return setcors(data=res,status=200)
@@ -636,7 +665,8 @@ def questionslist():
     else:
         startnum = (pagenum-1)*10
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         questionsnum = db.query("select count(*) questionsnum  from t_questions where status != 1 ;")[0].get("questionsnum")
         res = db.query("select id,title,brief,content,ximg,tags,author,status,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_questions where status != 1 limit {},{};".format(startnum,endnum))
@@ -664,7 +694,8 @@ def questionsdelete():
         return setcors(msg=listmsg)
     dlist = dlist[:-1]
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.commit("update t_questions set status = 1 where id in ({});".format(dlist))
         return setcors(data=res,status=200)
@@ -682,7 +713,8 @@ def setquestiontatus():
         return setcors(msg=headrsmsg)
     iid = request.args.get("id")
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.commit("update t_questions set status = (case when status = 2 then 0 else 2 end) where id = {};".format(iid))
         return setcors(data=res,status=200)
@@ -701,7 +733,8 @@ def usersfindquestions():
     requestdata = request.get_json()
     search = str(requestdata.get("search"))
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.query("select id,title,brief,content,ximg,tags,author,status,goods,collections,follows,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_questions where status !=1 and title like '%{}%' or author like '%{}%';".format(search,search))
         return setcors(data=res,status=200)
@@ -724,7 +757,8 @@ def gettagslist():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         tid = request.args.get("id")
         if tid == "" or tid == None:
@@ -749,7 +783,8 @@ def newtags():
     ctype = requestdata.get("ctype")
     tags = requestdata.get("tags")
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.commit("insert into t_content_tags (ctype,tags) values ({},'{}');".format(ctype,tags))
         return setcors(data=res,status=200)
@@ -770,7 +805,8 @@ def updatetags():
     ctype = requestdata.get("ctype")
     tags = requestdata.get("tags")
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.commit("update t_content_tags set ctype = '{}',tags = '{}' where id = {};".format(ctype,tags,tid))
         return setcors(data=res,status=200)
@@ -793,7 +829,8 @@ def deletetags():
         return setcors(msg=listmsg)
     dlist = dlist[:-1]
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.commit("update t_content_tags set status = 1 where id in ({});".format(dlist))
         return setcors(data=res,status=200)
@@ -811,7 +848,8 @@ def settagstatus():
         return setcors(msg=headrsmsg)
     iid = request.args.get("id")
     token = request.headers.get("token")
-    loginstatus = checkadminloginstatus(session,token)
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
     if loginstatus is True:
         res = db.commit("update t_content_tags set status = (case when status = 2 then 0 else 2 end) where id = {};".format(iid))
         return setcors(data=res,status=200)

@@ -46,9 +46,17 @@ redis_config = {
     'db': 0
 }
 
+redis_aconfig = {
+    # 'host': '192.168.0.103',
+    'host': '192.144.148.91',
+    'port': 6379,
+    'password': 'jk201148',
+    'db': 1
+}
 
 
 keys = {
     "user":"sb250",
-    "admin":"god666"
+    "admin":"god666",
+    "token":23
 }

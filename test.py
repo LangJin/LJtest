@@ -35,4 +35,5 @@ class RedisDb:
 
 
 redisdb = RedisDb(redis_config) 
-redisdb.setredisvalue("asdhas",{"a":"1"})
+res = redisdb.getredisvalue("zhangsan")
+print(res)
