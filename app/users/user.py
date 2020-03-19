@@ -3,8 +3,8 @@ __author__ = 'LangJin'
 
 from flask import request,session,make_response
 from . import userbp
-from ..utils.dbtools import Db
-from config import db_config
+from ..utils.dbtools import Db,RedisDb
+from config import db_config,redis_config
 import pymysql
 from ..utils.othertools import checkuserinfo,create_token,setcors,checkloginstatus,checkContentType,is_number,checkvalueisNone,encryption,checkphonenum,checkemail
 from ..utils.othertools import checkvaluelen
@@ -13,7 +13,7 @@ from ..utils.othertools import checkvaluelen
 
 
 db = Db(db_config)
-
+redisdb = RedisDb(redis_config) 
 
 @userbp.route("/regist",methods=["post"])
 def regist():
@@ -65,7 +65,7 @@ def regist():
 
 
 
-@userbp.route("/login",methods=["post"])
+@userbp.route("/loginbak",methods=["post"])
 def userlogin():
     '''
     用户登录接口\n
@@ -109,6 +109,54 @@ def userlogin():
                         res = db.commit(sql)
                         return setcors(msg=("密码错误次数太多，账号已锁定！",res))
                     session["loginerrornum"] = loginerrornum + 1
+                    return setcors(msg="密码错误")
+        else:
+            return setcors(msg=userregmsg)
+
+
+
+@userbp.route("/login",methods=["post"])
+def loginredis():
+    '''
+    用户登录接口\n
+    获取json格式的数据进行处理
+    '''
+    headrsmsg = checkContentType(request)
+    if headrsmsg != True:
+        return setcors(msg=headrsmsg)
+    else:
+        userinfo = request.get_json()
+        username = userinfo.get("username")
+        password = userinfo.get("password")
+        userregmsg = checkuserinfo(username,password)
+        if userregmsg is True:
+            sql = "select * from t_user where status = 0 and username = '{}'".format(username)
+            res = db.query(sql)
+            if len(res) != 1:
+                return setcors(msg="账号不存在或者账号异常")
+            else:
+                password = encryption(username,password,"user")
+                if password == res[0].get("password"):
+                    token = create_token()
+                    redisdata = {}
+                    redisdata["userinfo"] = {"token":token,"uid":res[0]["id"],"nickname":res[0]["nickname"],"username":res[0]["username"]}
+                    redisdb.setredisvalue(username,0)
+                    redisdata["loginerrornum"] = 0
+                    userinfo = redisdb.setredisvalue(token,redisdata)
+                    data = {}
+                    data["userinfo"] = userinfo
+                    data["token"] = token
+                    return setcors(msg="登录成功！",data=data,status=200)
+                else:
+                    loginerrornum = redisdb.getredisvalue(username)
+                    if loginerrornum == None:
+                        loginerrornum = 1
+                    loginerrornum = redisdb.getredisvalue(username)
+                    if loginerrornum > 2:
+                        sql = "update t_user set status = 2 where username = '{}';".format(username)
+                        res = db.commit(sql)
+                        return setcors(msg=("密码错误次数太多，账号已锁定！",res))
+                    redisdb.setredisvalue(username,loginerrornum + 1)
                     return setcors(msg="密码错误")
         else:
             return setcors(msg=userregmsg)

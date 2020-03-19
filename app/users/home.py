@@ -309,3 +309,53 @@ def gettaglist():
     ctype = request.args.get("type")
     res = db.query("select tags from t_content_tags where ctype = {};".format(ctype))
     return setcors(data=res,status=200)
+
+
+@userbp.route("/search",methods=["get"])
+def search():
+    """
+    搜索
+    0教程1提问2灵感3心得体会,4用户
+    """
+    value = request.args.get("value")
+    ctype = request.args.get("type")
+    pagenum = int(request.args.get("pagenum"))
+    endnum = 10
+    if pagenum == 1:
+        startnum = 0
+    else:
+        startnum = (pagenum-1)*10
+    if ctype == "0":
+        counts = db.query("select count(*) counts from t_coures a join t_user b on a.uid = b.id where a.status = 0 and a.tags like '%{}%' or a.title like '%{}%';".format(value,value))[0].get("counts")
+        res = db.query("select a.id,a.title,a.content,a.ximg,a.brief,a.goods\
+            ,a.collections,a.follows,a.uid,b.nickname,b.userinfo,b.headpic,\
+                DATE_FORMAT(a.updatetime, '%Y.%m.%d') times from t_coures a \
+                    join t_user b on a.uid = b.id where a.status = 0 and a.tags like '%{}%' or a.title like '%{}%' limit {},{};".format(value,value,startnum,endnum))
+    elif ctype == "3":
+        counts = db.query("select count(*) counts from t_article a join t_user b on a.uid = b.id where a.status = 0 and a.tags like '%{}%' or a.title like '%{}%';".format(value,value))[0].get("counts")
+        res = db.query("select a.id,a.title,a.content,a.ximg,a.brief,a.goods,\
+            a.collections,a.follows,a.uid,b.nickname,b.userinfo,b.headpic,\
+                DATE_FORMAT(a.updatetime, '%Y.%m.%d') times from t_article a \
+                    join t_user b on a.uid = b.id where a.status = 0 and a.tags like '%{}%' or a.title like '%{}%' limit {},{};".format(value,value,startnum,endnum))
+    elif ctype == "1":
+        counts = db.query("select count(*) counts from t_questions a join t_user b on a.uid = b.id where a.status = 0 and a.tags like '%{}%' or a.title like '%{}%';".format(value,value))[0].get("counts")
+        res = db.query("select a.id,a.title,a.content,a.ximg,a.brief,a.goods,\
+            a.collections,a.follows,a.uid,b.nickname,b.userinfo,b.headpic,\
+                DATE_FORMAT(a.updatetime, '%Y.%m.%d') times from t_questions a \
+                    join t_user b on a.uid = b.id where a.status = 0 and a.tags like '%{}%' or a.title like '%{}%' limit {},{};".format(value,value,startnum,endnum))
+    elif ctype == "2":
+        counts = db.query("select count(*) counts from t_inspirer a join t_user b on a.uid = b.id where a.status = 0 and a.content like '%{}%';".format(value))[0].get("counts")
+        res = db.query("select a.id,a.content,a.ximg,a.goods,\
+            a.collections,a.uid,b.nickname,b.userinfo,b.headpic,\
+                DATE_FORMAT(a.updatetime, '%Y.%m.%d') times from t_inspirer a \
+                    join t_user b on a.uid = b.id where a.status = 0 and a.content like '%{}%' limit {},{};".format(value,startnum,endnum))
+    elif ctype == "4":
+        counts = db.query("select count(*) counts from t_user where status = 0 and nickname like '%{}%';".format(value))[0].get("counts")
+        res = db.query("select id,nickname,headpic,userinfo from t_user where status = 0 and nickname like '%{}%' limit {},{};".format(value,startnum,endnum))
+    else:
+        return setcors(msg="不存在该type类型！")
+    data = {
+        "contentlist":res,
+        "counts":counts
+    }
+    return setcors(data=data,status=200)

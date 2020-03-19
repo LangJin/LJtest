@@ -772,7 +772,7 @@ def updatetags():
     token = request.headers.get("token")
     loginstatus = checkadminloginstatus(session,token)
     if loginstatus is True:
-        res = db.commit("update t_content_tags set ctype = {},tags = '{}' where id = {};".format(ctype,tags,tid))
+        res = db.commit("update t_content_tags set ctype = '{}',tags = '{}' where id = {};".format(ctype,tags,tid))
         return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
