@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50726
 File Encoding         : 65001
 
-Date: 2020-03-20 04:07:27
+Date: 2020-03-20 16:09:31
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -57,7 +57,7 @@ CREATE TABLE `t_article` (
   `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `remark` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=63019 DEFAULT CHARSET=utf8 COMMENT='心得体会';
+) ENGINE=InnoDB AUTO_INCREMENT=63021 DEFAULT CHARSET=utf8 COMMENT='心得体会';
 
 -- ----------------------------
 -- Table structure for t_article_user_status
@@ -90,7 +90,7 @@ CREATE TABLE `t_content_tags` (
   `createtime` datetime DEFAULT CURRENT_TIMESTAMP,
   `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for t_coures
@@ -130,7 +130,7 @@ CREATE TABLE `t_coures_user_status` (
   `createtime` datetime DEFAULT CURRENT_TIMESTAMP,
   `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=189 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=193 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for t_inspirer
@@ -148,7 +148,7 @@ CREATE TABLE `t_inspirer` (
   `createtime` datetime DEFAULT CURRENT_TIMESTAMP,
   `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1763 DEFAULT CHARSET=utf8 COMMENT='灵光一闪';
+) ENGINE=InnoDB AUTO_INCREMENT=1774 DEFAULT CHARSET=utf8 COMMENT='灵光一闪';
 
 -- ----------------------------
 -- Table structure for t_inspirer_user_status
@@ -165,7 +165,7 @@ CREATE TABLE `t_inspirer_user_status` (
   `createtime` datetime DEFAULT CURRENT_TIMESTAMP,
   `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=80 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=81 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for t_questions
@@ -188,7 +188,7 @@ CREATE TABLE `t_questions` (
   `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `remark` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1900 DEFAULT CHARSET=utf8 COMMENT='交流讨论表';
+) ENGINE=InnoDB AUTO_INCREMENT=1902 DEFAULT CHARSET=utf8 COMMENT='交流讨论表';
 
 -- ----------------------------
 -- Table structure for t_questions_user_status
@@ -249,7 +249,7 @@ CREATE TABLE `t_user` (
   `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `remark` varchar(255) DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=103463 DEFAULT CHARSET=utf8 COMMENT='用户表';
+) ENGINE=InnoDB AUTO_INCREMENT=103466 DEFAULT CHARSET=utf8 COMMENT='用户表';
 
 -- ----------------------------
 -- Table structure for t_user_comments
@@ -267,7 +267,7 @@ CREATE TABLE `t_user_comments` (
   `createtime` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updatetime` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4569 DEFAULT CHARSET=utf8 COMMENT='用户评论表';
+) ENGINE=InnoDB AUTO_INCREMENT=4578 DEFAULT CHARSET=utf8 COMMENT='用户评论表';
 
 -- ----------------------------
 -- Table structure for t_user_follows
@@ -282,7 +282,7 @@ CREATE TABLE `t_user_follows` (
   `createtime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updatetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=73 DEFAULT CHARSET=utf8 COMMENT='用户关注和粉丝表';
+) ENGINE=InnoDB AUTO_INCREMENT=74 DEFAULT CHARSET=utf8 COMMENT='用户关注和粉丝表';
 
 -- ----------------------------
 -- Table structure for t_user_mbq

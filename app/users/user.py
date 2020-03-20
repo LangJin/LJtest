@@ -356,7 +356,10 @@ def inspirer():
         uid = session["userinfo"]["uid"]
         author = session["userinfo"]["nickname"]
         dbres = db.commit("insert into t_inspirer (content,uid,author,ximg) values ('{}',{},'{}','{}');".format(content,uid,author,ximg))
-        dbqres = db.query("select id from t_inspirer where uid = {} order by updatetime desc limit 1;".format(uid))[0].get("id")
+        if dbres == True:
+            dbqres = db.query("select id from t_inspirer where uid = {} order by updatetime desc limit 1;".format(uid))[0].get("id")
+        else:
+            dbqres = "添加数据失败"
         data = {
             "inspirerid":dbqres,
             "status":dbres
@@ -518,7 +521,7 @@ def articleupdate():
     loginres = checkloginstatus(token)
     loginstatus = loginres[0]
     session = loginres[1]
-    if checkloginstatus(session,token) is True:
+    if loginstatus is True:
         uid = session["userinfo"]["uid"]
         ares = db.query("select * from t_article where status =0 and uid ={} and id = {};".format(uid,aid))
         if len(ares) != 0: 
@@ -1174,9 +1177,58 @@ def userfuser():
             rid = res[0].get("id")
             res = db.commit("update t_user_follows set status = (case when status = 0 then 1 else 0 end) where id = {};".format(rid))
             return setcors(data=res,status=200)
-
     else:
         return setcors(msg=loginstatus)
+
+
+
+@userbp.route("/getmytaglist",methods=["get"])
+def getmytaglist():
+    '''
+    获取私人标签列表
+    '''
+    token = request.headers.get("token")
+    ctype = request.args.get("type")
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1] 
+    if loginstatus is True:
+        uid = session["userinfo"]["uid"]
+        res = db.query("select tags from t_content_tags where status = 0 and ctype = {} and uid in ({},0);".format(ctype,uid))
+        tagslist = []
+        for i in range(len(res)):
+            tagslist.append(res[i].get("tags"))
+        tagslist = list(set(tagslist))
+        res = ""
+        for i in tagslist:
+            res = res+i+","
+        tags = {"tags":res[:-1]}
+        return setcors(data=tags,status=200)
+    else:
+        return setcors(msg=loginstatus)
+
+
+
+@userbp.route("/newmytag",methods=["post"])
+def newmytag():
+    '''
+    新增私人标签
+    '''
+    token = request.headers.get("token")
+    requestdata = request.get_json()
+    ctype = requestdata.get("type")
+    tag = requestdata.get("tag")
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    session = loginres[1] 
+    if loginstatus is True:
+        uid = session["userinfo"]["uid"]
+        res = db.commit("insert into t_content_tags (ctype,tags,uid) values ({},'{}',{});".format(ctype,tag,uid))
+        return setcors(data=res,status=200)
+    else:
+        return setcors(msg=loginstatus)
+
+
 
 
 @userbp.route("/test")

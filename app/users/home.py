@@ -307,8 +307,16 @@ def gettaglist():
     获取标签列表
     '''
     ctype = request.args.get("type")
-    res = db.query("select tags from t_content_tags where ctype = {};".format(ctype))
-    return setcors(data=res,status=200)
+    res = db.query("select tags from t_content_tags where status = 0 and ctype = {};".format(ctype))
+    tagslist = []
+    for i in range(len(res)):
+        tagslist.append(res[i].get("tags"))
+    tagslist = list(set(tagslist))
+    res = ""
+    for i in tagslist:
+        res = res+i+","
+    tags = {"tags":res[:-1]}
+    return setcors(data=tags,status=200)
 
 
 @userbp.route("/search",methods=["get"])
