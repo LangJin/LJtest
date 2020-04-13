@@ -37,6 +37,9 @@ def userinspirer():
     '''
     pagenum = request.args.get("pagenum")
     uid = request.args.get("uid")
+    idmsg = is_number(uid)
+    if idmsg != True:
+        return setcors(msg=idmsg)
     pagenummsg = is_number(pagenum)
     if pagenummsg != True:
         return setcors(msg=pagenummsg)
@@ -67,6 +70,9 @@ def userarticle():
     '''
     pagenum = request.args.get("pagenum")
     uid = request.args.get("uid")
+    idmsg = is_number(uid)
+    if idmsg != True:
+        return setcors(msg=idmsg)
     pagenummsg = is_number(pagenum)
     if pagenummsg != True:
         return setcors(msg=pagenummsg)
@@ -96,6 +102,9 @@ def userquestions():
     '''
     pagenum = request.args.get("pagenum")
     uid = request.args.get("uid")
+    idmsg = is_number(uid)
+    if idmsg != True:
+        return setcors(msg=idmsg)
     pagenummsg = is_number(pagenum)
     if pagenummsg != True:
         return setcors(msg=pagenummsg)
@@ -124,6 +133,9 @@ def getuserfollows():
     获取关注人列表
     '''
     uid = request.args.get("uid")
+    idmsg = is_number(uid)
+    if idmsg != True:
+        return setcors(msg=idmsg)
     counts = db.query("select count(*) counts from t_user_follows where status = 0 and uid = {};".format(uid))[0]
     res = db.query("select u.id,u.nickname,u.headpic,u.userinfo,DATE_FORMAT(f.updatetime, '%Y.%m.%d') times from t_user u join t_user_follows f on f.fid = u.id where f.status = 0 and f.uid = {};".format(uid))
     data = {
@@ -139,9 +151,9 @@ def getuserfens():
     获取粉丝列表
     '''
     uid = request.args.get("uid")
-    counts = db.query("select count(*) counts from t_user_follows where status = 0 and fid = {};".format(uid))[0]
+    counts = db.query("select count(*) counts from t_user u join t_user_follows f on f.uid = u.id where f.status = 0 and f.fid = {};".format(uid))[0]
     res = db.query("select u.id,u.nickname,u.headpic,u.userinfo,DATE_FORMAT(f.updatetime, '%Y.%m.%d') times from \
-        t_user u join t_user_follows f on f.uid = u.id where f.status = 0 and f.fid = {}".format(uid))
+        t_user u join t_user_follows f on f.uid = u.id where f.status = 0 and f.fid = {};".format(uid))
     data = {
         "userlist":res,
         "counts":counts.get("counts")
@@ -233,7 +245,7 @@ select * from (
 def userfindps():
     '''
     找回密码
-    {"username":"","password":"","mb":{题目id:答案}
+    {"username":"","password":"","mb":{题目id:答案}}
     '''
     requestdata = request.get_json()
     username = requestdata.get("username")
@@ -244,7 +256,11 @@ def userfindps():
         return setcors(msg=userregmsg)
     res = db.query("select mb from t_user where username = '{}';".format(username))
     if len(res) == 1:
-        umb = json.loads(res[0].get("mb"))
+        umb = res[0].get("mb")
+        if umb != None:
+            umb = json.loads(umb)
+        else:
+            return setcors(msg="用户没有设置密保，请联系管理员！")
         if mb == umb:
             password = encryption(username,password,"user")
             res = db.commit("update t_user set password = '{}' where username = '{}';".format(password,username))

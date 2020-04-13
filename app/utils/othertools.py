@@ -243,7 +243,7 @@ def is_number(s):
             else:
                 return "数字必须大于0"
         except ValueError:
-            return "【{}】应该是数字才行！".format(s)
+            return "【{}】应该是正整数才行！".format(s)
     else:
         return "不能为空"
 
@@ -279,6 +279,16 @@ def checkphonenum(phone):
     else:
         return "请输入正确的手机号！"
 
+
+def checkurl(url):
+    '''
+    正则判断URL格式
+    '''
+    res = re.match("^(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?$",url)
+    if res:
+        return True
+    else:
+        return "请输入正确的URL！"
 
 def checkemail(email):
     '''

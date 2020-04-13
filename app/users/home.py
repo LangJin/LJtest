@@ -52,22 +52,6 @@ def getcoures():
     return setcors(data=data,status=200)
 
 
-@userbp.route("/get/coure",methods=["get"])
-def getcourecid():
-    '''
-    获取具体的教程内容
-    '''
-    cid = request.args.get("cid")
-    nummsg = is_number(cid)
-    if nummsg == True:
-        res = db.query("SELECT c.id,c.title,c.content,c.tags,c.ximg,c.brief,\
-            c.goods,c.collections,c.follows,a.nickname,a.userinfo,a.headpic,\
-            DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_coures c JOIN t_admin a \
-            on c.uid = a.id WHERE c.STATUS = 0 and c.id = {};".format(cid))
-        return setcors(data=res,status=200)
-    else:
-        return setcors(msg=nummsg)
-
 
 @userbp.route("/getquestions",methods=["get"])
 def getquestions():
@@ -327,7 +311,12 @@ def search():
     """
     value = request.args.get("value")
     ctype = request.args.get("type")
-    pagenum = int(request.args.get("pagenum"))
+    pagenum = request.args.get("pagenum")
+    pagenummsg = is_number(pagenum)
+    if pagenummsg != True:
+        return setcors(msg=pagenummsg)
+    else:
+        pagenum = int(pagenum)
     endnum = 10
     if pagenum == 1:
         startnum = 0

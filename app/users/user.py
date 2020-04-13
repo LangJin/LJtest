@@ -7,7 +7,7 @@ from ..utils.dbtools import Db,RedisDb
 from config import db_config,redis_config
 import pymysql
 from ..utils.othertools import checkuserinfo,create_token,setcors,checkloginstatus,checkContentType,is_number,checkvalueisNone,encryption,checkphonenum,checkemail
-from ..utils.othertools import checkvaluelen,encryptiontoken,clearuserinfo
+from ..utils.othertools import checkvaluelen,encryptiontoken,clearuserinfo,checkpasswd
 # from werkzeug import secure_filename
 
 
@@ -146,6 +146,9 @@ def userupdateps():
     requestdata = request.get_json()
     oldps = requestdata.get("oldps")
     newps = requestdata.get("newps")
+    psmsg = checkpasswd(newps)
+    if psmsg != True:
+        return setcors(msg=psmsg)
     token = request.headers.get("token")
     loginres = checkloginstatus(token)
     loginstatus = loginres[0]
@@ -202,6 +205,30 @@ def usersertmb():
         return setcors(msg=loginstatus)
 
 
+@userbp.route("/get/coure",methods=["get"])
+def getcourecid():
+    '''
+    获取具体的教程内容
+    '''
+    cid = request.args.get("cid")
+    token = request.headers.get("token")
+    loginres = checkloginstatus(token)
+    loginstatus = loginres[0]
+    if loginstatus is True:
+        nummsg = is_number(cid)
+        if nummsg == True:
+            res = db.query("SELECT c.id,c.title,c.content,c.tags,c.ximg,c.brief,\
+                c.goods,c.collections,c.follows,a.nickname,a.userinfo,a.headpic,\
+                DATE_FORMAT(c.updatetime, '%Y.%m.%d') times FROM t_coures c JOIN t_admin a \
+                on c.uid = a.id WHERE c.STATUS = 0 and c.id = {};".format(cid))
+            if len(res) == 0:
+                return setcors(msg="不存在该教程")
+            return setcors(data=res,status=200)
+        else:
+            return setcors(msg=nummsg)
+    else:
+        return setcors(msg=loginstatus)
+
 
 @userbp.route("/question/new",methods=["post"])
 def question():
@@ -230,9 +257,9 @@ def question():
         briefmsg = checkvaluelen(brief,150)
         if briefmsg != True:
             return setcors(msg="简介"+briefmsg)
-        tagsmsg = checkvaluelen(tags,10)
-        if tagsmsg != True:
-            return setcors("标签"+tagsmsg)
+        for i in tags.split(","):
+            if len(i) < 4 or len(i) > 6:
+                return setcors(msg="标签要求不能大于6个字，不能少于4个字。")
         loginres = checkloginstatus(token)
         loginstatus = loginres[0]
         session = loginres[1]
@@ -275,9 +302,9 @@ def questionupdate():
     briefmsg = checkvaluelen(brief,150)
     if briefmsg != True:
         return setcors(msg="简介"+briefmsg)
-    tagsmsg = checkvaluelen(tags,10)
-    if tagsmsg != True:
-        return setcors("标签"+tagsmsg)
+    for i in tags.split(","):
+        if len(i) < 4 or len(i) > 6:
+            return setcors(msg="标签要求不能大于6个字，不能少于4个字。")
     qid = requestdata.get("qid")
     idmsg = is_number(qid)
     if idmsg != True:
@@ -342,6 +369,8 @@ def inspirer():
         ximg = ximg[:-1]
     else:
         ximg = "ximg.jpg"
+    if len(ximg.split(",")) > 3:
+        return setcors(msg="图片不能超过3张！")
     valuemsg = checkvalueisNone([content])
     if valuemsg != True:
         return setcors(msg=valuemsg)
@@ -383,6 +412,8 @@ def inspirerupdate():
         ximg = ximg[:-1]
     else:
         ximg = "ximg.jpg"
+    if len(ximg.split(",")) > 3:
+        return setcors(msg="图片不能超过3张！")
     content = requestdata.get("content")
     valuemsg = checkvalueisNone([content])
     contentmsg = checkvaluelen(content,200)
@@ -464,9 +495,9 @@ def article():
     briefmsg = checkvaluelen(brief,150)
     if briefmsg != True:
         return setcors(msg="简介"+briefmsg)
-    tagsmsg = checkvaluelen(tags,10)
-    if tagsmsg != True:
-        return setcors("标签"+tagsmsg)
+    for i in tags.split(","):
+        if len(i) < 4 or len(i) > 6:
+            return setcors(msg="标签要求不能大于6个字，不能少于4个字。")
     token = request.headers.get("token")
     loginres = checkloginstatus(token)
     loginstatus = loginres[0]
@@ -510,9 +541,9 @@ def articleupdate():
     briefmsg = checkvaluelen(brief,150)
     if briefmsg != True:
         return setcors(msg="简介"+briefmsg)
-    tagsmsg = checkvaluelen(tags,10)
-    if tagsmsg != True:
-        return setcors("标签"+tagsmsg)
+    for i in tags.split(","):
+        if len(i) < 4 or len(i) > 6:
+            return setcors(msg="每个标签要求不能大于6个字，不能少于4个字。")
     aid = requestdata.get("aid")
     idmsg = is_number(aid)
     if idmsg != True:
@@ -580,11 +611,23 @@ def updateuserinfo():
     if emailmsg != True:
         return setcors(msg="邮箱格式不对！")
     nickname = requestdata.get("nickname")
+    if nickname == None or nickname == "":
+        return setcors(msg="昵称不能为空")
+    if len(nickname) > 8:
+        return setcors(msg="昵称不能大于8个字符！")
     sex = requestdata.get("sex")
+    if sex not in ("男","女","保密"):
+        return setcors("性别只能是男、女、保密")
     job = requestdata.get("job")
+    jobmsg = checkvaluelen(job,8)
+    if jobmsg != True:
+        return setcors(msg="职业不能大于8个字，不能为空。")
     weixin = requestdata.get("weixin")
     qq = requestdata.get("qq")
     qianming = requestdata.get("userinfo")
+    qianmingmsg = checkvaluelen(qianming,20)
+    if qianmingmsg != True:
+        return setcors(msg="个人签名不能超过20个字。")
     address = requestdata.get("address")
     token = request.headers.get("token")
     loginres = checkloginstatus(token)
@@ -1025,6 +1068,25 @@ def usercomment():
     loginstatus = loginres[0]
     session = loginres[1] 
     if loginstatus is True:
+        ctype = int(ctype)
+        if ctype == 0:
+            res = db.query("select * from t_coures where status = 0 and id = {};".format(fid))
+            if len(res) == 0:
+                return setcors(msg="评论的教程不存在！")
+        elif ctype == 1:
+            res = db.query("select * from t_questions where status = 0 and id = {};".format(fid))
+            if len(res) == 0:
+                return setcors(msg="评论的问题不存在！")
+        elif ctype == 2:
+            res = db.query("select * from t_inspirer where status = 0 and id = {};".format(fid))
+            if len(res) == 0:
+                return setcors(msg="评论的灵感不存在！")
+        elif ctype == 3:
+            res = db.query("select * from t_article where status = 0 and id = {};".format(fid))
+            if len(res) == 0:
+                return setcors(msg="评论的文章不存在！")
+        else:
+            return setcors(msg="ctype类型不正确！")
         uid = session["userinfo"]["uid"]
         author = session["userinfo"]["nickname"]
         dbres = db.commit("insert into t_user_comments (ctype,fid,uid,comment,author) values ('{}',{},{},'{}','{}');".format(ctype,fid,uid,comment,author))
@@ -1218,6 +1280,10 @@ def newmytag():
     requestdata = request.get_json()
     ctype = requestdata.get("type")
     tag = requestdata.get("tag")
+    if tag == None or tag == "":
+        return setcors(msg="标签不能为空！")
+    if len(tag) < 4 or len(tag) > 6:
+        return setcors(msg="标签要求不能大于6个字，不能少于4个字。")
     loginres = checkloginstatus(token)
     loginstatus = loginres[0]
     session = loginres[1] 

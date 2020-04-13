@@ -6,7 +6,7 @@ from . import adminbp
 from ..utils.dbtools import Db,RedisDb
 from config import db_config,redis_aconfig
 from ..utils.othertools import checkuserinfo,create_token,encryption,setcors,checkContentType,is_number,checkvalueisNone,checklistid
-from ..utils.othertools import encryptiontoken,checkadminloginstatus
+from ..utils.othertools import encryptiontoken,checkadminloginstatus,checkurl,checkvaluelen
 # from werkzeug import secure_filename
 
 db = Db(db_config)
@@ -76,7 +76,12 @@ def titleimglist():
             res = db.query("select id,title,imghost,rurl,status,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_title_img where status != 1;")
             return setcors(data=res,status=200)
         else:
+            idmsg = is_number(tid)
+            if idmsg != True:
+                return setcors(msg=idmsg)
             res = db.query("select id,title,imghost,rurl,status,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_title_img where status != 1 and id = {};".format(tid))
+            if len(res) == 0:
+                return setcors(msg="输入的id不存在！")
             return setcors(data=res,status=200)
     else:
         return setcors(msg=loginstatus)
@@ -92,8 +97,15 @@ def newtitleimg():
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
     title = requestdata.get("title")
+    if title == None or title == "":
+        return setcors(msg="title不能为空！")
     imghost = requestdata.get("imghost")
+    if imghost == None or imghost == "":
+        return setcors(msg="图片不能为空！")
     rurl = requestdata.get("rurl")
+    urlmsg = checkurl(rurl)
+    if urlmsg != True:
+        return setcors(msg=urlmsg)
     token = request.headers.get("token")
     loginres = checkadminloginstatus(token)
     loginstatus = loginres[0]
@@ -114,8 +126,15 @@ def updatetitleimg():
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
     title = requestdata.get("title")
+    if title == None or title == "":
+        return setcors(msg="title不能为空！")
     imghost = requestdata.get("imghost")
+    if imghost == None or imghost == "":
+        return setcors(msg="图片不能为空！")
     rurl = requestdata.get("rurl")
+    urlmsg = checkurl(rurl)
+    if urlmsg != True:
+        return setcors(msg=urlmsg)
     tid = requestdata.get("tid")
     token = request.headers.get("token")
     loginres = checkadminloginstatus(token)
@@ -136,6 +155,9 @@ def settitleimgstatus():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     tid = request.args.get("id")
+    idmsg = is_number(tid)
+    if idmsg != True:
+        return setcors(msg=idmsg)
     token = request.headers.get("token")
     loginres = checkadminloginstatus(token)
     loginstatus = loginres[0]
@@ -261,7 +283,9 @@ def usersfind():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    search = str(requestdata.get("search"))
+    search = requestdata.get("search")
+    if search == None or search == "":
+        return setcors(msg="搜索内容不能为空！")
     token = request.headers.get("token")
     loginres = checkadminloginstatus(token)
     loginstatus = loginres[0]
@@ -321,8 +345,14 @@ def couresnew():
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
     title = requestdata.get("title")
+    titleimg = checkvaluelen(title,50)
+    if titleimg != True:
+        return setcors(msg=titleimg)
     brief = requestdata.get("brief")
     tags = requestdata.get("tags")
+    for i in tags.split(","):
+        if len(i) < 4 or len(i) > 6:
+            return setcors(msg="每个标签要求不能大于6个字，不能少于4个字。")
     content = requestdata.get("content")
     valuemsg = checkvalueisNone([title,brief,tags,content])
     if valuemsg != True:
@@ -350,8 +380,14 @@ def couresupdate():
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
     title = requestdata.get("title")
+    titleimg = checkvaluelen(title,50)
+    if titleimg != True:
+        return setcors(msg=titleimg)
     brief = requestdata.get("brief")
     tags = requestdata.get("tags")
+    for i in tags.split(","):
+        if len(i) < 4 or len(i) > 6:
+            return setcors(msg="每个标签要求不能大于6个字，不能少于4个字。")
     content = requestdata.get("content")
     cid = requestdata.get("cid")
     idmsg = is_number(cid)
@@ -365,8 +401,7 @@ def couresupdate():
     loginstatus = loginres[0]
     session = loginres[1]
     if loginstatus is True:
-        uid = session["admininfo"]["uid"]
-        qres = db.query("select * from t_coures where uid ={} and status != 1 and id = {};".format(uid,cid))
+        qres = db.query("select * from t_coures where status != 1 and id = {};".format(cid))
         if len(qres) != 0:
             dbres = db.commit("update t_coures set title='{}',brief='{}',tags='{}',content='{}' where id = {};".format(title,brief,tags,content,cid))
             return setcors(msg=dbres,status=200)
@@ -409,6 +444,9 @@ def setcourestatus():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     cid = request.args.get("id")
+    idmsg = is_number(cid)
+    if idmsg != True:
+        return setcors(msg=idmsg)
     token = request.headers.get("token")
     loginres = checkadminloginstatus(token)
     loginstatus = loginres[0]
@@ -428,7 +466,9 @@ def usersfindcoures():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    search = str(requestdata.get("search"))
+    search = requestdata.get("search")
+    if search == None or search == "":
+        return setcors(msg="搜索内容不能为空！")
     token = request.headers.get("token")
     loginres = checkadminloginstatus(token)
     loginstatus = loginres[0]
@@ -512,6 +552,9 @@ def setinspirstatus():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     iid = request.args.get("id")
+    idmsg = is_number(iid)
+    if idmsg != True:
+        return setcors(msg=idmsg)
     token = request.headers.get("token")
     loginres = checkadminloginstatus(token)
     loginstatus = loginres[0]
@@ -531,7 +574,9 @@ def usersfindinspirer():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    search = str(requestdata.get("search"))
+    search = requestdata.get("search")
+    if search == None or search == "":
+        return setcors(msg="搜索内容不能为空！")
     token = request.headers.get("token")
     loginres = checkadminloginstatus(token)
     loginstatus = loginres[0]
@@ -612,6 +657,9 @@ def setarticletatus():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     iid = request.args.get("id")
+    idmsg = is_number(iid)
+    if idmsg != True:
+        return setcors(msg=idmsg)
     token = request.headers.get("token")
     loginres = checkadminloginstatus(token)
     loginstatus = loginres[0]
@@ -631,7 +679,9 @@ def usersfindarticle():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    search = str(requestdata.get("search"))
+    search = requestdata.get("search")
+    if search == None or search == "":
+        return setcors(msg="搜索内容不能为空！")
     token = request.headers.get("token")
     loginres = checkadminloginstatus(token)
     loginstatus = loginres[0]
@@ -712,6 +762,9 @@ def setquestiontatus():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     iid = request.args.get("id")
+    idmsg = is_number(iid)
+    if idmsg != True:
+        return setcors(msg=idmsg)
     token = request.headers.get("token")
     loginres = checkadminloginstatus(token)
     loginstatus = loginres[0]
@@ -731,7 +784,9 @@ def usersfindquestions():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
-    search = str(requestdata.get("search"))
+    search = requestdata.get("search")
+    if search == None or search == "":
+        return setcors(msg="搜索内容不能为空！")
     token = request.headers.get("token")
     loginres = checkadminloginstatus(token)
     loginstatus = loginres[0]
@@ -764,6 +819,9 @@ def gettagslist():
         if tid == "" or tid == None:
             res = db.query("select id,ctype,tags,status,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_content_tags where status != 1;")
         else:
+            idmsg = is_number(tid)
+            if idmsg != True:
+                return setcors(msg=idmsg)
             res = db.query("select id,ctype,tags,status,DATE_FORMAT(updatetime,'%Y-%m-%d %T') updatetime from t_content_tags where status != 1 and id = {};".format(tid))
         return setcors(data=res,status=200)
     else:
@@ -781,7 +839,14 @@ def newtags():
         return setcors(msg=headrsmsg)
     requestdata = request.get_json()
     ctype = requestdata.get("ctype")
+    if ctype not in (0,1,3,"0","1","3"):
+        return setcors(msg="ctype只有0，1，3三种")
     tags = requestdata.get("tags")
+    if tags == None or tags == "":
+        return setcors(msg="tags不能为空！")
+    for i in tags.split(","):
+        if len(i) < 4 or len(i) > 6:
+            return setcors(msg="每个标签要求不能大于6个字，不能少于4个字。")
     token = request.headers.get("token")
     loginres = checkadminloginstatus(token)
     loginstatus = loginres[0]
@@ -803,7 +868,12 @@ def updatetags():
     requestdata = request.get_json()
     tid = requestdata.get("id")
     ctype = requestdata.get("ctype")
+    if ctype not in (0,1,3,"0","1","3"):
+        return setcors(msg="ctype只有0，1，3三种")
     tags = requestdata.get("tags")
+    for i in tags.split(","):
+        if len(i) < 4 or len(i) > 6:
+            return setcors(msg="每个标签要求不能大于6个字，不能少于4个字。")
     token = request.headers.get("token")
     loginres = checkadminloginstatus(token)
     loginstatus = loginres[0]
@@ -847,11 +917,37 @@ def settagstatus():
     if headrsmsg != True:
         return setcors(msg=headrsmsg)
     iid = request.args.get("id")
+    idmsg = is_number(iid)
+    if idmsg != True:
+        return setcors(msg=idmsg)
     token = request.headers.get("token")
     loginres = checkadminloginstatus(token)
     loginstatus = loginres[0]
     if loginstatus is True:
         res = db.commit("update t_content_tags set status = (case when status = 2 then 0 else 2 end) where id = {};".format(iid))
         return setcors(data=res,status=200)
+    else:
+        return setcors(msg=loginstatus)
+
+
+@adminbp.route("/gettag0list",methods=["get"])
+def gettag0list():
+    '''
+    获取教程标签列表
+    '''
+    token = request.headers.get("token")
+    loginres = checkadminloginstatus(token)
+    loginstatus = loginres[0]
+    if loginstatus is True:
+        res = db.query("select tags from t_content_tags where status = 0 and ctype = 0 and uid in (0);")
+        tagslist = []
+        for i in range(len(res)):
+            tagslist.append(res[i].get("tags"))
+        tagslist = list(set(tagslist))
+        res = ""
+        for i in tagslist:
+            res = res+i+","
+        tags = {"tags":res[:-1]}
+        return setcors(data=tags,status=200)
     else:
         return setcors(msg=loginstatus)
