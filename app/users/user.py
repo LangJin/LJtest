@@ -1299,12 +1299,6 @@ def newmytag():
 
 @userbp.route("/test")
 def test():
-    headers  = request.args.get("token")
-    mb = {1:"哈哈"}
-    mblist = []
-    for i in mb:
-        mblist.append(i)
-        mblist.append(mb[i])
-    mb = tuple(mblist)
-    print(mb)
-    return setcors(data=headers,status=200)
+    bbb = request.url_rule.rule
+    print(request.referrer)
+    return setcors(status=200,data=bbb)

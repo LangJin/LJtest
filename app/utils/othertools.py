@@ -325,3 +325,11 @@ def checklistid(value):
         return True
     else:
         return "输入的值不符合规范，必须以数字开头逗号结尾，如1,2,3,"
+
+
+def checkvaluerule():
+    '''
+    检查用户输入的值是否符合规范
+    参数是否为空，类型，长度。
+    '''
+    pass
