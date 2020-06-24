@@ -3,8 +3,12 @@ __author__ = 'LangJin'
 
 import os, hashlib,urllib
 from flask import jsonify,make_response,session,request
-from config import keys
+from config import keys,redis_config,redis_aconfig
+from .dbtools import RedisDb
 import re
+
+
+
 
 def create_token():
     '''
@@ -22,6 +26,35 @@ def encryption(username,password,role):
     md5.update(password.encode("utf8")+username.encode("utf8")+keys.get(role).encode("utf8"))
     password = md5.hexdigest()
     return password
+
+
+def encryptiontoken(username,token,role="token"):
+    '''
+    说明：token的加密算法,role是角色\n
+    用法:encryption("用户名","原始token","user")
+    '''
+    num = keys.get(role)
+    a = token[:num]
+    b = token[(40-num)*-1:]
+    print(token)
+    print(a+b)
+    username = username[::-1]
+    token = a+username+b
+    return token
+
+
+def opentoken(token,role="token"):
+    """
+    解密token的算法,role默认‘token’
+    """
+    num = keys.get(role)
+    a = token[:num]
+    b = token[(40-num)*-1:]
+    username = token[num:(40-num)*-1]
+    username = username[::-1]
+    token = a+b
+    return username,token
+
 
 def checkusername(username):
     '''
@@ -72,19 +105,76 @@ def checkuserinfo(username,password):
     
 
 
-def checkloginstatus(session,token):
+def checkloginstatus(token):
     '''
     检查用户的登录状态
     '''
-    userinfo = session.get("userinfo")
-    if userinfo != None and token != None:
-        tokenid = userinfo.get("token")
-        if tokenid == token:
-            return True
-        else:
-            return "token无效，请重新登录"
+    if token == None:
+        return "请先登录后再操作！",False
+    userreq = opentoken(token)
+    username = userreq[0]
+    token = userreq[1]
+    redisdb = RedisDb(redis_config)
+    redisdata = redisdb.getredisvalue(username)
+    if redisdata == None:
+        return "请先登录后再操作！",False
+    userinfo = redisdata.get("userinfo")
+    if userinfo == None:
+        return "请先登录后再操作！",False
+    retoken = userinfo.get("token")
+    if retoken == token:
+        return True,redisdata
     else:
+        return "token无效，请重新登录",False
+
+
+def clearuserinfo(token):
+    '''
+    清空用户redis数据
+    '''
+    if token == None:
         return "请先登录后再操作！"
+    userreq = opentoken(token)
+    username = userreq[0]
+    token = userreq[1]
+    redisdb = RedisDb(redis_config)
+    redisdata = redisdb.getredisvalue(username)
+    if redisdata == None:
+        return "请先登录后再操作！"
+    userinfo = redisdata.get("userinfo")
+    if userinfo == None:
+        return "请先登录后再操作！"
+    retoken = userinfo.get("token")
+    if retoken == token:
+        res = redisdb.delredisvalue(username)
+        return res
+    else:
+        return "token无效，请重新登录"
+
+
+
+
+def checkadminloginstatus(token):
+    '''
+    检查管理员的登录状态
+    '''
+    if token == None:
+        return "请先登录后再操作1！",False
+    userreq = opentoken(token)
+    username = userreq[0]
+    token = userreq[1]
+    redisdb = RedisDb(redis_aconfig)
+    redisdata = redisdb.getredisvalue(username)
+    if redisdata == None:
+        return "请先登录后再操作2！",False
+    admininfo = redisdata.get("admininfo")
+    if admininfo == None:
+        return "请先登录后再操作3！",False
+    retoken = admininfo.get("token")
+    if retoken == token:
+        return True,redisdata
+    else:
+        return "token无效，请重新登录4",False
 
 
 
@@ -153,7 +243,7 @@ def is_number(s):
             else:
                 return "数字必须大于0"
         except ValueError:
-            return "【{}】应该是数字才行！".format(s)
+            return "【{}】应该是正整数才行！".format(s)
     else:
         return "不能为空"
 
@@ -183,12 +273,22 @@ def checkphonenum(phone):
     '''
     正则判断手机号格式
     '''
-    res = re.match("^(13[0-9]|14[5|7]|15[0|1|2|3|4|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$",phone)
+    res = re.match("^1(3|4|5|7|8)\d{9}$",phone)
     if res:
         return True
     else:
         return "请输入正确的手机号！"
 
+
+def checkurl(url):
+    '''
+    正则判断URL格式
+    '''
+    res = re.match("^(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?$",url)
+    if res:
+        return True
+    else:
+        return "请输入正确的URL！"
 
 def checkemail(email):
     '''
@@ -219,9 +319,17 @@ def checklistid(value):
     检查输入的值是否符合规范
     例：1,2,3,
     '''
-    res = re.match("^([0-9]+,)+$",value)
+    res = re.match("^([1-9]{1}[0-9]*,)+$",value)  
     # print(res)
     if res:
         return True
     else:
         return "输入的值不符合规范，必须以数字开头逗号结尾，如1,2,3,"
+
+
+def checkvaluerule():
+    '''
+    检查用户输入的值是否符合规范
+    参数是否为空，类型，长度。
+    '''
+    pass

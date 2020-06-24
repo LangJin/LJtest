@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>心得体会</title>
+    <link rel="stylesheet" href="../lib/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="../lib/animate/animate.css" />
+    <link rel="stylesheet" href="../css/global.css" />
+    <link rel="stylesheet" href="../css/reset.css" />
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/testTutorial.css" />
+</head>
+
+<body>
+    <!-- 头部 -->
+    <div class="tn-header">
+        <div class="tn-header-wrap">
+            <b>
+          <a href="../index.html" title="测谈网">测谈网</a>
+        </b>
+            <nav>
+                <div class="select"><a href="../index.html">首页</a></div>
+                <div class="select select-menu1">
+                    测试教程
+                    <span class="glyphicon glyphicon-chevron-down"></span>
+                    <ul class="menu animated fadeInUp">
+                        <li><a href="javascript:void(0)" onclick="go_tutorial_list()">测试教程</a></li>
+
+
+                    </ul>
+                </div>
+                <div class="select select-menu2">
+                    交流讨论
+                    <span class="glyphicon glyphicon-chevron-down"></span>
+                    <ul class="menu animated fadeInUp">
+
+                        <li><a href="question.html">交流讨论</a></li>
+                        <li><a href="experience.html">文章心得</a></li>
+                        <li><a href="inspiration.html">灵光一闪</a></li>
+                    </ul>
+                </div>
+            </nav>
+            <!-- 带选择的搜索 -->
+            <div class="search">
+                <select name="" id="">
+            <option value="">全局</option>
+            <option value="">文章</option>
+            <option value="">评论</option>
+          </select>
+                <div class="input-box">
+                    <input type="text" placeholder="输入你想知道的" />
+                    <span class="glyphicon glyphicon-search"></span>
+                </div>
+            </div>
+
+            <div class="utils-box logged" id="logined">
+                <a href=""> <span class="glyphicon glyphicon-bell"></span></a>
+                </a>
+                <a href="javascript:void(0)" onclick="user_logout()">
+                    <span class="glyphicon glyphicon-off" onclick="user_logout()"></span>
+                </a>
+                <a href="" id="personal">
+                    <img src="./assets/imgs/imgs.jpeg" id="headpic_nav" alt="" />
+                </a>
+            </div>
+            <div class="utils-box notLog" id="unlogin">
+                <div class="operating login">
+                    <a href="login.html">登录</a>
+                </div>
+                <div class="operating registered">
+                    <a href="register.html">注册</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="wrap testTutorial">
+        <div class="wrap banner-title">
+            <div class="banner-title-box">
+                <div class="title">测谈心得体会</div>
+            </div>
+        </div>
+        <div class="main testTutorial-body">
+            <div class="main-left testTutorial-body-left">
+                <div id="acp_meaus" class="meaus acp_meaus">
+                    <!-- <div class="meaus-item meaus-item-active">全部</div>
+                    <div class="meaus-item">项目分类1</div>
+                    <div class="meaus-item">项目分类2</div> -->
+                </div>
+                <div class="list" id="experience_list">
+
+                </div>
+
+                <!-- 分页组件 -->
+                <div class="page-navigation">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            <li>
+                                <a id="pre" href="javascript:void(0)" aria-label="Previous">
+                                    <span aria-hidden="true">上一页</span>
+                                </a>
+                            </li>
+                            <li class="active">
+                                <a href="javascript:void(0)" id="current">第1页/共1页</a>
+                            </li>
+                            <li>
+                                <a id="next" href="#" aria-label="Next">
+                                    <span aria-hidden="true">下一页</span>
+                                </a>
+                            </li>
+                            <input id="total" type="hidden" value="">
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            <div class="main-right">
+                <div class="editTool">
+                    <div class="editTool-item" onclick="go_write_article()">
+                        <img src="../assets/imgs/e1.png" alt="" />
+                        <span>写文章</span>
+                    </div>
+                    <div class="editTool-item" onclick="go_write_inspiration()">
+                        <img src="../assets/imgs/e2.png" alt="" />
+                        <span>写灵感</span>
+                    </div>
+                    <div class="editTool-item" onclick="go_write_question()">
+                        <img src="../assets/imgs/e3.png" alt="" />
+                        <span>写疑惑</span>
+                    </div>
+                    <div class="editTool-item" onclick="go_student_learn()">
+                        <img src="../assets/imgs/e4.png" alt="" />
+                        <span>学习</span>
+                    </div>
+                    <div class="editTool-item" onclick="go_student_answering()">
+                        <img src="../assets/imgs/e5.png" alt="" />
+                        <span>练习</span>
+                    </div>
+                    <div class="editTool-item" onclick="go_actual_combat_project()">
+                        <img src="../assets/imgs/e6.png" alt="" />
+                        <span>实战</span>
+                    </div>
+                </div>
+                <div class="right-title">
+                    <img src="../assets/imgs/cup.png" alt="" />
+                    <span>热门项目排行榜</span>
+                </div>
+                <div class="hot-list">
+                    <div class="hot-list-item sort">
+                        <div class="img-box">
+                            <div class="tag">1</div>
+                            <img src="../assets/imgs/z.png" alt="" />
+                        </div>
+                        <div class="info">
+                            <div class="title">测试工程师技能</div>
+                            <p class="desc">初期的太极系列，都是单人</p>
+                            <button class="btn">查看教程</button>
+                        </div>
+                    </div>
+                    <div class="hot-list-item">
+                        <div class="img-box">
+                            <div class="tag">2</div>
+                            <img src="../assets/imgs/z.png" alt="" />
+                        </div>
+                        <div class="info">
+                            <div class="title">测试工程师技能</div>
+                            <p class="desc">初期的太极系列，都是单人</p>
+                            <button class="btn">查看教程</button>
+                        </div>
+                    </div>
+                    <div class="hot-list-item">
+                        <div class="img-box">
+                            <div class="tag">3</div>
+                            <img src="../assets/imgs/z.png" alt="" />
+                        </div>
+                        <div class="info">
+                            <div class="title">测试工程师技能</div>
+                            <p class="desc">初期的太极系列，都是单人</p>
+                            <button class="btn">查看教程</button>
+                        </div>
+                    </div>
+                    <a href="" target="_blank" class="hot-list-other">
+                        <div class="tag">4</div>
+                        <div class="title">测试工程师技能</div>
+                        <p class="desc">初期的太极系列，都是单人</p>
+                    </a>
+                    <a href="" target="_blank" class="hot-list-other">
+                        <div class="tag">5</div>
+                        <div class="title">测试工程师技能</div>
+                        <p class="desc">初期的太极系列，都是单人</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 尾部 -->
+    <div class="tn-footer">
+        <div class="tn-footer-wrap">
+            <div class="intro">
+                <div class="about">
+                    <li>
+                        <span><a href="">企业合作</a></span>
+                        <i></i>
+                        <span><a href="">人才招聘</a></span>
+                        <i></i>
+                        <span><a href="">联系我们</a></span>
+                        <i></i>
+                        <span><a href="">关于我们</a></span>
+                        <i></i>
+                        <span><a href="">帮助中心</a></span>
+                    </li>
+                    <li>
+                        <span><a href="">意见反馈</a></span>
+                        <i></i>
+                        <span><a href="">友情链接</a></span>
+                    </li>
+                </div>
+                <div class="chat">
+                    <div class="QR QR-qq">
+                        <img src="../assets/imgs/qrcode.png" alt="QQ群" />
+                        <span>QQ群</span>
+                    </div>
+                    <div class="QR QR-weixin">
+                        <img src="../assets/imgs/qrcode.png" alt="微信" />
+                        <span>微信</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            2020 All rights reserved 浪晋科技, Powered by 流云.
+        </div>
+    </div>
+    <script src="../lib/jquery/jquery-3.4.1.min.js"></script>
+    <script src="../lib/bootstrap/js/bootstrap.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/experience.js"></script>
+    <script>
+        $('#acp_meaus .meaus-item').on('click', function() {
+            $('#acp_meaus .meaus-item').removeClass('meaus-item-active')
+            $(this).addClass('meaus-item-active')
+        })
+    </script>
+</body>
+
+</html>

@@ -1,8 +1,9 @@
 
 from flask import request
+import json
 from . import userbp
 from ..utils.dbtools import Db
-from ..utils.othertools import setcors,is_number
+from ..utils.othertools import setcors,is_number,encryption,checkuserinfo
 from config import db_config
 db = Db(db_config)
 
@@ -29,13 +30,16 @@ def getuserinfo():
         return setcors(msg=nummsg)
 
 
-@userbp.route("/userinspirer")
+@userbp.route("/userinspirer",methods=["get"])
 def userinspirer():
     '''
     获取用户的灵感列表
     '''
     pagenum = request.args.get("pagenum")
     uid = request.args.get("uid")
+    idmsg = is_number(uid)
+    if idmsg != True:
+        return setcors(msg=idmsg)
     pagenummsg = is_number(pagenum)
     if pagenummsg != True:
         return setcors(msg=pagenummsg)
@@ -66,6 +70,9 @@ def userarticle():
     '''
     pagenum = request.args.get("pagenum")
     uid = request.args.get("uid")
+    idmsg = is_number(uid)
+    if idmsg != True:
+        return setcors(msg=idmsg)
     pagenummsg = is_number(pagenum)
     if pagenummsg != True:
         return setcors(msg=pagenummsg)
@@ -95,6 +102,9 @@ def userquestions():
     '''
     pagenum = request.args.get("pagenum")
     uid = request.args.get("uid")
+    idmsg = is_number(uid)
+    if idmsg != True:
+        return setcors(msg=idmsg)
     pagenummsg = is_number(pagenum)
     if pagenummsg != True:
         return setcors(msg=pagenummsg)
@@ -123,6 +133,9 @@ def getuserfollows():
     获取关注人列表
     '''
     uid = request.args.get("uid")
+    idmsg = is_number(uid)
+    if idmsg != True:
+        return setcors(msg=idmsg)
     counts = db.query("select count(*) counts from t_user_follows where status = 0 and uid = {};".format(uid))[0]
     res = db.query("select u.id,u.nickname,u.headpic,u.userinfo,DATE_FORMAT(f.updatetime, '%Y.%m.%d') times from t_user u join t_user_follows f on f.fid = u.id where f.status = 0 and f.uid = {};".format(uid))
     data = {
@@ -138,9 +151,9 @@ def getuserfens():
     获取粉丝列表
     '''
     uid = request.args.get("uid")
-    counts = db.query("select count(*) counts from t_user_follows where status = 0 and fid = {};".format(uid))[0]
+    counts = db.query("select count(*) counts from t_user u join t_user_follows f on f.uid = u.id where f.status = 0 and f.fid = {};".format(uid))[0]
     res = db.query("select u.id,u.nickname,u.headpic,u.userinfo,DATE_FORMAT(f.updatetime, '%Y.%m.%d') times from \
-        t_user u join t_user_follows f on f.uid = u.id where f.status = 0 and f.fid = {}".format(uid))
+        t_user u join t_user_follows f on f.uid = u.id where f.status = 0 and f.fid = {};".format(uid))
     data = {
         "userlist":res,
         "counts":counts.get("counts")
@@ -167,9 +180,9 @@ def getuserdt():
     else:
         startnum = (pagenum-1)*10
     sql = "select * from (\
-        select '发表了问题'  as dt,id,title,1 as ctype,uid,ximg,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_article UNION \
-        select '发表了文章',id,title,3,uid,ximg,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_questions UNION \
-        select '发表了灵感',id,content,2,uid,ximg,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_inspirer UNION \
+        select '发表了文章'  as dt,id,title,3 as ctype,uid,ximg,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_article where status = 0 UNION \
+        select '发表了问题',id,title,1,uid,ximg,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_questions where status = 0 UNION \
+        select '发表了灵感',id,content,2,uid,ximg,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_inspirer where status = 0 UNION \
         select '点赞了',b.id,b.title,0,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_coures_user_status a join t_coures b on a.cid = b.id where gstatus = 0 UNION \
         select '收藏了',b.id,b.title,0,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_coures_user_status a join t_coures b on a.cid = b.id  where cstatus = 0 UNION \
         select '关注了',b.id,b.title,0,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_coures_user_status  a join t_coures b on a.cid = b.id where fstatus = 0 UNION \
@@ -183,9 +196,26 @@ def getuserdt():
         select '关注了',b.id,b.title,1,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_questions_user_status  a join t_questions b on a.qid = b.id where fstatus = 0 \
         ) as a where uid = {} order by times desc limit {},{}; ".format(uid,startnum,endnum)
     res = db.query(sql=sql)
+    sql = "select count(*) counts from (\
+        select '发表了文章'  as dt,id,title,3 as ctype,uid,ximg,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_article where status = 0 UNION \
+        select '发表了问题',id,title,1,uid,ximg,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_questions where status = 0 UNION \
+        select '发表了灵感',id,content,2,uid,ximg,DATE_FORMAT(updatetime, '%Y.%m.%d %T') times from t_inspirer where status = 0 UNION \
+        select '点赞了',b.id,b.title,0,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_coures_user_status a join t_coures b on a.cid = b.id where gstatus = 0 UNION \
+        select '收藏了',b.id,b.title,0,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_coures_user_status a join t_coures b on a.cid = b.id  where cstatus = 0 UNION \
+        select '关注了',b.id,b.title,0,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_coures_user_status  a join t_coures b on a.cid = b.id where fstatus = 0 UNION \
+        select '点赞了',b.id,b.title,3,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_article_user_status a join t_article b on a.aid = b.id where gstatus = 0 UNION \
+        select '收藏了',b.id,b.title,3,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_article_user_status a join t_article b on a.aid = b.id  where cstatus = 0 UNION \
+        select '关注了',b.id,b.title,3,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_article_user_status  a join t_article b on a.aid = b.id where fstatus = 0 UNION \
+        select '点赞了',b.id,b.content,2,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_inspirer_user_status a join t_inspirer b on a.iid = b.id where gstatus = 0 UNION \
+        select '收藏了',b.id,b.content,2,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_inspirer_user_status a join t_inspirer b on a.iid = b.id  where cstatus = 0 UNION \
+        select '点赞了',b.id,b.title,1,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_questions_user_status a join t_questions b on a.qid = b.id where gstatus = 0 UNION \
+        select '收藏了',b.id,b.title,1,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_questions_user_status a join t_questions b on a.qid = b.id  where cstatus = 0 UNION \
+        select '关注了',b.id,b.title,1,a.uid,b.ximg,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_questions_user_status  a join t_questions b on a.qid = b.id where fstatus = 0 \
+        ) as a where uid = {};".format(uid)
+    counts = db.query(sql=sql)[0].get("counts")
     data = {
         "userlist":res,
-        "counts":88
+        "counts":counts
     }
     return setcors(data=data,status=200)
 
@@ -208,3 +238,34 @@ select * from (
     select '关注了',b.id,b.title,1,a.uid,DATE_FORMAT(a.updatetime, '%Y.%m.%d %T') times from t_questions_user_status  a join t_questions b on a.qid = b.id where fstatus = 0 
 ) as a where uid = 251 order by times desc limit 100;
 '''
+
+
+
+@userbp.route("/userfindps",methods=["post"])
+def userfindps():
+    '''
+    找回密码
+    {"username":"","password":"","mb":{题目id:答案}}
+    '''
+    requestdata = request.get_json()
+    username = requestdata.get("username")
+    password = requestdata.get("password")
+    mb = requestdata.get("mb")
+    userregmsg = checkuserinfo(username,password)
+    if userregmsg != True:
+        return setcors(msg=userregmsg)
+    res = db.query("select mb from t_user where username = '{}';".format(username))
+    if len(res) == 1:
+        umb = res[0].get("mb")
+        if umb != None:
+            umb = json.loads(umb)
+        else:
+            return setcors(msg="用户没有设置密保，请联系管理员！")
+        if mb == umb:
+            password = encryption(username,password,"user")
+            res = db.commit("update t_user set password = '{}' where username = '{}';".format(password,username))
+            return setcors(data=res,msg="设置新密码成功！",status=200)
+        else:
+            return setcors(msg="密保错误！")
+    else:
+        return setcors(msg="账号不存在！")
