@@ -21,8 +21,7 @@ def fileupload():
     #     return setcors(msg="上传失败")
     file = request.files["file"]
     if loginstatus is True:
-        if file and ('.' in file.filename and \
-            file.filename.rsplit('.', 1)[1] in set(['png', 'jpg', 'jpeg', 'gif'])):
+        if file and ('.' in file.filename and file.filename.rsplit('.', 1)[1] in set(['png', 'jpg', 'jpeg', 'gif'])):
             filename = secure_filename(file.filename)
             fname = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(15))
             filename = fname+"."+filename.split(".")[1]
