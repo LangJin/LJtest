@@ -11,7 +11,7 @@ PyMySQL==0.9.3
 redis==3.4.1
 requests==2.22.0
 six==1.13.0
-urllib3==1.25.8
+urllib3==1.26.5
 Werkzeug==0.16.0
 gevent==1.4.0
 greenlet==0.4.15
